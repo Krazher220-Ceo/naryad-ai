@@ -49,11 +49,12 @@ export default async function MasterPage() {
       <TelegramLinkCard />
 
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 py-4 pb-36 lg:max-w-6xl">
-        <div className="grid grid-cols-2 gap-2 lg:max-w-md">
+        <div className="grid grid-cols-3 gap-2 lg:max-w-lg">
           {(
             [
               ["/master/shift", "shiftReport.title"],
               ["/master/rating", "rating.linkShort"],
+              ["/master/equipment/qr", "equipmentQr.link"],
             ] as const
           ).map(([href, label]) => (
             <Link
