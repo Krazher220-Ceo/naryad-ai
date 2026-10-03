@@ -13,6 +13,7 @@ export async function signIn(
 ): Promise<SignInState> {
   const login = String(formData.get("login") ?? "").trim();
   const pin = String(formData.get("pin") ?? "");
+  const next = String(formData.get("next") ?? "");
 
   if (login === "" || !/^\d{6}$/.test(pin)) {
     return { error: t("auth.errorPinFormat") };
@@ -36,7 +37,8 @@ export async function signIn(
     return { error: t("auth.errorNoProfile") };
   }
 
-  redirect(ROLE_HOME[employee.role]);
+  // Только адрес внутри приложения («/…», но не «//чужой-сайт»), иначе — на экран роли.
+  redirect(next.startsWith("/") && !next.startsWith("//") ? next : ROLE_HOME[employee.role]);
 }
 
 export async function signOut(): Promise<void> {
