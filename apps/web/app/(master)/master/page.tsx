@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
+import { TelegramLinkCard } from "@/components/TelegramLinkCard";
 import { OrderRow } from "@/components/master/OrderRow";
 import { BottomActionBar, EmptyState, WorkerChip, cx } from "@/components/ui";
 import { requireRole } from "@/lib/auth/session";
@@ -45,6 +46,7 @@ export default async function MasterPage() {
     <div className="flex min-h-dvh flex-col bg-canvas">
       <RealtimeRefresh />
       <AppHeader fullName={employee.fullName} roleLabel={t("roles.master")} />
+      <TelegramLinkCard />
 
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 py-4 pb-36 lg:max-w-6xl">
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
