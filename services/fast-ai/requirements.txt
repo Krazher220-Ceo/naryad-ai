@@ -1,0 +1,2 @@
+# Быстрый слой ИИ: Laya (laya-multilingual) и HTTP-сервер FastAPI из пакета laya[serve]
+laya[serve]==0.3.25
