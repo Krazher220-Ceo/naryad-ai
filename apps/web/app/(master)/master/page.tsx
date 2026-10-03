@@ -54,6 +54,7 @@ export default async function MasterPage() {
             [
               ["/master/shift", "shiftReport.title"],
               ["/master/rating", "rating.linkShort"],
+              ["/master/anomalies", "anomalies.linkShort"],
               ["/master/equipment/qr", "equipmentQr.link"],
               ["/master/settings", "settings.title"],
             ] as const
