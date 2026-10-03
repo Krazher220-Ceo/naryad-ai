@@ -112,9 +112,11 @@ export async function getRating(from: Date, to: Date): Promise<RatingRow[]> {
     const badRefusals = rejects.filter((e) => !e.reason_code || !EXCUSED_REJECTS.includes(e.reason_code)).length;
     const assignedCount = mine.length + rejects.length; // отклонённые и переназначенные ушли другому
 
-    const share = (bad: number, all: number) => (all > 0 ? (1 - bad / all) * 100 : 100);
+    // Нет нарядов — нечего засчитывать: доля 0, а не 100. Иначе новичок без работы обгонял бы опытных.
+    const share = (bad: number, all: number) => (all > 0 ? (1 - bad / all) * 100 : 0);
     const parts = {
-      quality: avgScore !== null ? ((avgScore - 1) / 4) * 100 : 50,
+      // Нет оценок — нейтральные 50, но только если наряды были.
+      quality: avgScore !== null ? ((avgScore - 1) / 4) * 100 : closed.length > 0 ? 50 : 0,
       onTime: share(late, closed.length),
       noReturns: share(Math.min(closed.length, returns + repeats), closed.length),
       volume: 0, // заполняется ниже, когда известен лучший объём в периоде
