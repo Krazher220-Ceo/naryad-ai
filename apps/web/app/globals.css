@@ -1,5 +1,88 @@
 @import "tailwindcss";
 
+/*
+  Токены дизайн-системы НарядAI. Описание и правила: docs/ui/design-system.md.
+  Каждый цвет --color-x даёт классы bg-x, text-x, border-x.
+  Все пары «текст на фоне» проверены на контраст не ниже WCAG AA (4.5:1).
+*/
+@theme {
+  /* Основа */
+  --color-canvas: #f8fafc;
+  --color-surface: #ffffff;
+  --color-ink: #0f172a;
+  --color-ink-muted: #334155;
+  --color-line: #cbd5e1;
+  --color-line-strong: #64748b;
+  --color-brand: #0f172a;
+  --color-brand-hover: #1e293b;
+  --color-accent: #f59e0b;
+  --color-accent-ink: #92400e;
+  --color-focus: #b45309;
+  --color-danger: #b91c1c;
+  --color-danger-hover: #991b1b;
+  --color-danger-soft: #fee2e2;
+  --color-success: #15803d;
+  --color-success-soft: #dcfce7;
+  --color-warning-soft: #fef3c7;
+  --color-info: #1d4ed8;
+  --color-info-soft: #dbeafe;
+
+  /* Статус исполнителя: цвет точки */
+  --color-worker-free: #15803d;
+  --color-worker-busy: #eab308;
+  --color-worker-queue: #1d4ed8;
+  --color-worker-off: #64748b;
+
+  /* Приоритет: сплошная заливка, текст белый */
+  --color-prio-emergency: #b91c1c;
+  --color-prio-high: #c2410c;
+  --color-prio-normal: #334155;
+  --color-prio-planned: #0f766e;
+
+  /* Статус наряда: светлый фон (bg) и тёмный текст (fg), контраст не ниже 6:1 */
+  --color-st-issued-bg: #dbeafe;
+  --color-st-issued-fg: #1e3a8a;
+  --color-st-accepted-bg: #e0e7ff;
+  --color-st-accepted-fg: #3730a3;
+  --color-st-queued-bg: #ede9fe;
+  --color-st-queued-fg: #5b21b6;
+  --color-st-rejected-bg: #fee2e2;
+  --color-st-rejected-fg: #991b1b;
+  --color-st-in-progress-bg: #fef3c7;
+  --color-st-in-progress-fg: #78350f;
+  --color-st-paused-bg: #ffedd5;
+  --color-st-paused-fg: #9a3412;
+  --color-st-done-bg: #ccfbf1;
+  --color-st-done-fg: #115e59;
+  --color-st-ai-review-bg: #fae8ff;
+  --color-st-ai-review-fg: #86198f;
+  --color-st-rework-bg: #ffe4e6;
+  --color-st-rework-fg: #9f1239;
+  --color-st-closed-bg: #dcfce7;
+  --color-st-closed-fg: #166534;
+  --color-st-cancelled-bg: #e2e8f0;
+  --color-st-cancelled-fg: #334155;
+
+  /* Размеры касания: основная цель 56 px, вторичная 48 px */
+  --spacing-touch: 3.5rem;
+  --spacing-touch-sm: 3rem;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Заметная рамка фокуса для клавиатуры и внешних устройств */
+:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
 }
