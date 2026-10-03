@@ -24,11 +24,20 @@ export function RealtimeRefresh() {
       timer = setTimeout(() => router.refresh(), 300);
     };
 
-    const channel = supabase
-      .channel("orders-live")
-      .on("postgres_changes", { event: "*", schema: "public", table: "work_orders" }, scheduleRefresh)
-      .on("postgres_changes", { event: "*", schema: "public", table: "employees" }, scheduleRefresh)
-      .subscribe();
+    let channel: ReturnType<typeof supabase.channel> | undefined;
+    let cancelled = false;
+
+    // Сначала передаём Realtime токен вошедшего пользователя. Иначе подписка уходит
+    // от имени анонима, и правила доступа не присылают ни одного события по нарядам.
+    supabase.auth.getSession().then(({ data }) => {
+      if (cancelled) return;
+      if (data.session) supabase.realtime.setAuth(data.session.access_token);
+      channel = supabase
+        .channel("orders-live")
+        .on("postgres_changes", { event: "*", schema: "public", table: "work_orders" }, scheduleRefresh)
+        .on("postgres_changes", { event: "*", schema: "public", table: "employees" }, scheduleRefresh)
+        .subscribe();
+    });
 
     // Телефон уснул и проснулся: сразу подтягиваем свежие данные.
     const onVisible = () => {
@@ -37,9 +46,10 @@ export function RealtimeRefresh() {
     document.addEventListener("visibilitychange", onVisible);
 
     return () => {
+      cancelled = true;
       clearTimeout(timer);
       document.removeEventListener("visibilitychange", onVisible);
-      supabase.removeChannel(channel);
+      if (channel) supabase.removeChannel(channel);
     };
   }, [router]);
 
