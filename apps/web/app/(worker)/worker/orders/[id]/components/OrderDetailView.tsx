@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { t, type MessageKey } from "@/lib/i18n";
 import { RealtimeRefresh } from "@/lib/orders/RealtimeRefresh";
-import { transitionOrder } from "@/lib/orders/actions";
+import { sendTransition } from "@/lib/offline/queue";
 import {
   workerActions,
   canComplete,
@@ -91,7 +91,7 @@ export function OrderDetailView({ order, events, photos, materials, review }: Or
     const clientActionId = getClientActionId(actionKey);
 
     try {
-      const res = await transitionOrder({
+      const res = await sendTransition({
         orderId: order.id,
         action,
         clientActionId,
@@ -99,7 +99,12 @@ export function OrderDetailView({ order, events, photos, materials, review }: Or
 
       if (res.ok) {
         clearClientActionId(actionKey);
-        router.refresh();
+        if (res.queued) {
+          setToastMessage(t("offline.queued"));
+          setToastTone("offline");
+        } else {
+          router.refresh();
+        }
       } else {
         setToastMessage(res.error);
         setToastTone("danger");
@@ -120,7 +125,7 @@ export function OrderDetailView({ order, events, photos, materials, review }: Or
     const clientActionId = getClientActionId(actionKey);
 
     try {
-      const res = await transitionOrder({
+      const res = await sendTransition({
         orderId: order.id,
         action: "reject",
         reasonCode: rejectReason.code || undefined,
@@ -132,7 +137,12 @@ export function OrderDetailView({ order, events, photos, materials, review }: Or
         clearClientActionId(actionKey);
         setRejectSheetOpen(false);
         setRejectReason({ code: "", text: "" });
-        router.refresh();
+        if (res.queued) {
+          setToastMessage(t("offline.queued"));
+          setToastTone("offline");
+        } else {
+          router.refresh();
+        }
       } else {
         setToastMessage(res.error);
         setToastTone("danger");
@@ -153,7 +163,7 @@ export function OrderDetailView({ order, events, photos, materials, review }: Or
     const clientActionId = getClientActionId(actionKey);
 
     try {
-      const res = await transitionOrder({
+      const res = await sendTransition({
         orderId: order.id,
         action: "pause",
         reasonCode: pauseReason.code || undefined,
@@ -165,7 +175,12 @@ export function OrderDetailView({ order, events, photos, materials, review }: Or
         clearClientActionId(actionKey);
         setPauseSheetOpen(false);
         setPauseReason({ code: "", text: "" });
-        router.refresh();
+        if (res.queued) {
+          setToastMessage(t("offline.queued"));
+          setToastTone("offline");
+        } else {
+          router.refresh();
+        }
       } else {
         setToastMessage(res.error);
         setToastTone("danger");

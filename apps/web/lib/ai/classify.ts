@@ -90,7 +90,12 @@ async function viaLlm(description: string): Promise<Classification | null> {
   };
 }
 
+// Laya после дообучения (docs/laya-eval.md): специальность 100%, категория 85%, приоритет 45%.
+// Поэтому от Laya берём специальность и категорию, а точный шифр и приоритет — у языковой модели.
 export async function classifyProblem(description: string): Promise<Classification | null> {
   if (description.trim().length < 5) return null;
-  return (await viaLaya(description)) ?? (await viaLlm(description));
+  const [laya, llm] = await Promise.all([viaLaya(description), viaLlm(description)]);
+  if (laya && llm) return { ...llm, category: laya.category ?? llm.category, specialty: laya.specialty ?? llm.specialty, source: "laya" };
+  if (laya) return { ...laya, priority: null }; // приоритету Laya пока не доверяем
+  return llm;
 }

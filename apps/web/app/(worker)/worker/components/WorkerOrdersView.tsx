@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { t } from "@/lib/i18n";
 import { RealtimeRefresh } from "@/lib/orders/RealtimeRefresh";
-import { transitionOrder } from "@/lib/orders/actions";
+import { sendTransition } from "@/lib/offline/queue";
 import {
   REJECT_REASONS,
   PAUSE_REASONS,
@@ -101,7 +101,7 @@ export function WorkerOrdersView({ open, recent }: WorkerOrdersViewProps) {
     const clientActionId = getClientActionId(actionKey);
 
     try {
-      const res = await transitionOrder({
+      const res = await sendTransition({
         orderId,
         action,
         clientActionId,
@@ -109,7 +109,12 @@ export function WorkerOrdersView({ open, recent }: WorkerOrdersViewProps) {
 
       if (res.ok) {
         clearClientActionId(actionKey);
-        router.refresh();
+        if (res.queued) {
+          setToastMessage(t("offline.queued"));
+          setToastTone("offline");
+        } else {
+          router.refresh();
+        }
       } else {
         setToastMessage(res.error);
         setToastTone("danger");
@@ -130,7 +135,7 @@ export function WorkerOrdersView({ open, recent }: WorkerOrdersViewProps) {
     const clientActionId = getClientActionId(actionKey);
 
     try {
-      const res = await transitionOrder({
+      const res = await sendTransition({
         orderId: rejectingOrder.id,
         action: "reject",
         reasonCode: rejectReason.code || undefined,
@@ -142,7 +147,12 @@ export function WorkerOrdersView({ open, recent }: WorkerOrdersViewProps) {
         clearClientActionId(actionKey);
         setRejectingOrder(null);
         setRejectReason({ code: "", text: "" });
-        router.refresh();
+        if (res.queued) {
+          setToastMessage(t("offline.queued"));
+          setToastTone("offline");
+        } else {
+          router.refresh();
+        }
       } else {
         setToastMessage(res.error);
         setToastTone("danger");
@@ -163,7 +173,7 @@ export function WorkerOrdersView({ open, recent }: WorkerOrdersViewProps) {
     const clientActionId = getClientActionId(actionKey);
 
     try {
-      const res = await transitionOrder({
+      const res = await sendTransition({
         orderId: pausingOrder.id,
         action: "pause",
         reasonCode: pauseReason.code || undefined,
@@ -175,7 +185,12 @@ export function WorkerOrdersView({ open, recent }: WorkerOrdersViewProps) {
         clearClientActionId(actionKey);
         setPausingOrder(null);
         setPauseReason({ code: "", text: "" });
-        router.refresh();
+        if (res.queued) {
+          setToastMessage(t("offline.queued"));
+          setToastTone("offline");
+        } else {
+          router.refresh();
+        }
       } else {
         setToastMessage(res.error);
         setToastTone("danger");
