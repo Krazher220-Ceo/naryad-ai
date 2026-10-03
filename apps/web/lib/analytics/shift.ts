@@ -63,9 +63,14 @@ export async function getShiftReport(date: string, shift: Shift) {
 
   const issued = orders.filter((o) => inShift(o.created_at));
   const done = orders.filter((o) => inShift(o.done_at));
-  // Просрочен в смене: срок наступил в смене, а исполнено позже срока или ещё не исполнено.
+  // Просрочен в смене: срок прошёл до конца смены, а наряд к концу смены не исполнен
+  // или исполнен в эту смену позже срока. Так считаются и наряды, просроченные ещё в прошлых сменах.
+  const shiftEndIso = new Date(endMs).toISOString();
   const overdue = orders.filter(
-    (o) => o.status !== "cancelled" && o.due_at < new Date(endMs).toISOString() && (o.done_at === null || o.done_at > o.due_at) && o.due_at >= s,
+    (o) =>
+      o.status !== "cancelled" &&
+      o.due_at < shiftEndIso &&
+      (o.done_at === null || o.done_at >= shiftEndIso || (o.done_at >= s && o.done_at > o.due_at)),
   );
 
   // Загрузка людей: исполненные в смене наряды и их нормативные часы.
