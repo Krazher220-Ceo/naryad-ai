@@ -467,5 +467,17 @@
       "masterScore": "Мастер изменил оценку",
       "aiVerdict": "ИИ проверил наряд"
     }
+  },
+  "analytics": {
+    "shiftFallback": "За смену выдано {issued}, выполнено {done}, просрочено {overdue}, отклонено {rejected}. Наибольший простой: {downtime}.",
+    "downtimeItem": "{name} — {minutes} мин"
+  },
+  "suggest": {
+    "fitsSpecialty": "{specialty}",
+    "otherSpecialty": "другая специальность",
+    "queue": "в очереди {n}",
+    "noQueue": "очереди нет",
+    "rating": "рейтинг {n}",
+    "noRating": "мало данных для рейтинга"
   }
 }

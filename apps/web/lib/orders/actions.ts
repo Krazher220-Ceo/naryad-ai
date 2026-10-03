@@ -6,6 +6,8 @@ import { createClient } from "@/lib/supabase/server";
 import { t } from "@/lib/i18n";
 import { reviewOrder } from "@/lib/ai/review";
 import { getCurrentEmployee } from "@/lib/auth/session";
+import { classifyProblem, type Classification } from "@/lib/ai/classify";
+import { suggestWorkers, type Candidate } from "./suggest";
 import { notifyNewOrder, notifyStatusChange } from "./notifications";
 import type { ActionResult, OrderAction, OrderPriority, OrderStatus, OrderType } from "./types";
 
@@ -180,4 +182,16 @@ export async function setMasterScore(input: {
   if (error) return { ok: false, error: toErrorText(error) };
   refresh();
   return { ok: true, data: { saved: true } };
+}
+
+// Подсказка для формы выдачи: шифр, приоритет, специальность по описанию и подходящие исполнители.
+// Только мастер. Если ИИ недоступен, исполнители всё равно подбираются (без учёта специальности).
+export async function suggestForIssue(description: string): Promise<
+  ActionResult<{ classification: Classification | null; candidates: Candidate[] }>
+> {
+  const me = await getCurrentEmployee();
+  if (me?.role !== "master") return { ok: false, error: t("orders.errors.forbidden") };
+  const classification = await classifyProblem(description);
+  const candidates = await suggestWorkers(classification?.specialty ?? null);
+  return { ok: true, data: { classification, candidates } };
 }
