@@ -6,11 +6,12 @@ import { t } from "@/lib/i18n";
 
 const initialState: SignInState = { error: null };
 
-export function LoginForm() {
+export function LoginForm({ next }: { next?: string }) {
   const [state, formAction, pending] = useActionState(signIn, initialState);
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
+      {next && <input type="hidden" name="next" value={next} />}
       <label className="flex flex-col gap-1.5 text-base font-medium text-slate-700">
         <span>{t("auth.login")}</span>
         <input

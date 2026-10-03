@@ -1,7 +1,8 @@
 import { t } from "@/lib/i18n";
 import { LoginForm } from "./LoginForm";
 
-export default function LoginPage() {
+export default async function LoginPage({ searchParams }: PageProps<"/login">) {
+  const { next } = await searchParams;
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-sm flex-col justify-between p-4 py-6">
       <div className="flex flex-1 flex-col justify-center gap-6">
@@ -14,7 +15,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <LoginForm />
+        <LoginForm next={typeof next === "string" ? next : undefined} />
       </div>
 
       <p className="pt-4 text-center text-xs text-slate-500">

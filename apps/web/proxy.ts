@@ -49,7 +49,8 @@ export async function proxy(request: NextRequest) {
   }
 
   if (!userData.user) {
-    return isPublic(path) ? response : redirectTo("/login");
+    // После входа вернём туда, куда шли (например, на QR-код оборудования).
+    return isPublic(path) ? response : redirectTo(`/login?next=${encodeURIComponent(path + request.nextUrl.search)}`);
   }
 
   const pathRole = roleOfPath(path);
