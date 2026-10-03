@@ -33,6 +33,8 @@
 | @supabase/supabase-js | Доступ к базе, хранилищу и Realtime |
 | @supabase/ssr | Сессия Supabase в cookie для серверных компонентов и proxy |
 | server-only | Защита: серверный код с секретами не попадёт в браузер |
+| write-excel-file (MIT) | Выгрузка отчётов в Excel (.xlsx) |
+| @react-pdf/renderer (MIT) | Выгрузка отчётов в PDF |
 | qrcode, @types/qrcode | QR-коды оборудования для быстрого выбора при выдаче наряда (уровень коррекции H, со значком в центре) |
 
 ## Зависимости `services/fast-ai`
@@ -49,3 +51,12 @@
 | Vercel | Хостинг приложения |
 | Telegram Bot API | Уведомления на телефон |
 | Supabase pg_cron и pg_net | Расписание контроля сроков раз в минуту |
+
+## Проверка лицензий зависимостей
+
+Все зависимости, включая транзитивные, разрешают коммерческое использование и закрытый код.
+Проверено по `apps/web/package-lock.json` 4 октября 2026:
+- MIT, ISC, Apache-2.0, BSD, 0BSD, CC0, Unlicense, BlueOak — разрешительные;
+- `jszip` и библиотека `buffers` без лицензии приходили с `exceljs` — поэтому вместо `exceljs` взята `write-excel-file`;
+- LGPL-3.0 (`@img/sharp-libvips-*`, необязательная зависимость Next.js для картинок) и MPL-2.0
+  (`lightningcss` из Tailwind, `axe-core` из линтера) — слабый копилефт, не требует открывать наш код.
