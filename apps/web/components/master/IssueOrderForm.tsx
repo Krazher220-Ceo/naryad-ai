@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Button,
@@ -12,6 +12,7 @@ import {
   PRIORITIES,
   SegmentedControl,
   Select,
+  Skeleton,
   StepForm,
   TextArea,
   TextInput,
@@ -20,10 +21,15 @@ import {
   cx,
 } from "@/components/ui";
 import { t, type MessageKey } from "@/lib/i18n";
-import { createOrder } from "@/lib/orders/actions";
+import { createOrder, suggestForIssue } from "@/lib/orders/actions";
 import { uploadOrderPhoto } from "@/lib/orders/photos";
 import type { IssueFormData } from "@/lib/orders/queries";
 import type { OrderPriority, OrderType } from "@/lib/orders/types";
+import {
+  IssueSuggestion,
+  type IssueCandidate,
+  type IssueClassification,
+} from "./IssueSuggestion";
 
 const DESCRIPTION_CHIPS = [
   "master.issue.chips.leak",
@@ -77,6 +83,108 @@ export function IssueOrderForm({ data, employeeId }: { data: IssueFormData; empl
   const actionId = useRef<string | null>(null);
   const createdOrderId = useRef<string | null>(null);
   const uploadedCount = useRef(0);
+
+  const [suggesting, setSuggesting] = useState(false);
+  const [suggestionUnavailable, setSuggestionUnavailable] = useState(false);
+  const [suggestion, setSuggestion] = useState<{
+    classification: IssueClassification;
+    candidates: IssueCandidate[];
+  } | null>(null);
+
+  const hasManuallyChangedPriority = useRef(false);
+  const hasManuallyChangedFaultCode = useRef(false);
+  const hasManuallyChangedAssignee = useRef(false);
+  const lastFetchedDesc = useRef<string | null>(null);
+  const step3Ref = useRef<HTMLDivElement>(null);
+
+  const triggerSuggest = useCallback(
+    async (text: string) => {
+      const trimmed = text.trim();
+      if (!trimmed || trimmed === lastFetchedDesc.current) return;
+      lastFetchedDesc.current = trimmed;
+      setSuggesting(true);
+      setSuggestionUnavailable(false);
+      try {
+        const result = await suggestForIssue(trimmed);
+        if (!result.ok || !result.data.classification) {
+          setSuggestion(null);
+          setSuggestionUnavailable(true);
+          return;
+        }
+
+        const { classification, candidates } = result.data;
+        setSuggestion({
+          classification: classification as IssueClassification,
+          candidates: candidates as IssueCandidate[],
+        });
+        setSuggestionUnavailable(false);
+
+        // Подставить шифр, если мастер ещё не менял вручную и он есть в списке шифров формы
+        if (!hasManuallyChangedFaultCode.current && classification.faultCode) {
+          const match = data.faultCodes.some((f) => f.code === classification.faultCode);
+          if (match) {
+            setFaultCode(classification.faultCode);
+          }
+        }
+
+        // Подставить приоритет, если мастер не выбирал его сам на шаге 2. Аварийный, выбранный мастером, никогда не понижать.
+        if (!hasManuallyChangedPriority.current && classification.priority) {
+          setPriority((prev) =>
+            prev === "emergency" && classification.priority !== "emergency" ? prev : classification.priority!,
+          );
+        }
+
+        // Подставить исполнителя = candidates[0], если мастер ещё не выбирал вручную
+        if (!hasManuallyChangedAssignee.current && candidates && candidates.length > 0) {
+          const topCandidate = data.workers.find((w) => w.id === candidates[0].id);
+          if (topCandidate) {
+            setAssigneeId(topCandidate.id);
+          }
+        }
+      } catch {
+        setSuggestion(null);
+        setSuggestionUnavailable(true);
+      } finally {
+        setSuggesting(false);
+      }
+    },
+    [data.faultCodes, data.workers],
+  );
+
+  useEffect(() => {
+    const trimmed = description.trim();
+    if (trimmed.length < 10) return;
+    const timer = setTimeout(() => {
+      triggerSuggest(trimmed);
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, [description, triggerSuggest]);
+
+  useEffect(() => {
+    const el = step3Ref.current;
+    if (!el) return;
+    const section = el.closest("section");
+    if (!section) return;
+
+    function checkVisibility() {
+      if (!section) return;
+      const isHidden = section.classList.contains("hidden");
+      const isDesktop = typeof window !== "undefined" && window.innerWidth >= 768;
+      const trimmed = description.trim();
+      if ((!isHidden || isDesktop) && trimmed.length > 0) {
+        triggerSuggest(trimmed);
+      }
+    }
+
+    checkVisibility();
+
+    const mo = new MutationObserver(() => {
+      checkVisibility();
+    });
+    mo.observe(section, { attributes: true, attributeFilter: ["class"] });
+
+    return () => mo.disconnect();
+  }, [description, triggerSuggest]);
 
   const equipment = data.equipment.find((e) => e.id === equipmentId);
   const suggested = suggestWorker(data.workers);
@@ -205,7 +313,10 @@ export function IssueOrderForm({ data, employeeId }: { data: IssueFormData; empl
             <SegmentedControl
               ariaLabel={t("master.issue.priority")}
               value={priority}
-              onChange={setPriority}
+              onChange={(p) => {
+                hasManuallyChangedPriority.current = true;
+                setPriority(p);
+              }}
               options={PRIORITIES.map((p) => ({
                 value: p,
                 label: t(`orders.priority.${p}`),
@@ -229,6 +340,29 @@ export function IssueOrderForm({ data, employeeId }: { data: IssueFormData; empl
       title: t("master.issue.steps.assignee"),
       content: (
         <>
+          <div ref={step3Ref} />
+          {suggesting && (
+            <InlineNotice tone="info">
+              <div className="flex flex-col gap-2">
+                <span>{t("issueAi.loading")}</span>
+                <Skeleton className="h-3 w-48" />
+              </div>
+            </InlineNotice>
+          )}
+          {!suggesting && suggestionUnavailable && (
+            <InlineNotice tone="info">{t("issueAi.unavailable")}</InlineNotice>
+          )}
+          {!suggesting && suggestion && (
+            <IssueSuggestion
+              classification={suggestion.classification}
+              candidates={suggestion.candidates}
+              selectedWorkerId={assignee?.id}
+              onSelectCandidate={(id) => {
+                hasManuallyChangedAssignee.current = true;
+                setAssigneeId(id);
+              }}
+            />
+          )}
           <Field label={t("master.issue.assignee")}>
             {data.workers.length === 0 ? (
               <InlineNotice tone="warning">{t("master.issue.noWorkers")}</InlineNotice>
@@ -258,6 +392,7 @@ export function IssueOrderForm({ data, employeeId }: { data: IssueFormData; empl
                           type="button"
                           aria-pressed={w.id === assignee?.id}
                           onClick={() => {
+                            hasManuallyChangedAssignee.current = true;
                             setAssigneeId(w.id);
                             setPickingWorker(false);
                           }}
@@ -281,7 +416,10 @@ export function IssueOrderForm({ data, employeeId }: { data: IssueFormData; empl
             <Select
               id="issue-fault"
               value={faultCode}
-              onChange={(e) => setFaultCode(e.target.value)}
+              onChange={(e) => {
+                hasManuallyChangedFaultCode.current = true;
+                setFaultCode(e.target.value);
+              }}
               options={data.faultCodes.map((f) => ({ value: f.code, label: `${f.code} · ${f.name}` }))}
             />
           </Field>
