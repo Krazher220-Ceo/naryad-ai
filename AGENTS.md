@@ -58,7 +58,8 @@
 проверка типов:   cd apps/web && npm run typecheck
 линтер:           cd apps/web && npm run lint
 сборка:           cd apps/web && npm run build
-тесты:            пока нет (появятся в M1 для lib/orders)
+тесты:            supabase/tests/order_cycle.sql — цикл наряда на настоящей базе
+                  (SQL Editor или execute_sql через MCP; всё откатывается)
 миграции:         новые файлы supabase/migrations/NNNN_*.sql; применяются к проекту Supabase
                   через Supabase MCP (apply_migration) или `npx supabase db push`
 генерация данных: минимальные справочники и демо-логины — supabase/seed.sql
