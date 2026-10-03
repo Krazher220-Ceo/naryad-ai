@@ -13,7 +13,7 @@ const PRIORITY_RANK: Record<OrderPriority, number> = { emergency: 0, high: 1, no
 const ORDER_LIST_FIELDS = `
   id, number, type, description, priority, status, due_at, created_at, updated_at,
   assignee_id, brigade,
-  equipment:equipment_id ( id, name, inventory_no ),
+  equipment:equipment_id ( id, name, inventory_no, type ),
   section:section_id ( id, name ),
   assignee:employees!work_orders_assignee_id_fkey ( id, full_name )
 `;

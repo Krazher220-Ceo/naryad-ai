@@ -63,9 +63,17 @@ function dueAtIso(hours: number): string {
   return new Date(Date.now() + hours * 3600 * 1000).toISOString();
 }
 
-export function IssueOrderForm({ data, employeeId }: { data: IssueFormData; employeeId: string }) {
+export function IssueOrderForm({
+  data,
+  employeeId,
+  initialEquipmentId = null,
+}: {
+  data: IssueFormData;
+  employeeId: string;
+  initialEquipmentId?: string | null;
+}) {
   const router = useRouter();
-  const [equipmentId, setEquipmentId] = useState<string | null>(null);
+  const [equipmentId, setEquipmentId] = useState<string | null>(initialEquipmentId);
   const [search, setSearch] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<OrderPriority>("normal");
