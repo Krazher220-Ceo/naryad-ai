@@ -373,7 +373,14 @@
     "notAccepted": "Наряд №{number} ({priority}) не принят за {minutes} мин. Исполнитель: {worker}. Свободны сейчас: {candidates}.",
     "noFreeWorkers": "свободных нет",
     "leadOverdue": "Длительная просрочка: наряд №{number} просрочен на {minutes} мин. {place}. Исполнитель: {worker}.",
-    "reviewReady": "ИИ проверил наряд №{number}: {verdict}, оценка {score}/5. {summary}"
+    "reviewReady": "ИИ проверил наряд №{number}: {verdict}, оценка {score}/5. {summary}",
+    "status": {
+      "rework": "Наряд №{number} возвращён на доработку. {place}. Причина: {reason}",
+      "cancel": "Наряд №{number} отменён мастером. {place}. Причина: {reason}",
+      "close": "Наряд №{number} закрыт мастером. {place}. Спасибо за работу.",
+      "reject": "Исполнитель {worker} отклонил наряд №{number}. {place}. Причина: {reason}. Переназначьте наряд.",
+      "pause": "Наряд №{number} приостановлен. {place}. Исполнитель: {worker}. Причина: {reason}"
+    }
   },
   "ai": {
     "verdict": {

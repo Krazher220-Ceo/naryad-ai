@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { t } from "@/lib/i18n";
 import { reviewOrder } from "@/lib/ai/review";
 import { getCurrentEmployee } from "@/lib/auth/session";
-import { notifyNewOrder } from "./notifications";
+import { notifyNewOrder, notifyStatusChange } from "./notifications";
 import type { ActionResult, OrderAction, OrderPriority, OrderStatus, OrderType } from "./types";
 
 // Серверные действия с нарядом. Единственный путь изменить наряд из интерфейса.
@@ -83,6 +83,9 @@ export async function transitionOrder(input: TransitionInput): Promise<ActionRes
     p_client_action_id: input.clientActionId,
   });
   if (error) return { ok: false, error: toErrorText(error) };
+  after(() =>
+    notifyStatusChange({ orderId: input.orderId, action: input.action, reason: input.reason, reasonCode: input.reasonCode }),
+  );
   refresh();
   return { ok: true, data: { status: data } };
 }
