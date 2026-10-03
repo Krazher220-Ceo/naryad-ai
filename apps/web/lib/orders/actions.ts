@@ -1,8 +1,12 @@
 "use server";
 
 import { refresh } from "next/cache";
+import { after } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { t } from "@/lib/i18n";
+import { reviewOrder } from "@/lib/ai/review";
+import { getCurrentEmployee } from "@/lib/auth/session";
+import { notifyNewOrder } from "./notifications";
 import type { ActionResult, OrderAction, OrderPriority, OrderStatus, OrderType } from "./types";
 
 // Серверные действия с нарядом. Единственный путь изменить наряд из интерфейса.
@@ -53,6 +57,8 @@ export async function createOrder(input: CreateOrderInput): Promise<ActionResult
     p_client_action_id: input.clientActionId,
   });
   if (error) return { ok: false, error: toErrorText(error) };
+  // Сообщение исполнителю отправляем после ответа: мастер не ждёт Telegram.
+  after(() => notifyNewOrder(data));
   refresh();
   return { ok: true, data: { orderId: data } };
 }
@@ -102,8 +108,19 @@ export async function completeOrder(input: CompleteOrderInput): Promise<ActionRe
     p_client_action_id: input.clientActionId,
   });
   if (error) return { ok: false, error: toErrorText(error) };
+  // ИИ-проверка идёт после ответа: исполнитель сразу видит «Отправлено на проверку».
+  // Ошибка проверки не должна ломать закрытие — наряд просто останется у мастера.
+  after(() => reviewOrder(input.orderId).catch((e) => console.error("reviewOrder failed", e)));
   refresh();
   return { ok: true, data: { status: data } };
+}
+
+// Перезапустить ИИ-проверку вручную (кнопка мастера, если модель была недоступна).
+export async function rerunReview(orderId: string): Promise<ActionResult<{ started: true }>> {
+  const me = await getCurrentEmployee();
+  if (me?.role !== "master") return { ok: false, error: t("orders.errors.forbidden") };
+  after(() => reviewOrder(orderId).catch((e) => console.error("reviewOrder failed", e)));
+  return { ok: true, data: { started: true } };
 }
 
 export type ReassignInput = {
@@ -124,6 +141,7 @@ export async function reassignOrder(input: ReassignInput): Promise<ActionResult<
     p_client_action_id: input.clientActionId,
   });
   if (error) return { ok: false, error: toErrorText(error) };
+  after(() => notifyNewOrder(input.orderId));
   refresh();
   return { ok: true, data: { status: data } };
 }
@@ -142,4 +160,21 @@ export async function changeOrderPriority(input: {
   if (error) return { ok: false, error: toErrorText(error) };
   refresh();
   return { ok: true, data: { priority: data } };
+}
+
+// Мастер меняет оценку ИИ. Причина обязательна, изменение попадает в историю наряда.
+export async function setMasterScore(input: {
+  reviewId: string;
+  score: number;
+  reason: string;
+}): Promise<ActionResult<{ saved: true }>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("set_master_score", {
+    p_review_id: input.reviewId,
+    p_score: input.score,
+    p_reason: input.reason,
+  });
+  if (error) return { ok: false, error: toErrorText(error) };
+  refresh();
+  return { ok: true, data: { saved: true } };
 }

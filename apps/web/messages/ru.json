@@ -364,5 +364,43 @@
       "commentPlaceholder": "Дополнительные замечания (по желанию)...",
       "submittedToast": "Отправлено на проверку"
     }
+  },
+  "notify": {
+    "newOrder": "Новый наряд №{number} ({priority}). {place}. {description}. Срок: {due}.",
+    "remind": "Через {minutes} мин срок наряда №{number}. {place}. Статус: {status}.",
+    "overdue": "Наряд №{number} просрочен на {minutes} мин. {place}. Исполнитель: {worker}. Статус: {status} с {since}.",
+    "lastComment": " Последний комментарий: «{comment}».",
+    "notAccepted": "Наряд №{number} ({priority}) не принят за {minutes} мин. Исполнитель: {worker}. Свободны сейчас: {candidates}.",
+    "noFreeWorkers": "свободных нет",
+    "leadOverdue": "Длительная просрочка: наряд №{number} просрочен на {minutes} мин. {place}. Исполнитель: {worker}.",
+    "reviewReady": "ИИ проверил наряд №{number}: {verdict}, оценка {score}/5. {summary}"
+  },
+  "ai": {
+    "verdict": {
+      "accept": "принято",
+      "accept_with_note": "принято с замечаниями",
+      "rework": "требует доработки",
+      "needs_master": "нужна проверка мастером"
+    },
+    "source": {
+      "laya": "Laya",
+      "llm": "языковая модель",
+      "vlm": "модель по фото",
+      "rules": "правила"
+    },
+    "rules": {
+      "noWorkDone": "Не описаны выполненные работы.",
+      "noFaultCode": "Не указан шифр неисправности.",
+      "noAfterPhoto": "Нет фото «после».",
+      "duplicatePhoto": "Фото «после» уже встречалось в другом наряде.",
+      "materialOver": "{name}: списано {qty} {unit} при обычном расходе {typical} — в {ratio} раза больше.",
+      "materialHigh": "{name}: списано {qty} {unit} при обычном расходе {typical}.",
+      "materialUnrelated": "{name} обычно не списывается при шифре {code}.",
+      "timeLong": "Работа заняла {actual} мин при нормативе {norm} мин.",
+      "timeShort": "Работа заняла {actual} мин при нормативе {norm} мин — подозрительно быстро.",
+      "timeOk": "Время работы {actual} мин в пределах норматива {norm} мин.",
+      "late": "Сдан позже срока на {minutes} мин.",
+      "allFilled": "Закрытие заполнено полностью."
+    }
   }
 }
