@@ -7,7 +7,9 @@ import type { OrderPriority, OrderStatus } from "@/lib/orders/types";
 const TIME_ZONE = "Asia/Qostanay";
 
 function fill(key: MessageKey, values: Record<string, string | number>): string {
-  return Object.entries(values).reduce((text, [k, v]) => text.split(`{${k}}`).join(String(v)), t(key));
+  const text = Object.entries(values).reduce((acc, [k, v]) => acc.split(`{${k}}`).join(String(v)), t(key));
+  // «Ахметов Е.» перед точкой шаблона даёт «Е..» — оставляем одну точку.
+  return text.replace(/\.\./g, ".");
 }
 
 export function formatTime(iso: string): string {
