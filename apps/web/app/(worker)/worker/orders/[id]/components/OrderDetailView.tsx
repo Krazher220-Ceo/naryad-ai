@@ -31,6 +31,9 @@ import {
   type NoticeTone,
   type ReasonValue,
 } from "@/components/ui";
+import { eventLabel } from "@/components/review/eventLabel";
+import { ReviewReport } from "@/components/review/ReviewReport";
+import { ReviewWaiting } from "@/components/review/ReviewPolling";
 import { formatOrderTime, getOverdueMinutes } from "@/app/(worker)/worker/components/utils";
 
 type OrderDetailViewProps = {
@@ -38,9 +41,10 @@ type OrderDetailViewProps = {
   events: OrderDetails["events"];
   photos: OrderDetails["photos"];
   materials: OrderDetails["materials"];
+  review: OrderDetails["review"];
 };
 
-export function OrderDetailView({ order, events, photos, materials }: OrderDetailViewProps) {
+export function OrderDetailView({ order, events, photos, materials, review }: OrderDetailViewProps) {
   const router = useRouter();
 
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
@@ -237,6 +241,12 @@ export function OrderDetailView({ order, events, photos, materials }: OrderDetai
           </InlineNotice>
         )}
 
+        {/* Отчёт ИИ: оценка и что улучшить */}
+        {review && ["ai_review", "rework", "closed"].includes(order.status) && (
+          <ReviewReport review={review} mode="worker" />
+        )}
+        {!review && order.status === "ai_review" && <ReviewWaiting />}
+
         {/* Двухколоночная раскладка на ноутбуке (md+) */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {/* Левая колонка: Описание, детали, фото, материалы */}
@@ -379,7 +389,7 @@ export function OrderDetailView({ order, events, photos, materials }: OrderDetai
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-base font-semibold text-ink">
-                        {t(`orders.event.${event.action}` as MessageKey)}
+                        {eventLabel(event.action)}
                       </span>
                       <span className="shrink-0 text-sm text-ink-muted">
                         {formatOrderTime(event.created_at)}

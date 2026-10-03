@@ -1,10 +1,13 @@
 import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
 import { formatDateTime, minutesLate } from "@/components/master/format";
+import { eventLabel } from "@/components/review/eventLabel";
+import { ReviewReport } from "@/components/review/ReviewReport";
+import { ReviewWaiting } from "@/components/review/ReviewPolling";
 import { OrderActions, type WorkerOption } from "@/components/master/OrderActions";
 import { Card, ErrorState, IconChevronLeft, OverdueTag, PriorityBadge, StatusBadge } from "@/components/ui";
 import { requireRole } from "@/lib/auth/session";
-import { t, type MessageKey } from "@/lib/i18n";
+import { t } from "@/lib/i18n";
 import { getOrderDetails } from "@/lib/orders/queries";
 import { RealtimeRefresh } from "@/lib/orders/RealtimeRefresh";
 import { canReassign, masterActions } from "@/lib/orders/transitions";
@@ -70,7 +73,9 @@ export default async function MasterOrderPage({ params }: PageProps<"/master/ord
     );
   }
 
-  const { order, events, photos, materials } = details;
+  const { order, events, photos, materials, review } = details;
+  // Когда наряд ушёл на проверку ИИ: от этого момента считаем, не завис ли отчёт.
+  const reviewSince = events.findLast((e) => e.to_status === "ai_review")?.created_at ?? null;
 
   // Список исполнителей нужен только для переназначения.
   let workers: WorkerOption[] = [];
@@ -117,6 +122,12 @@ export default async function MasterOrderPage({ params }: PageProps<"/master/ord
               {order.overdue && <OverdueTag minutesLate={minutesLate(order.due_at)} />}
             </div>
 
+            {review ? (
+              <ReviewReport review={review} mode="master" />
+            ) : (
+              order.status === "ai_review" && <ReviewWaiting />
+            )}
+
             <p className="text-xl font-semibold text-ink">{order.description}</p>
 
             <dl className="grid gap-3">
@@ -146,6 +157,18 @@ export default async function MasterOrderPage({ params }: PageProps<"/master/ord
               priority={order.priority}
               assigneeId={order.assignee_id}
               workers={workers}
+              review={
+                review
+                  ? {
+                      id: review.id,
+                      verdict: review.verdict,
+                      score: review.master_score ?? review.score,
+                      improve: review.checks.text.improve,
+                      hasErrors: review.checks.errors.length > 0,
+                    }
+                  : null
+              }
+              reviewSince={reviewSince}
             />
 
             <section className="flex flex-col gap-2">
@@ -161,7 +184,7 @@ export default async function MasterOrderPage({ params }: PageProps<"/master/ord
                           {formatDateTime(e.created_at)}
                           {e.actor?.full_name ? ` · ${e.actor.full_name}` : ""}
                         </span>
-                        <span className="text-lg font-semibold text-ink">{t(`orders.event.${e.action}` as MessageKey)}</span>
+                        <span className="text-lg font-semibold text-ink">{eventLabel(e.action)}</span>
                         {(e.reason || e.comment) && <span className="text-base text-ink">{e.reason ?? e.comment}</span>}
                       </li>
                     ))}
