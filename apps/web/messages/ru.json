@@ -240,5 +240,56 @@
       "showToast": "Показать «Сохранено»",
       "submitted": "Отправлено (демо)"
     }
+  },
+  "worker": {
+    "myOrders": "Мои наряды",
+    "newOrders": "Новый наряд",
+    "now": "Сейчас",
+    "queue": "Очередь",
+    "queueCount": "Очередь ({count})",
+    "doneToday": "Сделано сегодня",
+    "doneTodayCount": "Сделано сегодня ({count})",
+    "showDone": "Показать выполненные",
+    "hideDone": "Скрыть выполненные",
+    "noOrders": "Нарядов нет",
+    "history": "История",
+    "equipment": "Оборудование",
+    "section": "Участок",
+    "due": "Срок",
+    "master": "Мастер",
+    "beforePhotos": "Фото «до»",
+    "afterPhotos": "Фото «после»",
+    "materialsUsed": "Использованные материалы",
+    "back": "Назад",
+    "rejectSheetTitle": "Отклонить наряд №{number}?",
+    "rejectSheetDescription": "Мастер увидит причину и переназначит наряд.",
+    "pauseSheetTitle": "Приостановить наряд №{number}?",
+    "pauseSheetDescription": "Укажите причину приостановки работ.",
+    "statusNotice": {
+      "done": "Наряд исполнен и ожидает проверки.",
+      "ai_review": "Наряд находится на проверке ИИ.",
+      "closed": "Наряд закрыт мастером.",
+      "rejected": "Наряд отклонён.",
+      "cancelled": "Наряд отменён мастером."
+    },
+    "close": {
+      "title": "Закрытие наряда №{number}",
+      "stepWorks": "Работы",
+      "stepCode": "Шифр",
+      "stepMaterials": "Материалы",
+      "stepPhoto": "Фото «после»",
+      "stepComment": "Комментарий",
+      "workDoneLabel": "Что сделано",
+      "workDonePlaceholder": "Опишите выполненные работы...",
+      "faultCodeLabel": "Шифр неисправности",
+      "faultCodePlaceholder": "Выберите шифр",
+      "materialsTitle": "Материалы",
+      "noTypicalMaterials": "У этого шифра нет типовых материалов",
+      "addMaterial": "Добавить материал",
+      "selectMaterial": "Выберите материал из списка",
+      "commentLabel": "Комментарий",
+      "commentPlaceholder": "Дополнительные замечания (по желанию)...",
+      "submittedToast": "Отправлено на проверку"
+    }
   }
 }
