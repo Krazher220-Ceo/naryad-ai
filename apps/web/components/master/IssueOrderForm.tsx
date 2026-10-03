@@ -63,6 +63,10 @@ function dueAtIso(hours: number): string {
   return new Date(Date.now() + hours * 3600 * 1000).toISOString();
 }
 
+function dueAtMinutesIso(minutes: number): string {
+  return new Date(Date.now() + minutes * 60 * 1000).toISOString();
+}
+
 export function IssueOrderForm({
   data,
   employeeId,
@@ -79,6 +83,7 @@ export function IssueOrderForm({
   const [priority, setPriority] = useState<OrderPriority>("normal");
   const [type, setType] = useState<OrderType>("unplanned");
   const [faultCode, setFaultCode] = useState("");
+  const [dueMode, setDueMode] = useState<"norm" | "demo2min">("norm");
   const [assigneeId, setAssigneeId] = useState<string | null>(null);
   const [pickingWorker, setPickingWorker] = useState(false);
   const [photos, setPhotos] = useState<File[]>([]);
@@ -219,7 +224,7 @@ export function IssueOrderForm({
           sectionId: equipment.section_id,
           equipmentId: equipment.id,
           priority,
-          dueAt: dueAtIso(hours),
+          dueAt: dueMode === "demo2min" ? dueAtMinutesIso(2) : dueAtIso(hours),
           assigneeId: assignee?.id ?? undefined,
           faultCode: faultCode || undefined,
           clientActionId: actionId.current,
@@ -431,7 +436,22 @@ export function IssueOrderForm({
               options={data.faultCodes.map((f) => ({ value: f.code, label: `${f.code} · ${f.name}` }))}
             />
           </Field>
-          <p className="text-lg font-semibold text-ink">{t("master.issue.dueIn").replace("{hours}", String(hours))}</p>
+          <Field label={t("demo.dueModeLabel")}>
+            <SegmentedControl
+              ariaLabel={t("demo.dueModeLabel")}
+              value={dueMode}
+              onChange={setDueMode}
+              options={[
+                { value: "norm", label: t("demo.dueNorm") },
+                { value: "demo2min", label: t("demo.due2min") },
+              ]}
+            />
+          </Field>
+          <p className="text-lg font-semibold text-ink">
+            {dueMode === "demo2min"
+              ? t("demo.dueIn2Min")
+              : t("master.issue.dueIn").replace("{hours}", String(hours))}
+          </p>
           <Field label={t("master.issue.photos")} hint={t("master.issue.photosHint")}>
             <PhotoPicker value={photos} onChange={setPhotos} max={5} />
           </Field>

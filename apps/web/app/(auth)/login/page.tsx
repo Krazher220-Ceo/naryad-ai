@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { t } from "@/lib/i18n";
 import { LoginForm } from "./LoginForm";
 
@@ -18,9 +19,17 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
         <LoginForm next={typeof next === "string" ? next : undefined} />
       </div>
 
-      <p className="pt-4 text-center text-xs text-slate-500">
-        {t("auth.demoHint")}
-      </p>
+      <div className="flex flex-col items-center gap-2 pt-4 text-center">
+        <Link
+          href="/demo"
+          className="text-sm font-semibold text-slate-700 underline hover:text-slate-900"
+        >
+          {t("demo.loginLink")}
+        </Link>
+        <p className="text-xs text-slate-500">
+          {t("auth.demoHint")}
+        </p>
+      </div>
     </main>
   );
 }
