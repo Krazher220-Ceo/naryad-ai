@@ -39,6 +39,7 @@ export default async function OrderPage({ params }: OrderPageProps) {
         events={data.events}
         photos={data.photos}
         materials={data.materials}
+        review={data.review}
       />
     </div>
   );
