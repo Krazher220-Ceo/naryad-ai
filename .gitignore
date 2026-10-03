@@ -1,0 +1,33 @@
+# зависимости и сборка
+node_modules/
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+next-env.d.ts
+
+# секреты
+.env
+.env.*
+!.env.example
+
+# данные партнёра и большие файлы
+data/
+*.safetensors
+*.bin
+*.pt
+*.onnx
+*.gguf
+
+# python
+__pycache__/
+.venv/
+*.pyc
+
+# инструменты
+.worktrees/
+.vercel/
+supabase/.temp/
+.DS_Store
+*.log
