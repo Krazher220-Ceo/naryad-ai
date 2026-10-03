@@ -1,4 +1,4 @@
-// Типы базы. Сгенерированы Supabase (generate_typescript_types) после миграции 0004,
+// Типы базы. Сгенерированы Supabase (generate_typescript_types) после миграции 0006,
 // убраны служебные связи с представлением и сложные вспомогательные типы.
 // Не править руками: после новой миграции сгенерировать заново.
 
@@ -80,6 +80,7 @@ export type Database = {
           shift: string | null
           specialty: string | null
           telegram_chat_id: number | null
+          telegram_link_code: string | null
         }
         Insert: {
           auth_user_id?: string | null
@@ -94,6 +95,7 @@ export type Database = {
           shift?: string | null
           specialty?: string | null
           telegram_chat_id?: number | null
+          telegram_link_code?: string | null
         }
         Update: {
           auth_user_id?: string | null
@@ -108,6 +110,7 @@ export type Database = {
           shift?: string | null
           specialty?: string | null
           telegram_chat_id?: number | null
+          telegram_link_code?: string | null
         }
         Relationships: []
       }
@@ -229,6 +232,54 @@ export type Database = {
           unit?: string
         }
         Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          delivered: boolean
+          employee_id: string
+          error: string | null
+          id: string
+          kind: Database["public"]["Enums"]["notification_kind"]
+          order_id: string | null
+          text: string
+        }
+        Insert: {
+          created_at?: string
+          delivered: boolean
+          employee_id: string
+          error?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["notification_kind"]
+          order_id?: string | null
+          text: string
+        }
+        Update: {
+          created_at?: string
+          delivered?: boolean
+          employee_id?: string
+          error?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["notification_kind"]
+          order_id?: string | null
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "work_orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       order_templates: {
         Row: {
@@ -393,6 +444,9 @@ export type Database = {
           ai_provider: string
           id: number
           remind_before_min: number
+          overdue_repeat_min: number
+          lead_escalate_after_min: number
+          ai_confidence_threshold: number
         }
         Insert: {
           accept_timeout_min?: number
@@ -400,6 +454,9 @@ export type Database = {
           ai_provider?: string
           id?: number
           remind_before_min?: number
+          overdue_repeat_min?: number
+          lead_escalate_after_min?: number
+          ai_confidence_threshold?: number
         }
         Update: {
           accept_timeout_min?: number
@@ -407,6 +464,9 @@ export type Database = {
           ai_provider?: string
           id?: number
           remind_before_min?: number
+          overdue_repeat_min?: number
+          lead_escalate_after_min?: number
+          ai_confidence_threshold?: number
         }
         Relationships: []
       }
@@ -657,6 +717,18 @@ export type Database = {
         }
         Returns: Database["public"]["Enums"]["order_status"]
       }
+      my_telegram_link: {
+        Args: Record<string, never>
+        Returns: { link_code: string | null; linked: boolean }[]
+      }
+      set_master_score: {
+        Args: {
+          p_reason: string
+          p_review_id: string
+          p_score: number
+        }
+        Returns: undefined
+      }
       transition_order: {
         Args: {
           p_action: string
@@ -673,6 +745,13 @@ export type Database = {
       ai_source: "laya" | "llm" | "vlm" | "rules"
       ai_verdict: "accept" | "accept_with_note" | "rework" | "needs_master"
       employee_role: "master" | "worker" | "lead"
+      notification_kind:
+        | "new_order"
+        | "remind"
+        | "overdue"
+        | "not_accepted"
+        | "lead_overdue"
+        | "review_ready"
       order_priority: "emergency" | "high" | "normal" | "planned"
       order_status:
         | "issued"
