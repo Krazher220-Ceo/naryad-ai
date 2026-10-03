@@ -50,17 +50,22 @@
 
 ## Команды
 
-Раздел заполняется при создании проекта. После заполнения запускай проверки перед каждым коммитом.
+Все команды приложения выполняются в папке `apps/web`. Перед каждым коммитом запускай проверку типов и линтер.
 
 ```
-установка:        (заполнить)
-запуск:           (заполнить)
-проверка типов:   (заполнить)
-линтер:           (заполнить)
-тесты:            (заполнить)
-миграции:         (заполнить)
-генерация данных: (заполнить)
+установка:        cd apps/web && npm install && cp ../../.env.example .env.local   (заполнить ключи)
+запуск:           cd apps/web && npm run dev            (http://localhost:3000)
+проверка типов:   cd apps/web && npm run typecheck
+линтер:           cd apps/web && npm run lint
+сборка:           cd apps/web && npm run build
+тесты:            пока нет (появятся в M1 для lib/orders)
+миграции:         новые файлы supabase/migrations/NNNN_*.sql; применяются к проекту Supabase
+                  через Supabase MCP (apply_migration) или `npx supabase db push`
+генерация данных: минимальные справочники и демо-логины — supabase/seed.sql
+                  (выполнить в SQL Editor Supabase); полный генератор — scripts/seed (M3)
 ```
+
+Next.js в проекте версии 16: `middleware.ts` переименован в `proxy.ts`. Перед кодом читай документацию в `apps/web/node_modules/next/dist/docs/`.
 
 ## Правила кода
 
