@@ -576,5 +576,40 @@
     "noCode": "—",
     "noPriority": "—",
     "selected": "Выбран"
+  },
+  "anomaly": {
+    "allEquipment": "всего оборудования",
+    "shift": {
+      "text": "{subject}: ночью {night} внеплановых нарядов, днём {day} — в {ratio} раза больше; на других участках {othersRatio}.",
+      "recommendation": "Проверить режимы работы и осмотры в ночную смену на участке {subject}."
+    },
+    "problem_equipment": {
+      "text": "{subject}: {unplanned} внеплановых нарядов — в {ratio} раза больше, чем в среднем у {peers} ({peerMean}). Простой {downtimeHours} ч.",
+      "recommendation": "Провести обследование {subject} и включить устранение причин в план ППР."
+    },
+    "repeat_fault": {
+      "text": "{subject}: шифр {code} повторяется {repeats} раз из {ofUnplanned} внеплановых нарядов ({sharePct}%) — ремонт не устраняет причину.",
+      "recommendation": "Найти первопричину неисправности {code} на {subject}, а не менять деталь повторно."
+    },
+    "after_planned": {
+      "text": "{subject}: после {brokeWithin5Days} из {planned} плановых ремонтов ({ratePct}%) в течение 5 дней случилась поломка; по заводу — {plantRatePct}%.",
+      "recommendation": "Проверить качество планового ремонта {subject}: технологию, запчасти и приёмку работ."
+    },
+    "worker_returns": {
+      "text": "{subject}: {returns} возвратов на доработку из {orders} нарядов ({ratePct}%), у остальных — {othersRatePct}%.",
+      "recommendation": "Разобрать с исполнителем типичные ошибки и назначить наставника на сложные наряды."
+    },
+    "material_overuse": {
+      "text": "{subject}: {cases} списаний больше двух норм ({avgTimesNorm}× в среднем) — {section}, {shift} смена; это {cases} из {ofAllOveruse} случаев перерасхода.",
+      "recommendation": "Проверить списание {subject} на участке {section} и норму расхода."
+    },
+    "failure_trend": {
+      "text": "{subject}: {last14} внеплановых нарядов за последние 14 дней против {previous14} за предыдущие.",
+      "recommendation": "Вероятен отказ {subject}: запланировать диагностику до аварийной остановки."
+    },
+    "shiftName": {
+      "night": "ночная",
+      "day": "дневная"
+    }
   }
 }
