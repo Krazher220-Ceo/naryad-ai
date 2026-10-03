@@ -195,3 +195,28 @@ export async function suggestForIssue(description: string): Promise<
   const candidates = await suggestWorkers(classification?.specialty ?? null);
   return { ok: true, data: { classification, candidates } };
 }
+
+// Пороги контроля сроков и режим ИИ (мастер или руководитель). Права проверяет база (update_settings).
+export type SettingsInput = {
+  remindBeforeMin: number;
+  acceptTimeoutMin: number;
+  acceptTimeoutUrgentMin: number;
+  overdueRepeatMin: number;
+  leadEscalateAfterMin: number;
+  aiProvider: "cloud" | "local";
+};
+
+export async function updateSettings(input: SettingsInput): Promise<ActionResult<{ saved: true }>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("update_settings", {
+    p_remind_before_min: input.remindBeforeMin,
+    p_accept_timeout_min: input.acceptTimeoutMin,
+    p_accept_timeout_urgent_min: input.acceptTimeoutUrgentMin,
+    p_overdue_repeat_min: input.overdueRepeatMin,
+    p_lead_escalate_after_min: input.leadEscalateAfterMin,
+    p_ai_provider: input.aiProvider,
+  });
+  if (error) return { ok: false, error: toErrorText(error) };
+  refresh();
+  return { ok: true, data: { saved: true } };
+}

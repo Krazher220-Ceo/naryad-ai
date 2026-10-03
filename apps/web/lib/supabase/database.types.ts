@@ -1,4 +1,4 @@
-// Типы базы. Сгенерированы Supabase (generate_typescript_types) после миграции 0006,
+// Типы базы. Сгенерированы Supabase (generate_typescript_types) после миграции 0010,
 // убраны служебные связи с представлением и сложные вспомогательные типы.
 // Не править руками: после новой миграции сгенерировать заново.
 
@@ -720,6 +720,21 @@ export type Database = {
       my_telegram_link: {
         Args: Record<string, never>
         Returns: { link_code: string | null; linked: boolean }[]
+      }
+      restore_demo: {
+        Args: Record<string, never>
+        Returns: undefined
+      }
+      update_settings: {
+        Args: {
+          p_remind_before_min: number
+          p_accept_timeout_min: number
+          p_accept_timeout_urgent_min: number
+          p_overdue_repeat_min: number
+          p_lead_escalate_after_min: number
+          p_ai_provider: string
+        }
+        Returns: undefined
       }
       set_master_score: {
         Args: {
