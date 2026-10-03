@@ -49,6 +49,8 @@ export async function proxy(request: NextRequest) {
   }
 
   if (!userData.user) {
+    // Корень без входа — стартовая страница для жюри с логинами и сценарием.
+    if (path === "/") return redirectTo("/demo");
     // После входа вернём туда, куда шли (например, на QR-код оборудования).
     return isPublic(path) ? response : redirectTo(`/login?next=${encodeURIComponent(path + request.nextUrl.search)}`);
   }

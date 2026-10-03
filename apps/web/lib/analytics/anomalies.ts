@@ -82,7 +82,7 @@ function repeatFault(h: History): Draft[] {
         drafts.push({
           id: `repeat_fault:${eq.id}:${code}`,
           kind: "repeat_fault",
-          severity: "high",
+          severity: list.length / orders.length >= 0.7 ? "high" : "medium",
           subject: eq.name,
           facts: { code, repeats: list.length, ofUnplanned: orders.length, sharePct: share(list.length, orders.length) },
         });
@@ -211,7 +211,7 @@ function failureTrend(h: History, to: Date): Draft[] {
       drafts.push({
         id: `failure_trend:${list[0].equipment!.id}`,
         kind: "failure_trend",
-        severity: recent >= 5 ? "high" : "medium",
+        severity: recent >= 8 && recent >= before * 3 ? "high" : "medium",
         subject: list[0].equipment!.name,
         facts: { last14: recent, previous14: before },
       });
@@ -225,7 +225,7 @@ export async function findAnomalies(days = 90): Promise<{ anomalies: Anomaly[]; 
   const from = new Date(to.getTime() - days * DAY);
   const history = await loadHistory(from, to);
 
-  const drafts = [
+  const drafts: Draft[] = [
     ...problemEquipment(history),
     ...repeatFault(history),
     ...afterPlanned(history),
@@ -233,9 +233,17 @@ export async function findAnomalies(days = 90): Promise<{ anomalies: Anomaly[]; 
     ...workerReturns(history),
     ...materialOveruse(history),
     ...failureTrend(history, to),
-  ].sort((a, b) => Number(b.severity === "high") - Number(a.severity === "high"));
+  ];
 
-  const texts = await describeAnomalies(drafts);
-  const anomalies = drafts.map((d) => ({ ...d, ...texts[d.id] }));
+  // Порядок карточек: сначала по одной самой сильной карточке каждого вида, потом остальные.
+  // Так в превью на дашборде видны разные закономерности, а не три карточки про один конвейер.
+  const rank = (d: Draft) => (d.severity === "high" ? 0 : 1);
+  const sorted = [...drafts].sort((a, b) => rank(a) - rank(b));
+  const firstOfKind = sorted.filter((d, i) => sorted.findIndex((x) => x.kind === d.kind) === i);
+  const rest = sorted.filter((d) => !firstOfKind.includes(d));
+  const ordered = [...firstOfKind.sort((a, b) => rank(a) - rank(b)), ...rest];
+
+  const texts = await describeAnomalies(ordered);
+  const anomalies = ordered.map((d) => ({ ...d, ...texts[d.id] }));
   return { anomalies, period: { from: from.toISOString(), to: to.toISOString() } };
 }
