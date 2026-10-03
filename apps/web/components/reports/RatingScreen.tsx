@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
+import { ExportButtons } from "@/components/reports/ExportButtons";
 import { RatingFormula, RatingTable } from "@/components/reports/RatingTable";
 import { EmptyState, cx } from "@/components/ui";
 import { getRating } from "@/lib/analytics/rating";
@@ -54,6 +55,7 @@ export async function RatingScreen({
           ))}
         </nav>
 
+        <ExportButtons report="rating" params={{ days }} />
         <RatingFormula />
         {rows.length === 0 ? (
           <EmptyState title={t("rating.emptyTitle")} text={t("rating.emptyText")} />
