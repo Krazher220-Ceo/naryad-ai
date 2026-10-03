@@ -40,9 +40,11 @@ type Worker = IssueFormData["workers"][number];
 function suggestWorker(workers: Worker[]): Worker | undefined {
   const onShift = workers.filter((w) => w.board_status !== "off");
   const pool = onShift.length > 0 ? onShift : workers;
-  const free = pool.find((w) => w.board_status === "free");
-  if (free) return free;
-  return [...pool].sort((a, b) => (a.queue_count ?? 0) - (b.queue_count ?? 0))[0];
+  // Нагрузка: наряды в очереди плюс выданные, но ещё не принятые.
+  const load = (w: Worker) => (w.queue_count ?? 0) + (w.pending_count ?? 0);
+  const free = pool.filter((w) => w.board_status === "free").sort((a, b) => load(a) - load(b));
+  if (free.length > 0) return free[0];
+  return [...pool].sort((a, b) => load(a) - load(b))[0];
 }
 
 // Срок в часах: аварийный 1 ч, иначе норматив шифра, иначе 4 ч.
@@ -75,9 +77,6 @@ export function IssueOrderForm({ data, employeeId }: { data: IssueFormData; empl
   const actionId = useRef<string | null>(null);
   const createdOrderId = useRef<string | null>(null);
   const uploadedCount = useRef(0);
-  // Обход: StepForm на нажатии «Далее» превращает кнопку в «submit» и форма отправляется
-  // раньше времени. Нажатие по кнопке типа button не считаем отправкой.
-  const skipSubmit = useRef(false);
 
   const equipment = data.equipment.find((e) => e.id === equipmentId);
   const suggested = suggestWorker(data.workers);
@@ -92,7 +91,7 @@ export function IssueOrderForm({ data, employeeId }: { data: IssueFormData; empl
   );
 
   async function submit() {
-    if (!equipment || skipSubmit.current) return;
+    if (!equipment) return;
     setLoading(true);
     setError(null);
     try {
@@ -310,14 +309,7 @@ export function IssueOrderForm({ data, employeeId }: { data: IssueFormData; empl
   ];
 
   return (
-    <div
-      onClickCapture={(e) => {
-        const button = (e.target as HTMLElement).closest("button");
-        if (button?.type !== "button") return;
-        skipSubmit.current = true;
-        setTimeout(() => (skipSubmit.current = false), 0);
-      }}
-    >
+    <div>
       {equipment && (
         <p className="mb-4 text-base text-ink-muted">
           {t("master.issue.section")}: {data.sections.find((s) => s.id === equipment.section_id)?.name}
