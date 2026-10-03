@@ -1,0 +1,329 @@
+"use client";
+
+import Link from "next/link";
+import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Button,
+  Field,
+  IconCheck,
+  InlineNotice,
+  PhotoPicker,
+  PRIORITIES,
+  SegmentedControl,
+  Select,
+  StepForm,
+  TextArea,
+  TextInput,
+  WORK_TYPES,
+  WorkerChip,
+  cx,
+} from "@/components/ui";
+import { t, type MessageKey } from "@/lib/i18n";
+import { createOrder } from "@/lib/orders/actions";
+import { uploadOrderPhoto } from "@/lib/orders/photos";
+import type { IssueFormData } from "@/lib/orders/queries";
+import type { OrderPriority, OrderType } from "@/lib/orders/types";
+
+const DESCRIPTION_CHIPS = [
+  "master.issue.chips.leak",
+  "master.issue.chips.noStart",
+  "master.issue.chips.noise",
+  "master.issue.chips.vibration",
+  "master.issue.chips.overheat",
+  "master.issue.chips.belt",
+] as const satisfies readonly MessageKey[];
+
+type Worker = IssueFormData["workers"][number];
+
+// Кого предложить: свободного, иначе того, у кого меньше очередь. Не на смене — в последнюю очередь.
+function suggestWorker(workers: Worker[]): Worker | undefined {
+  const onShift = workers.filter((w) => w.board_status !== "off");
+  const pool = onShift.length > 0 ? onShift : workers;
+  const free = pool.find((w) => w.board_status === "free");
+  if (free) return free;
+  return [...pool].sort((a, b) => (a.queue_count ?? 0) - (b.queue_count ?? 0))[0];
+}
+
+// Срок в часах: аварийный 1 ч, иначе норматив шифра, иначе 4 ч.
+function dueHours(priority: OrderPriority, normHours: number | undefined): number {
+  if (priority === "emergency") return 1;
+  return normHours ?? 4;
+}
+
+function dueAtIso(hours: number): string {
+  return new Date(Date.now() + hours * 3600 * 1000).toISOString();
+}
+
+export function IssueOrderForm({ data, employeeId }: { data: IssueFormData; employeeId: string }) {
+  const router = useRouter();
+  const [equipmentId, setEquipmentId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [description, setDescription] = useState("");
+  const [priority, setPriority] = useState<OrderPriority>("normal");
+  const [type, setType] = useState<OrderType>("unplanned");
+  const [faultCode, setFaultCode] = useState("");
+  const [assigneeId, setAssigneeId] = useState<string | null>(null);
+  const [pickingWorker, setPickingWorker] = useState(false);
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  // Наряд уже создан, а упала загрузка фото: тогда показываем ссылку на панель.
+  const [orderCreated, setOrderCreated] = useState(false);
+
+  // При повторе после ошибки берём тот же id, чтобы наряд не задвоился.
+  const actionId = useRef<string | null>(null);
+  const createdOrderId = useRef<string | null>(null);
+  const uploadedCount = useRef(0);
+  // Обход: StepForm на нажатии «Далее» превращает кнопку в «submit» и форма отправляется
+  // раньше времени. Нажатие по кнопке типа button не считаем отправкой.
+  const skipSubmit = useRef(false);
+
+  const equipment = data.equipment.find((e) => e.id === equipmentId);
+  const suggested = suggestWorker(data.workers);
+  const assignee = data.workers.find((w) => w.id === assigneeId) ?? suggested;
+  const noneFree = !data.workers.some((w) => w.board_status === "free");
+  const norm = data.faultCodes.find((f) => f.code === faultCode)?.norm_hours;
+  const hours = dueHours(priority, norm);
+
+  const query = search.trim().toLowerCase();
+  const filtered = data.equipment.filter(
+    (e) => !query || e.name.toLowerCase().includes(query) || e.inventory_no.toLowerCase().includes(query),
+  );
+
+  async function submit() {
+    if (!equipment || skipSubmit.current) return;
+    setLoading(true);
+    setError(null);
+    try {
+      if (!createdOrderId.current) {
+        actionId.current ??= crypto.randomUUID();
+        const result = await createOrder({
+          type,
+          description: description.trim(),
+          sectionId: equipment.section_id,
+          equipmentId: equipment.id,
+          priority,
+          dueAt: dueAtIso(hours),
+          assigneeId: assignee?.id ?? undefined,
+          faultCode: faultCode || undefined,
+          clientActionId: actionId.current,
+        });
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        createdOrderId.current = result.data.orderId;
+        setOrderCreated(true);
+      }
+      // Фото грузим по одному; при сбое повтор продолжит с того же места.
+      while (uploadedCount.current < photos.length) {
+        await uploadOrderPhoto({
+          orderId: createdOrderId.current,
+          kind: "before",
+          file: photos[uploadedCount.current],
+          authorId: employeeId,
+        });
+        uploadedCount.current += 1;
+      }
+      router.push("/master");
+    } catch {
+      setError(createdOrderId.current ? t("orders.errors.photoUpload") : t("orders.errors.unknown"));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const steps = [
+    {
+      id: "equipment",
+      title: t("master.issue.steps.equipment"),
+      valid: equipmentId !== null,
+      content: (
+        <>
+          <TextInput
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={t("master.issue.search")}
+            aria-label={t("master.issue.search")}
+          />
+          {filtered.length === 0 && <p className="text-base text-ink-muted">{t("master.issue.noEquipment")}</p>}
+          {data.sections.map((section) => {
+            const items = filtered.filter((e) => e.section_id === section.id);
+            if (items.length === 0) return null;
+            return (
+              <div key={section.id} className="flex flex-col gap-2">
+                <h3 className="text-base font-bold text-ink-muted">{section.name}</h3>
+                {items.map((e) => {
+                  const selected = e.id === equipmentId;
+                  return (
+                    <button
+                      key={e.id}
+                      type="button"
+                      aria-pressed={selected}
+                      onClick={() => setEquipmentId(e.id)}
+                      className={cx(
+                        "flex min-h-touch items-center justify-between gap-2 rounded-xl border-2 px-4 text-left text-lg font-semibold",
+                        selected ? "border-brand bg-brand text-white" : "border-line-strong bg-surface text-ink hover:bg-canvas",
+                      )}
+                    >
+                      <span>
+                        {e.name} <span className="font-normal">· {e.inventory_no}</span>
+                      </span>
+                      {selected && <IconCheck className="size-6 shrink-0" />}
+                    </button>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </>
+      ),
+    },
+    {
+      id: "problem",
+      title: t("master.issue.steps.problem"),
+      valid: description.trim().length > 0,
+      content: (
+        <>
+          <div className="flex flex-wrap gap-2">
+            {DESCRIPTION_CHIPS.map((key) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setDescription(t(key))}
+                className="min-h-touch-sm rounded-xl border-2 border-line-strong bg-surface px-4 text-base font-semibold text-ink hover:bg-canvas active:bg-line"
+              >
+                {t(key)}
+              </button>
+            ))}
+          </div>
+          <Field label={t("master.issue.description")} htmlFor="issue-description" hint={t("master.issue.descriptionHint")} required>
+            <TextArea id="issue-description" value={description} onChange={(e) => setDescription(e.target.value)} />
+          </Field>
+          <Field label={t("master.issue.priority")}>
+            <SegmentedControl
+              ariaLabel={t("master.issue.priority")}
+              value={priority}
+              onChange={setPriority}
+              options={PRIORITIES.map((p) => ({
+                value: p,
+                label: t(`orders.priority.${p}`),
+                tone: p === "emergency" ? "danger" : "default",
+              }))}
+            />
+          </Field>
+          <Field label={t("master.issue.type")}>
+            <SegmentedControl
+              ariaLabel={t("master.issue.type")}
+              value={type}
+              onChange={setType}
+              options={WORK_TYPES.map((w) => ({ value: w, label: t(`orders.type.${w}`) }))}
+            />
+          </Field>
+        </>
+      ),
+    },
+    {
+      id: "assignee",
+      title: t("master.issue.steps.assignee"),
+      content: (
+        <>
+          <Field label={t("master.issue.assignee")}>
+            {data.workers.length === 0 ? (
+              <InlineNotice tone="warning">{t("master.issue.noWorkers")}</InlineNotice>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {noneFree && assignee && (
+                  <InlineNotice tone="warning">
+                    {t("master.issue.allBusy").replace("{name}", assignee.full_name ?? "")}
+                  </InlineNotice>
+                )}
+                {assignee && (
+                  <WorkerChip
+                    name={assignee.full_name ?? ""}
+                    state={assignee.board_status}
+                    orderNumber={assignee.current_order_number ?? undefined}
+                    queueCount={assignee.queue_count ?? undefined}
+                  />
+                )}
+                <Button variant="secondary" size="md" onClick={() => setPickingWorker(!pickingWorker)}>
+                  {t("master.issue.change")}
+                </Button>
+                {pickingWorker && (
+                  <ul className="flex flex-col gap-2">
+                    {data.workers.map((w) => (
+                      <li key={w.id}>
+                        <button
+                          type="button"
+                          aria-pressed={w.id === assignee?.id}
+                          onClick={() => {
+                            setAssigneeId(w.id);
+                            setPickingWorker(false);
+                          }}
+                          className={cx("block w-full rounded-xl text-left", w.id === assignee?.id && "ring-4 ring-brand")}
+                        >
+                          <WorkerChip
+                            name={w.full_name ?? ""}
+                            state={w.board_status}
+                            orderNumber={w.current_order_number ?? undefined}
+                            queueCount={w.queue_count ?? undefined}
+                          />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+          </Field>
+          <Field label={t("master.issue.faultCode")} htmlFor="issue-fault" hint={t("master.issue.faultCodeHint")}>
+            <Select
+              id="issue-fault"
+              value={faultCode}
+              onChange={(e) => setFaultCode(e.target.value)}
+              options={data.faultCodes.map((f) => ({ value: f.code, label: `${f.code} · ${f.name}` }))}
+            />
+          </Field>
+          <p className="text-lg font-semibold text-ink">{t("master.issue.dueIn").replace("{hours}", String(hours))}</p>
+          <Field label={t("master.issue.photos")} hint={t("master.issue.photosHint")}>
+            <PhotoPicker value={photos} onChange={setPhotos} max={5} />
+          </Field>
+          {error && (
+            <InlineNotice
+              tone="danger"
+              action={
+                orderCreated ? (
+                  <Link href="/master" className="text-base font-bold underline">
+                    {t("master.card.back")}
+                  </Link>
+                ) : undefined
+              }
+            >
+              {error}
+            </InlineNotice>
+          )}
+        </>
+      ),
+    },
+  ];
+
+  return (
+    <div
+      onClickCapture={(e) => {
+        const button = (e.target as HTMLElement).closest("button");
+        if (button?.type !== "button") return;
+        skipSubmit.current = true;
+        setTimeout(() => (skipSubmit.current = false), 0);
+      }}
+    >
+      {equipment && (
+        <p className="mb-4 text-base text-ink-muted">
+          {t("master.issue.section")}: {data.sections.find((s) => s.id === equipment.section_id)?.name}
+        </p>
+      )}
+      <StepForm steps={steps} submitLabel={t("master.issue.submit")} onSubmit={submit} loading={loading} />
+    </div>
+  );
+}
