@@ -90,12 +90,14 @@ export function StepForm({ steps, submitLabel, onSubmit, loading }: StepFormProp
               <span className="sr-only">{t("ui.action.back")}</span>
             </Button>
           )}
+          {/* key обязателен: без него React переиспользует ту же кнопку, она становится submit
+              прямо во время нажатия «Далее», и форма отправляется на шаг раньше. */}
           {isLast ? (
-            <Button type="submit" fullWidth disabled={!allValid} loading={loading}>
+            <Button key="submit" type="submit" fullWidth disabled={!allValid} loading={loading}>
               {submitLabel}
             </Button>
           ) : (
-            <Button fullWidth disabled={!currentValid} onClick={() => setCurrent(current + 1)}>
+            <Button key="next" fullWidth disabled={!currentValid} onClick={() => setCurrent(current + 1)}>
               {t("ui.action.next")}
             </Button>
           )}
