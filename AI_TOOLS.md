@@ -60,3 +60,9 @@
 - `jszip` и библиотека `buffers` без лицензии приходили с `exceljs` — поэтому вместо `exceljs` взята `write-excel-file`;
 - LGPL-3.0 (`@img/sharp-libvips-*`, необязательная зависимость Next.js для картинок) и MPL-2.0
   (`lightningcss` из Tailwind, `axe-core` из линтера) — слабый копилефт, не требует открывать наш код.
+
+## Шрифты
+
+| Шрифт | Лицензия | Назначение |
+|---|---|---|
+| IBM Plex Sans Regular и Bold (`apps/web/public/fonts/`, текст лицензии рядом в `OFL.txt`) | SIL Open Font License 1.1, коммерческое использование разрешено | Кириллица в PDF-выгрузках: в стандартном шрифте PDF русских букв нет. Источник: github.com/IBM/plex |

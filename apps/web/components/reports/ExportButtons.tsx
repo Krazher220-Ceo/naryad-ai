@@ -1,0 +1,23 @@
+import { t } from "@/lib/i18n";
+
+const linkClass =
+  "inline-flex min-h-touch-sm flex-1 items-center justify-center rounded-xl border-2 border-ink bg-surface px-4 text-base font-semibold text-ink hover:bg-canvas active:bg-line sm:flex-none";
+
+// Две ссылки на выгрузку отчёта. Обычные <a>: файл скачивается, а не открывается как страница.
+export function ExportButtons({ report, params }: { report: string; params: Record<string, string | number> }) {
+  const href = (format: "xlsx" | "pdf") => {
+    const query = new URLSearchParams({ format, ...Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)])) });
+    return `/api/export/${report}?${query.toString()}`;
+  };
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-base font-semibold text-ink-muted">{t("export.title")}</span>
+      <a href={href("xlsx")} download className={linkClass}>
+        {t("export.excel")}
+      </a>
+      <a href={href("pdf")} download className={linkClass}>
+        {t("export.pdf")}
+      </a>
+    </div>
+  );
+}
