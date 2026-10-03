@@ -5,7 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 // Пять составляющих из кейса, каждая приводится к шкале 0–100:
 //   quality   — средняя оценка качества (оценка мастера, если он её менял, иначе ИИ), 1–5 -> 0–100;
 //   onTime    — доля нарядов, исполненных в срок;
-//   noReturns — доля нарядов БЕЗ возврата на доработку и без повторной поломки того же оборудования за 7 дней;
+//   noReturns — доля нарядов БЕЗ возврата на доработку и без повторной поломки
+//               (тот же шифр на том же оборудовании в течение 7 дней — ремонт не устранил причину);
 //   volume    — количество и сложность: сумма нормативных часов закрытых нарядов относительно лучшего в периоде;
 //   noRefusal — доля выданных нарядов без отказа по неуважительной причине.
 // Итог — взвешенная сумма. Веса — предложение команды, их можно поменять в одном месте ниже.
@@ -39,6 +40,7 @@ type Order = {
   due_at: string;
   done_at: string | null;
   created_at: string;
+  fault_code: string | null;
   fault: { norm_hours: number } | null;
 };
 
@@ -51,13 +53,13 @@ export async function getRating(from: Date, to: Date): Promise<RatingRow[]> {
     supabase.from("employees").select("id, full_name, brigade").eq("role", "worker").order("full_name"),
     supabase
       .from("work_orders")
-      .select("id, assignee_id, equipment_id, type, status, due_at, done_at, created_at, fault:fault_code ( norm_hours )")
+      .select("id, assignee_id, equipment_id, type, status, due_at, done_at, created_at, fault_code, fault:fault_code ( norm_hours )")
       .gte("created_at", fromIso)
       .lte("created_at", toIso),
     // Наряды после периода — чтобы увидеть повторную поломку в течение 7 дней после конца периода.
     supabase
       .from("work_orders")
-      .select("equipment_id, type, created_at")
+      .select("equipment_id, fault_code, created_at")
       .eq("type", "unplanned")
       .gte("created_at", fromIso)
       .lte("created_at", new Date(to.getTime() + REPEAT_WINDOW_MS).toISOString()),
@@ -97,12 +99,13 @@ export async function getRating(from: Date, to: Date): Promise<RatingRow[]> {
 
     const reworked = new Set(events.filter((e) => e.action === "rework").map((e) => e.order_id));
     const returns = closed.filter((o) => reworked.has(o.id)).length;
-    // Повторная поломка: внеплановый наряд на то же оборудование в течение 7 дней после исполнения.
+    // Повторная поломка: внеплановый наряд с тем же шифром на то же оборудование в течение 7 дней.
     const repeats = closed.filter((o) => {
+      if (!o.fault_code) return false;
       const done = new Date(o.done_at!).getTime();
       return unplanned.some((u) => {
         const t = new Date(u.created_at).getTime();
-        return u.equipment_id === o.equipment_id && t > done && t - done <= REPEAT_WINDOW_MS;
+        return u.equipment_id === o.equipment_id && u.fault_code === o.fault_code && t > done && t - done <= REPEAT_WINDOW_MS;
       });
     }).length;
 
@@ -139,6 +142,8 @@ export async function getRating(from: Date, to: Date): Promise<RatingRow[]> {
   const maxHours = Math.max(1, ...rows.map((r) => r.facts.normHours));
   for (const r of rows) {
     r.parts.volume = (r.facts.normHours / maxHours) * 100;
+    // Целые проценты: на экране и в объяснении дробные доли не нужны.
+    for (const key of Object.keys(r.parts) as (keyof typeof r.parts)[]) r.parts[key] = Math.round(r.parts[key]);
     r.total = Math.round(
       r.parts.quality * WEIGHTS.quality +
         r.parts.onTime * WEIGHTS.onTime +

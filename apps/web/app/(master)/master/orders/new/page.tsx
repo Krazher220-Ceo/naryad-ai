@@ -6,7 +6,9 @@ import { requireRole } from "@/lib/auth/session";
 import { t } from "@/lib/i18n";
 import { getIssueFormData } from "@/lib/orders/queries";
 
-export default async function NewOrderPage() {
+// ?equipment=<id> приходит с QR-кода оборудования: форма откроется с уже выбранным оборудованием.
+export default async function NewOrderPage({ searchParams }: PageProps<"/master/orders/new">) {
+  const { equipment } = await searchParams;
   const employee = await requireRole("master");
   const data = await getIssueFormData();
 
@@ -19,7 +21,11 @@ export default async function NewOrderPage() {
           {t("master.card.back")}
         </Link>
         <h1 className="text-2xl font-bold text-ink">{t("master.issue.title")}</h1>
-        <IssueOrderForm data={data} employeeId={employee.id} />
+        <IssueOrderForm
+          data={data}
+          employeeId={employee.id}
+          initialEquipmentId={typeof equipment === "string" && data.equipment.some((e) => e.id === equipment) ? equipment : null}
+        />
       </main>
     </div>
   );

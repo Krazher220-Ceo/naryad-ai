@@ -10,12 +10,14 @@ type ListItemProps = {
   // Справа от заголовка: срок или номер наряда.
   meta?: React.ReactNode;
   tone?: "default" | "emergency";
+  // Слева: значок, например тип оборудования.
+  icon?: React.ReactNode;
   href?: string;
   onClick?: () => void;
 };
 
 // Строка списка нарядов или исполнителей. Высота от 72 px, вся строка — одна цель касания.
-export function ListItem({ title, subtitle, badges, meta, tone = "default", href, onClick }: ListItemProps) {
+export function ListItem({ title, subtitle, badges, meta, tone = "default", icon, href, onClick }: ListItemProps) {
   const clickable = Boolean(href || onClick);
   const className = cx(
     "flex min-h-18 w-full items-center gap-3 rounded-2xl bg-surface p-4 text-left",
@@ -25,6 +27,7 @@ export function ListItem({ title, subtitle, badges, meta, tone = "default", href
 
   const body = (
     <>
+      {icon && <span className="flex size-10 shrink-0 items-center justify-center self-start rounded-xl bg-canvas text-ink">{icon}</span>}
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         <div className="flex items-start justify-between gap-2">
           <span className="text-lg font-semibold leading-snug text-ink">{title}</span>
