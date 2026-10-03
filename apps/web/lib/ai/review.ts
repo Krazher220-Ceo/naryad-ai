@@ -4,6 +4,7 @@ import { notifyEmployee } from "@/lib/notify";
 import { reviewReadyText } from "@/lib/notify/messages";
 import type { Json } from "@/lib/supabase/database.types";
 import { createAnonymizer } from "./anonymize";
+import type { ReviewChecks } from "./types";
 import { chatJson, type AiProvider, type ContentPart } from "./provider";
 import { PHOTO_CHECK_SYSTEM, REVIEW_TEXT_SYSTEM, WORK_MATCH_SYSTEM } from "./prompts";
 import { runRules, rulesScore, type RuleCheck } from "./rules";
@@ -177,7 +178,8 @@ export async function reviewOrder(orderId: string): Promise<{ verdict: Verdict }
   }
 
   // ---------- 6. Сохранить, записать в журнал, уведомить ----------
-  const checks = { rules, work_match: workMatch, photo: photoCheck, text, provider, errors } as unknown as Json;
+  const reviewChecks: ReviewChecks = { rules, work_match: workMatch, photo: photoCheck, text, provider, errors };
+  const checks = reviewChecks as unknown as Json;
   await db.from("ai_reviews").insert({
     order_id: orderId,
     verdict,

@@ -2,6 +2,7 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { isOverdue } from "./transitions";
 import type { OrderPriority, WorkerBoardStatus } from "./types";
+import type { ReviewChecks } from "@/lib/ai/types";
 
 // Чтение данных для экранов. Запросы идут от имени вошедшего пользователя,
 // поэтому каждый видит только то, что разрешают правила доступа базы.
@@ -108,7 +109,7 @@ export async function getOrderDetails(orderId: string) {
   if (error) throw error;
   if (!order) return null;
 
-  const [eventsRes, photosRes, materialsRes] = await Promise.all([
+  const [eventsRes, photosRes, materialsRes, reviewRes] = await Promise.all([
     supabase
       .from("work_order_events")
       .select("id, action, from_status, to_status, comment, reason, reason_code, created_at, actor:actor_id ( full_name )")
@@ -119,6 +120,14 @@ export async function getOrderDetails(orderId: string) {
       .from("material_usages")
       .select("id, qty, material:material_id ( id, name, unit, typical_qty )")
       .eq("order_id", orderId),
+    // Последняя проверка ИИ: после доработки наряд проверяется заново.
+    supabase
+      .from("ai_reviews")
+      .select("id, verdict, score, confidence, checks, explanation, source, master_score, master_reason, created_at")
+      .eq("order_id", orderId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ]);
   if (eventsRes.error) throw eventsRes.error;
   if (photosRes.error) throw photosRes.error;
@@ -137,6 +146,7 @@ export async function getOrderDetails(orderId: string) {
     events: eventsRes.data,
     photos,
     materials: materialsRes.data,
+    review: reviewRes.data ? { ...reviewRes.data, checks: reviewRes.data.checks as unknown as ReviewChecks } : null,
   };
 }
 
