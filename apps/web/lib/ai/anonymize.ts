@@ -22,11 +22,12 @@ export function createAnonymizer(fullNames: string[]): Anonymizer {
   return {
     hide: (text) => pairs.reduce((acc, p) => acc.split(p.real).join(p.label), text),
     restore: (text) => {
-      // Обратно подставляем полное ФИО. С конца: «Сотрудник-10» раньше, чем «Сотрудник-1».
+      // Обратно подставляем полное ФИО. Модель может просклонять метку («у сотрудника-1»),
+      // поэтому ищем её в любом падеже и регистре. (?!\d): «Сотрудник-1» не задевает «Сотрудник-10».
       let result = text;
-      for (let i = fullNames.length - 1; i >= 0; i--) {
-        result = result.split(`Сотрудник-${i + 1}`).join(fullNames[i]);
-      }
+      fullNames.forEach((name, i) => {
+        result = result.replace(new RegExp(`[Сс]отрудник[а-яё]*-${i + 1}(?!\\d)`, "g"), name);
+      });
       return result;
     },
   };
