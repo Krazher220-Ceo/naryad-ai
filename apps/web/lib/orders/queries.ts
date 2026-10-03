@@ -86,7 +86,11 @@ export async function getWorkerOrders() {
 export type WorkerOrders = Awaited<ReturnType<typeof getWorkerOrders>>;
 
 // Полная карточка наряда: поля, журнал, фото (временные ссылки), материалы.
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function getOrderDetails(orderId: string) {
+  // Неверный адрес в строке браузера: «не найден», а не ошибка базы.
+  if (!UUID_RE.test(orderId)) return null;
   const supabase = await createClient();
 
   const { data: order, error } = await supabase
