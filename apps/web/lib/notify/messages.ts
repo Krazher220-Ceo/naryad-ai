@@ -87,3 +87,19 @@ export function reviewReadyText(r: { number: number; verdict: string; score: num
   const verdict = t(`ai.verdict.${r.verdict}` as MessageKey);
   return fill("notify.reviewReady", { number: r.number, verdict, score: r.score, summary: r.summary });
 }
+
+// Смена статуса: доработка, отмена, закрытие — исполнителю; отказ и пауза — мастеру.
+export type StatusNotifyAction = "rework" | "cancel" | "close" | "reject" | "pause";
+
+export function statusChangeText(
+  action: StatusNotifyAction,
+  o: { number: number; equipment: string; section: string; workerName: string | null },
+  reason: string | null,
+): string {
+  return fill(`notify.status.${action}`, {
+    number: o.number,
+    place: `${o.equipment}, ${o.section.toLowerCase()}`,
+    worker: o.workerName ? shortName(o.workerName) : "—",
+    reason: reason ?? "—",
+  });
+}

@@ -752,6 +752,7 @@ export type Database = {
         | "not_accepted"
         | "lead_overdue"
         | "review_ready"
+        | "status_change"
       order_priority: "emergency" | "high" | "normal" | "planned"
       order_status:
         | "issued"
