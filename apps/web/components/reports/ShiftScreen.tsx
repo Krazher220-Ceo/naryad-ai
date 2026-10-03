@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
+import { ExportButtons } from "@/components/reports/ExportButtons";
 import { ShiftReportView } from "@/components/reports/ShiftReportView";
 import { cx } from "@/components/ui";
 import { currentShift, getShiftReport, type Shift } from "@/lib/analytics/shift";
@@ -83,6 +84,7 @@ export async function ShiftScreen({
           )}
         </nav>
 
+        <ExportButtons report="shift" params={{ date, shift }} />
         <ShiftReportView report={report} />
       </main>
     </div>

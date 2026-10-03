@@ -1,0 +1,41 @@
+import { Suspense } from "react";
+import { Skeleton } from "@/components/ui";
+import { t } from "@/lib/i18n";
+import { AnomalyList } from "./AnomalyList";
+import { ExportButtons } from "./ExportButtons";
+import { PeriodSwitch, ReportPage } from "./ReportPage";
+
+export const ANOMALY_PERIODS = [30, 90] as const;
+
+// Одна страница аномалий для мастера и руководителя.
+export function AnomaliesScreen({
+  fullName,
+  roleLabel,
+  basePath,
+  days,
+}: {
+  fullName: string;
+  roleLabel: string;
+  basePath: "/master" | "/lead";
+  days: number;
+}) {
+  return (
+    <ReportPage fullName={fullName} roleLabel={roleLabel} backHref={basePath} backLabel={t("anomalies.back")} title={t("anomalies.title")}>
+      <p className="text-base text-ink-muted">{t("anomalies.intro")}</p>
+      <PeriodSwitch basePath={`${basePath}/anomalies`} days={days} options={ANOMALY_PERIODS} />
+      <ExportButtons report="anomalies" params={{ days }} />
+      <Suspense
+        key={days}
+        fallback={
+          <div role="status" className="flex flex-col gap-3">
+            <p className="text-base font-semibold text-ink">{t("anomalies.loading")}</p>
+            <Skeleton className="h-48" />
+            <Skeleton className="h-48" />
+          </div>
+        }
+      >
+        <AnomalyList days={days} />
+      </Suspense>
+    </ReportPage>
+  );
+}
