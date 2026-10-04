@@ -93,6 +93,16 @@ select pg_temp.try('help on foreign order -> must fail', format($q$select reques
 select pg_temp.as_user('master1');
 select pg_temp.try('master dismiss request', format($q$select resolve_request(%L,'dismissed')::text$q$, (select val from v where k='r1')));
 
+-- M6: центр уведомлений, настройки, сводка по машине (0012, 0013)
+select pg_temp.try('stats for master', format($q$select breakdowns_30d::text || '/' || open_orders::text from equipment_recent_stats(%L)$q$, (select val from v where k='eq')));
+select pg_temp.try('mark own notifications read', $q$select mark_notifications_read()::text$q$);
+select pg_temp.try('save prefs', $q$select save_notification_prefs(array['remind']::notification_kind[], '22:00', '07:00')::text$q$);
+select pg_temp.try('own prefs readable = 1', $q$select count(*)::text from notification_prefs$q$);
+select pg_temp.try('half quiet hours -> must fail', $q$select save_notification_prefs('{}', '22:00', null)::text$q$);
+select pg_temp.as_user('worker2');
+select pg_temp.try('foreign prefs hidden = 0', $q$select count(*)::text from notification_prefs$q$);
+select pg_temp.try('worker stats', format($q$select breakdowns_30d::text from equipment_recent_stats(%L)$q$, (select val from v where k='eq')));
+
 reset role;
 select step, what, result from t_log order by step;
 rollback;
