@@ -26,7 +26,7 @@ import {
   ReasonPicker,
   isReasonValid,
   InlineNotice,
-  Toast,
+  useToast,
   IconChevronLeft,
   IconX,
   type NoticeTone,
@@ -53,8 +53,7 @@ export function OrderDetailView({ order, events, photos, materials, review, toBr
   const router = useRouter();
 
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [toastTone, setToastTone] = useState<NoticeTone>("success");
+  const toast = useToast();
 
   // Подтверждение отклонения
   const [rejectSheetOpen, setRejectSheetOpen] = useState(false);
@@ -108,18 +107,16 @@ export function OrderDetailView({ order, events, photos, materials, review, toBr
       if (res.ok) {
         clearClientActionId(actionKey);
         if (res.queued) {
-          setToastMessage(t("offline.queued"));
-          setToastTone("offline");
+          toast.show("offline");
         } else {
+          toast.show("saved");
           router.refresh();
         }
       } else {
-        setToastMessage(res.error);
-        setToastTone("danger");
+        toast.show("error", { detail: res.error });
       }
     } catch {
-      setToastMessage(t("orders.errors.unknown"));
-      setToastTone("danger");
+      toast.show("error");
     } finally {
       setLoadingAction(null);
     }
@@ -146,18 +143,16 @@ export function OrderDetailView({ order, events, photos, materials, review, toBr
         setRejectSheetOpen(false);
         setRejectReason({ code: "", text: "" });
         if (res.queued) {
-          setToastMessage(t("offline.queued"));
-          setToastTone("offline");
+          toast.show("offline");
         } else {
+          toast.show("saved");
           router.refresh();
         }
       } else {
-        setToastMessage(res.error);
-        setToastTone("danger");
+        toast.show("error", { detail: res.error });
       }
     } catch {
-      setToastMessage(t("orders.errors.unknown"));
-      setToastTone("danger");
+      toast.show("error");
     } finally {
       setSheetLoading(false);
     }
@@ -184,18 +179,16 @@ export function OrderDetailView({ order, events, photos, materials, review, toBr
         setPauseSheetOpen(false);
         setPauseReason({ code: "", text: "" });
         if (res.queued) {
-          setToastMessage(t("offline.queued"));
-          setToastTone("offline");
+          toast.show("offline");
         } else {
+          toast.show("saved");
           router.refresh();
         }
       } else {
-        setToastMessage(res.error);
-        setToastTone("danger");
+        toast.show("error", { detail: res.error });
       }
     } catch {
-      setToastMessage(t("orders.errors.unknown"));
-      setToastTone("danger");
+      toast.show("error");
     } finally {
       setSheetLoading(false);
     }
@@ -225,12 +218,6 @@ export function OrderDetailView({ order, events, photos, materials, review, toBr
     <>
       <RealtimeRefresh />
 
-      <Toast
-        open={Boolean(toastMessage)}
-        tone={toastTone}
-        message={toastMessage ?? ""}
-        onClose={() => setToastMessage(null)}
-      />
 
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-4 py-4 pb-44">
         {/* Шапка карточки: кнопка назад и номер наряда */}

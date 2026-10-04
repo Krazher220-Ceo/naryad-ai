@@ -38,6 +38,8 @@ type SelectedMaterial = {
   name: string;
   unit: string;
   qty: number;
+  // Норма из справочника (typical_qty). Больше нормы на 30% и более — предупреждение.
+  norm: number;
 };
 
 export function OrderCloseView({
@@ -65,6 +67,7 @@ export function OrderCloseView({
       name: m.name,
       unit: m.unit,
       qty: m.typical_qty ?? 1,
+      norm: m.typical_qty ?? 1,
     }));
   });
   const [isAddingMaterial, setIsAddingMaterial] = useState(false);
@@ -101,6 +104,7 @@ export function OrderCloseView({
       name: m.name,
       unit: m.unit,
       qty: m.typical_qty ?? 1,
+      norm: m.typical_qty ?? 1,
     }));
 
     setMaterials(newMaterials);
@@ -124,6 +128,7 @@ export function OrderCloseView({
         name: found.name,
         unit: found.unit,
         qty: found.typical_qty ?? 1,
+        norm: found.typical_qty ?? 1,
       },
     ]);
     setIsAddingMaterial(false);
@@ -281,6 +286,11 @@ export function OrderCloseView({
                     step={m.unit === "кг" || m.unit === "л" ? 0.5 : 1}
                     onChange={(val) => handleQtyChange(m.id, val)}
                   />
+                  {m.qty >= m.norm * 1.3 && (
+                    <InlineNotice tone="warning">
+                      {t("worker.close.overNorm").replace("{norm}", String(m.norm)).replace("{unit}", m.unit)}
+                    </InlineNotice>
+                  )}
                 </div>
               ))}
 

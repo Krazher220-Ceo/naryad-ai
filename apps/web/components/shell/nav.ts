@@ -87,6 +87,7 @@ export function pageTitle(role: Role, pathname: string): MessageKey {
   if (/\/orders\/[^/]+\/close$/.test(pathname)) return "shell.titles.closeOrder";
   if (/\/orders\/[^/]+$/.test(pathname)) return "shell.titles.order";
   if (pathname.startsWith("/notifications")) return "shell.nav.notifications";
+  if (pathname.startsWith("/worker/equipment/")) return "shell.titles.equipment";
   const match = NAV[role].pc.find((item) => isActive(item, pathname));
   return match?.label ?? "app.name";
 }

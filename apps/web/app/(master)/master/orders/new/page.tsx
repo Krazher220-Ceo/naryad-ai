@@ -18,7 +18,7 @@ export default async function NewOrderPage({ searchParams }: PageProps<"/master/
   const equipmentId = fromRequest?.equipment_id ?? (typeof equipment === "string" ? equipment : null);
 
   return (
-    <div className="flex min-h-dvh flex-col bg-canvas">
+    <div className="flex flex-1 flex-col bg-canvas">
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 py-4 lg:max-w-3xl">
         <Link href="/master" className="inline-flex min-h-touch-sm items-center gap-1 self-start text-lg font-semibold text-ink">
           <IconChevronLeft />
