@@ -4,28 +4,31 @@
   Токены дизайн-системы НарядAI. Описание и правила: docs/ui/design-system.md.
   Каждый цвет --color-x даёт классы bg-x, text-x, border-x.
   Все пары «текст на фоне» проверены на контраст не ниже WCAG AA (4.5:1).
+  Фирменные цвета и шрифты взяты с сайта АО «Костанайские минералы» (km.kz):
+  тёмно-синий #07316e и #001636, синий #1753a9, жёлтый акцент #ffc107, заголовки Oswald, текст Inter.
+  Цвета статусов и приоритетов не фирменные: они закреплены правилами интерфейса (AGENTS.md).
 */
 @theme {
   /* Основа */
-  --color-canvas: #f8fafc;
+  --color-canvas: #f3f6fb;
   --color-surface: #ffffff;
-  --color-ink: #0f172a;
+  --color-ink: #001636;
   --color-ink-muted: #334155;
   --color-line: #cbd5e1;
   --color-line-strong: #64748b;
-  --color-brand: #0f172a;
-  --color-brand-hover: #1e293b;
-  --color-accent: #f59e0b;
+  --color-brand: #07316e;
+  --color-brand-hover: #1753a9;
+  --color-accent: #ffc107;
   --color-accent-ink: #92400e;
-  --color-focus: #b45309;
+  --color-focus: #1753a9;
   --color-danger: #b91c1c;
   --color-danger-hover: #991b1b;
   --color-danger-soft: #fee2e2;
   --color-success: #15803d;
   --color-success-soft: #dcfce7;
   --color-warning-soft: #fef3c7;
-  --color-info: #1d4ed8;
-  --color-info-soft: #dbeafe;
+  --color-info: #1753a9;
+  --color-info-soft: #d4e4fd;
 
   /* Статус исполнителя: цвет точки */
   --color-worker-free: #15803d;
@@ -66,6 +69,10 @@
   /* Размеры касания: основная цель 56 px, вторичная 48 px */
   --spacing-touch: 3.5rem;
   --spacing-touch-sm: 3rem;
+
+  /* Шрифты подключаются в app/layout.tsx (next/font, файлы хранятся у нас) */
+  --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: var(--font-oswald), var(--font-inter), system-ui, sans-serif;
 }
 
 html {
@@ -73,7 +80,7 @@ html {
 }
 
 body {
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-sans);
   font-size: 1rem;
   line-height: 1.5;
   background-color: var(--color-canvas);
@@ -85,4 +92,19 @@ body {
 :focus-visible {
   outline: 3px solid var(--color-focus);
   outline-offset: 2px;
+}
+
+/* Заголовки страниц — узкий Oswald, как на km.kz */
+h1,
+h2 {
+  font-family: var(--font-display);
+  letter-spacing: 0.01em;
+}
+
+/* Логотип компании: белый SVG как маска, цвет задаётся фоном (bg-brand, bg-white) */
+.km-logo {
+  display: inline-block;
+  aspect-ratio: 124 / 80;
+  -webkit-mask: url("/brand/km-logo.svg") center / contain no-repeat;
+  mask: url("/brand/km-logo.svg") center / contain no-repeat;
 }
