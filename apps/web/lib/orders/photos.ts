@@ -12,7 +12,7 @@ const MAX_SIDE = 1600;
 const JPEG_QUALITY = 0.8;
 export const MAX_PHOTOS_PER_KIND = 5;
 
-async function compress(file: File): Promise<Blob> {
+export async function compress(file: File): Promise<Blob> {
   const bitmap = await createImageBitmap(file);
   const scale = Math.min(1, MAX_SIDE / Math.max(bitmap.width, bitmap.height));
   const canvas = document.createElement("canvas");
