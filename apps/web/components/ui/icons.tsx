@@ -110,6 +110,15 @@ export function IconInbox(p: IconProps) {
   );
 }
 
+export function IconMic(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <rect x="9" y="3" width="6" height="11" rx="3" />
+      <path d="M5 11a7 7 0 0014 0M12 18v3" />
+    </Svg>
+  );
+}
+
 export function IconSpinner({ className = "size-6" }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className={`motion-safe:animate-spin ${className}`}>

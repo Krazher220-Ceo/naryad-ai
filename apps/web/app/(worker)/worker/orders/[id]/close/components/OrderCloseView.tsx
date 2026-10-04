@@ -12,6 +12,8 @@ import {
   StepForm,
   Field,
   TextArea,
+  VoiceButton,
+  appendSpoken,
   Select,
   NumberStepper,
   PhotoPicker,
@@ -206,6 +208,7 @@ export function OrderCloseView({
             onChange={(e) => setWorkDone(e.target.value)}
             rows={4}
           />
+          <VoiceButton onText={(spoken) => setWorkDone((prev) => appendSpoken(prev, spoken))} />
         </Field>
       ),
     },
@@ -361,6 +364,7 @@ export function OrderCloseView({
             onChange={(e) => setComment(e.target.value)}
             rows={3}
           />
+          <VoiceButton onText={(spoken) => setComment((prev) => appendSpoken(prev, spoken))} />
         </Field>
       ),
     },
