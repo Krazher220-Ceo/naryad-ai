@@ -3,7 +3,8 @@
 import { useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { t, type MessageKey } from "@/lib/i18n";
+import { type MessageKey } from "@/lib/i18n";
+import { useT } from "@/components/LocaleProvider";
 import { RealtimeRefresh } from "@/lib/orders/RealtimeRefresh";
 import { sendTransition } from "@/lib/offline/queue";
 import {
@@ -45,6 +46,7 @@ type OrderDetailViewProps = {
 };
 
 export function OrderDetailView({ order, events, photos, materials, review }: OrderDetailViewProps) {
+  const t = useT();
   const router = useRouter();
 
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
@@ -404,7 +406,7 @@ export function OrderDetailView({ order, events, photos, materials, review }: Or
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-base font-semibold text-ink">
-                        {eventLabel(event.action)}
+                        {eventLabel(t, event.action)}
                       </span>
                       <span className="shrink-0 text-sm text-ink-muted">
                         {formatOrderTime(event.created_at)}

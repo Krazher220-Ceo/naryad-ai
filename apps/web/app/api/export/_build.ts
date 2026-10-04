@@ -3,7 +3,7 @@ import { findAnomalies } from "@/lib/analytics/anomalies";
 import { getDowntimeReport, getMaterialsReport, periodFromDays, type MaterialRow } from "@/lib/analytics/reports";
 import { getRating } from "@/lib/analytics/rating";
 import { getShiftReport, type Shift } from "@/lib/analytics/shift";
-import { t, type MessageKey } from "@/lib/i18n";
+import { tRu as t, type MessageKey } from "@/lib/i18n";
 
 // Любой отчёт — это заголовок и несколько таблиц. Из них собираются и Excel, и PDF.
 export type Cell = string | number;
@@ -73,12 +73,12 @@ async function downtime(p: ReportParams): Promise<ReportDoc> {
           t("downtimeReport.col.unplannedShare"),
           t("downtimeReport.col.topCause"),
         ],
-        rows: r.rows.map((x) => [x.name, x.section, x.hours, x.unplanned, x.planned, `${x.unplannedSharePct}%`, categoryLabel(x.topCategory)]),
+        rows: r.rows.map((x) => [x.name, x.section, x.hours, x.unplanned, x.planned, `${x.unplannedSharePct}%`, categoryLabel(t, x.topCategory)]),
       },
       {
         name: t("export.sheet.categories"),
         head: [t("downtimeReport.byCategoryTitle"), t("downtimeReport.col.hours")],
-        rows: r.byCategory.map((c) => [categoryLabel(c.category), c.hours]),
+        rows: r.byCategory.map((c) => [categoryLabel(t, c.category), c.hours]),
       },
     ],
   };
@@ -187,7 +187,7 @@ async function anomalies(p: ReportParams): Promise<ReportDoc> {
           a.text,
           a.recommendation,
           Object.entries(a.facts)
-            .map(([k, v]) => `${factLabel(k)}: ${factValue(k, v)}`)
+            .map(([k, v]) => `${factLabel(t, k)}: ${factValue(t, k, v)}`)
             .join("; "),
           t(`ai.source.${a.source}` as MessageKey),
         ]),

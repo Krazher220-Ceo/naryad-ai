@@ -6,12 +6,13 @@ import { PrintButton } from "@/components/equipment/PrintButton";
 import { equipmentQrSvg } from "@/components/equipment/qr";
 import { EmptyState } from "@/components/ui";
 import { requireRole } from "@/lib/auth/session";
-import { t } from "@/lib/i18n";
+import { getT } from "@/lib/i18n-server";
 import { createClient } from "@/lib/supabase/server";
 
 type Sticker = { id: string; name: string; inventoryNo: string; type: string; sectionName: string; svg: string };
 
 export default async function EquipmentQrPage() {
+  const t = await getT();
   const employee = await requireRole("master");
 
   // Адрес сайта берём из запроса: работает и на localhost, и на Vercel

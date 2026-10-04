@@ -1,9 +1,10 @@
 import { ReportPage } from "@/components/reports/ReportPage";
 import { requireRole } from "@/lib/auth/session";
-import { t } from "@/lib/i18n";
+import { getT } from "@/lib/i18n-server";
 import { AssistantChat } from "./AssistantChat";
 
 export default async function MasterAssistantPage() {
+  const t = await getT();
   const employee = await requireRole("master");
   return (
     <ReportPage

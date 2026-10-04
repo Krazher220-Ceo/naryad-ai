@@ -4,7 +4,7 @@ import { TelegramLinkCard } from "@/components/TelegramLinkCard";
 import { OrderRow } from "@/components/master/OrderRow";
 import { BottomActionBar, EmptyState, WorkerChip, cx } from "@/components/ui";
 import { requireRole } from "@/lib/auth/session";
-import { t } from "@/lib/i18n";
+import { getT } from "@/lib/i18n-server";
 import { getMasterBoard } from "@/lib/orders/queries";
 import { RealtimeRefresh } from "@/lib/orders/RealtimeRefresh";
 import type { OrderStatus, WorkerBoardStatus } from "@/lib/orders/types";
@@ -36,6 +36,7 @@ function Tile({ label, value, alert }: { label: string; value: number; alert?: b
 }
 
 export default async function MasterPage() {
+  const t = await getT();
   const employee = await requireRole("master");
   const { workers, orders } = await getMasterBoard();
 

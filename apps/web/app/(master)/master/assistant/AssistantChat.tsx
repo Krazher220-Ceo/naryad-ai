@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { Button, Card, InlineNotice, TextArea, VoiceButton, appendSpoken, cx } from "@/components/ui";
 import type { AssistantTurn } from "@/lib/ai/assistant";
-import { t, type MessageKey } from "@/lib/i18n";
+import { type MessageKey } from "@/lib/i18n";
+import { useT } from "@/components/LocaleProvider";
 import { askAssistant } from "./actions";
 
 type Message = AssistantTurn & { source?: "llm" | "rules" };
@@ -13,6 +14,7 @@ const EXAMPLES = ["free", "overdue", "anomalies", "priority"] as const;
 // Переписка с помощником. История живёт только на этой странице и уходит с каждым вопросом,
 // чтобы помощник понимал уточнения вроде «а у кого из них очередь?».
 export function AssistantChat() {
+  const t = useT();
   const [messages, setMessages] = useState<Message[]>([]);
   const [question, setQuestion] = useState("");
   const [pending, setPending] = useState(false);

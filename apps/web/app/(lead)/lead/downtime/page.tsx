@@ -4,9 +4,10 @@ import { PERIODS, parseDaysIn } from "@/components/reports/format";
 import { PeriodSwitch, ReportPage } from "@/components/reports/ReportPage";
 import { getDowntimeReport } from "@/lib/analytics/reports";
 import { requireRole } from "@/lib/auth/session";
-import { t } from "@/lib/i18n";
+import { getT } from "@/lib/i18n-server";
 
 export default async function LeadDowntimePage({ searchParams }: PageProps<"/lead/downtime">) {
+  const t = await getT();
   const employee = await requireRole("lead");
   const { days: daysParam } = await searchParams;
   const days = parseDaysIn(daysParam, PERIODS, 30);

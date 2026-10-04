@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Card, InlineNotice } from "@/components/ui";
-import { t } from "@/lib/i18n";
+import { getT } from "@/lib/i18n-server";
+import { LanguageSwitch } from "@/components/LanguageSwitch";
 import { ResetDemoButton } from "./ResetDemoButton";
 
 const DEMO_LOGINS = [
@@ -72,7 +73,8 @@ const SCENARIO_STEPS = [
   },
 ];
 
-export default function DemoPage() {
+export default async function DemoPage() {
+  const t = await getT();
   return (
     <div className="flex min-h-dvh flex-col bg-canvas text-ink">
       <header className="border-b border-line bg-surface">
@@ -88,6 +90,7 @@ export default function DemoPage() {
             >
               {t("demo.uiShowcaseLink")}
             </Link>
+            <LanguageSwitch />
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">
             {t("demo.title")}

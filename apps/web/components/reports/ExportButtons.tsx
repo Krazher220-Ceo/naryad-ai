@@ -1,10 +1,11 @@
-import { t } from "@/lib/i18n";
+import { getT } from "@/lib/i18n-server";
 
 const linkClass =
   "inline-flex min-h-touch-sm flex-1 items-center justify-center rounded-xl border-2 border-ink bg-surface px-4 text-base font-semibold text-ink hover:bg-canvas active:bg-line sm:flex-none";
 
 // Две ссылки на выгрузку отчёта. Обычные <a>: файл скачивается, а не открывается как страница.
-export function ExportButtons({ report, params }: { report: string; params: Record<string, string | number> }) {
+export async function ExportButtons({ report, params }: { report: string; params: Record<string, string | number> }) {
+  const t = await getT();
   const href = (format: "xlsx" | "pdf") => {
     const query = new URLSearchParams({ format, ...Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)])) });
     return `/api/export/${report}?${query.toString()}`;

@@ -3,7 +3,8 @@
 import { refresh } from "next/cache";
 import { after } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { t } from "@/lib/i18n";
+import type { Translate } from "@/lib/i18n";
+import { getT } from "@/lib/i18n-server";
 import { reviewOrder } from "@/lib/ai/review";
 import { getCurrentEmployee } from "@/lib/auth/session";
 import { classifyProblem, type Classification } from "@/lib/ai/classify";
@@ -22,7 +23,7 @@ type DbError = { code?: string; message: string };
 
 // Ошибку базы превращаем в понятный текст.
 // 22023 — наша проверка данных: её текст уже написан для человека в SQL.
-function toErrorText(error: DbError): string {
+function toErrorText(t: Translate, error: DbError): string {
   if (error.code === "42501") return t("orders.errors.forbidden");
   if (error.code === "P0002") return t("orders.errors.notFound");
   if (error.code === "22023") return error.message;
@@ -58,7 +59,7 @@ export async function createOrder(input: CreateOrderInput): Promise<ActionResult
     p_fault_code: input.faultCode,
     p_client_action_id: input.clientActionId,
   });
-  if (error) return { ok: false, error: toErrorText(error) };
+  if (error) return { ok: false, error: toErrorText(await getT(), error) };
   // Сообщение исполнителю отправляем после ответа: мастер не ждёт Telegram.
   after(() => notifyNewOrder(data));
   refresh();
@@ -84,7 +85,7 @@ export async function transitionOrder(input: TransitionInput): Promise<ActionRes
     p_comment: input.comment,
     p_client_action_id: input.clientActionId,
   });
-  if (error) return { ok: false, error: toErrorText(error) };
+  if (error) return { ok: false, error: toErrorText(await getT(), error) };
   after(() =>
     notifyStatusChange({ orderId: input.orderId, action: input.action, reason: input.reason, reasonCode: input.reasonCode }),
   );
@@ -112,7 +113,7 @@ export async function completeOrder(input: CompleteOrderInput): Promise<ActionRe
     p_comment: input.comment,
     p_client_action_id: input.clientActionId,
   });
-  if (error) return { ok: false, error: toErrorText(error) };
+  if (error) return { ok: false, error: toErrorText(await getT(), error) };
   // ИИ-проверка идёт после ответа: исполнитель сразу видит «Отправлено на проверку».
   // Ошибка проверки не должна ломать закрытие — наряд просто останется у мастера.
   after(() => reviewOrder(input.orderId).catch((e) => console.error("reviewOrder failed", e)));
@@ -122,6 +123,7 @@ export async function completeOrder(input: CompleteOrderInput): Promise<ActionRe
 
 // Перезапустить ИИ-проверку вручную (кнопка мастера, если модель была недоступна).
 export async function rerunReview(orderId: string): Promise<ActionResult<{ started: true }>> {
+  const t = await getT();
   const me = await getCurrentEmployee();
   if (me?.role !== "master") return { ok: false, error: t("orders.errors.forbidden") };
   after(() => reviewOrder(orderId).catch((e) => console.error("reviewOrder failed", e)));
@@ -145,7 +147,7 @@ export async function reassignOrder(input: ReassignInput): Promise<ActionResult<
     p_comment: input.comment,
     p_client_action_id: input.clientActionId,
   });
-  if (error) return { ok: false, error: toErrorText(error) };
+  if (error) return { ok: false, error: toErrorText(await getT(), error) };
   after(() => notifyNewOrder(input.orderId));
   refresh();
   return { ok: true, data: { status: data } };
@@ -162,7 +164,7 @@ export async function changeOrderPriority(input: {
     p_priority: input.priority,
     p_client_action_id: input.clientActionId,
   });
-  if (error) return { ok: false, error: toErrorText(error) };
+  if (error) return { ok: false, error: toErrorText(await getT(), error) };
   refresh();
   return { ok: true, data: { priority: data } };
 }
@@ -179,7 +181,7 @@ export async function setMasterScore(input: {
     p_score: input.score,
     p_reason: input.reason,
   });
-  if (error) return { ok: false, error: toErrorText(error) };
+  if (error) return { ok: false, error: toErrorText(await getT(), error) };
   refresh();
   return { ok: true, data: { saved: true } };
 }
@@ -189,6 +191,7 @@ export async function setMasterScore(input: {
 export async function suggestForIssue(description: string): Promise<
   ActionResult<{ classification: Classification | null; candidates: Candidate[] }>
 > {
+  const t = await getT();
   const me = await getCurrentEmployee();
   if (me?.role !== "master") return { ok: false, error: t("orders.errors.forbidden") };
   const classification = await classifyProblem(description);
@@ -216,7 +219,7 @@ export async function updateSettings(input: SettingsInput): Promise<ActionResult
     p_lead_escalate_after_min: input.leadEscalateAfterMin,
     p_ai_provider: input.aiProvider,
   });
-  if (error) return { ok: false, error: toErrorText(error) };
+  if (error) return { ok: false, error: toErrorText(await getT(), error) };
   refresh();
   return { ok: true, data: { saved: true } };
 }

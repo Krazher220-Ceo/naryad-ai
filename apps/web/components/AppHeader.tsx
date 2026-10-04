@@ -1,12 +1,14 @@
+import { LanguageSwitch } from "@/components/LanguageSwitch";
 import { signOut } from "@/lib/auth/actions";
-import { t } from "@/lib/i18n";
+import { getT } from "@/lib/i18n-server";
 
 interface AppHeaderProps {
   fullName: string;
   roleLabel: string;
 }
 
-export function AppHeader({ fullName, roleLabel }: AppHeaderProps) {
+export async function AppHeader({ fullName, roleLabel }: AppHeaderProps) {
+  const t = await getT();
   return (
     <header className="border-b border-line bg-surface">
       <div className="h-1 bg-accent" />
@@ -22,14 +24,17 @@ export function AppHeader({ fullName, roleLabel }: AppHeaderProps) {
             {roleLabel}
           </span>
         </div>
-        <form action={signOut} className="shrink-0">
+        <div className="flex shrink-0 flex-col items-end gap-2">
+          <LanguageSwitch />
+          <form action={signOut}>
           <button
             type="submit"
             className="flex min-h-touch-sm items-center justify-center rounded-xl border-2 border-ink bg-surface px-4 text-base font-semibold text-ink hover:bg-canvas active:bg-line"
           >
             {t("auth.signOut")}
           </button>
-        </form>
+          </form>
+        </div>
       </div>
     </header>
   );

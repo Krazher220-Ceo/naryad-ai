@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { Button, ConfirmSheet, InlineNotice } from "@/components/ui";
 import { resetDemo } from "@/lib/demo/actions";
-import { t } from "@/lib/i18n";
+import { useT } from "@/components/LocaleProvider";
 
 export function ResetDemoButton() {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [notice, setNotice] = useState<{ ok: boolean; message: string } | null>(null);

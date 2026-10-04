@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef } from "react";
-import { t } from "@/lib/i18n";
+import { useT } from "@/components/LocaleProvider";
 import { Button } from "./Button";
 import { IconCamera, IconImage, IconX } from "./icons";
 
@@ -14,6 +14,7 @@ type PhotoPickerProps = {
 // Выбор фото с камеры или из галереи, до max штук, с превью и удалением.
 // Только интерфейс: отдаёт File[] через onChange. Загрузку в хранилище делает экран.
 export function PhotoPicker({ value, onChange, max = 5 }: PhotoPickerProps) {
+  const t = useT();
   const cameraRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
   const full = value.length >= max;

@@ -1,12 +1,15 @@
+"use client";
+
 import { Card, IconAlert, IconCheck, IconInfo, IconX, InlineNotice, cx } from "@/components/ui";
-import { t, type MessageKey } from "@/lib/i18n";
+import type { MessageKey, Translate } from "@/lib/i18n";
+import { useT } from "@/components/LocaleProvider";
 import type { OrderDetails } from "@/lib/orders/queries";
 
 export type Review = NonNullable<OrderDetails["review"]>;
 type Verdict = Review["verdict"];
 
 // Подстановка значений в текст словаря: "{score} из 5" -> "3 из 5".
-function fill(key: MessageKey, values: Record<string, string | number>): string {
+function fill(t: Translate, key: MessageKey, values: Record<string, string | number>): string {
   return Object.entries(values).reduce((text, [k, v]) => text.split(`{${k}}`).join(String(v)), t(key));
 }
 
@@ -53,6 +56,7 @@ function formatPercent(value: number | null): number | null {
 }
 
 export function ReviewReport({ review, mode }: { review: Review; mode: "worker" | "master" }) {
+  const t = useT();
   const { checks } = review;
   const finalScore = review.master_score ?? review.score;
   const percent = formatPercent(review.confidence);
@@ -68,23 +72,23 @@ export function ReviewReport({ review, mode }: { review: Review; mode: "worker" 
             {t(`ai.verdict.${review.verdict}`)}
           </span>
           <span className="shrink-0 text-3xl font-bold text-ink">
-            {finalScore === null ? t("review.noScore") : fill("review.scoreOf", { score: finalScore })}
+            {finalScore === null ? t("review.noScore") : fill(t, "review.scoreOf", { score: finalScore })}
           </span>
         </div>
         {mode === "master" && (
           <span className="text-base text-ink-muted">
             {t("review.sourceLabel")}: {t(`ai.source.${review.source}`)}
-            {percent !== null && ` · ${fill("review.confidence", { percent })}`}
+            {percent !== null && ` · ${fill(t, "review.confidence", { percent })}`}
           </span>
         )}
       </div>
 
       {review.master_score !== null && (
         <InlineNotice tone="info">
-          <span>{fill("review.masterScore", { score: review.master_score })}</span>
-          {review.master_reason && <span className="font-normal">{fill("review.masterScoreReason", { reason: review.master_reason })}</span>}
+          <span>{fill(t, "review.masterScore", { score: review.master_score })}</span>
+          {review.master_reason && <span className="font-normal">{fill(t, "review.masterScoreReason", { reason: review.master_reason })}</span>}
           {mode === "master" && review.score !== null && (
-            <span className="font-normal">{fill("review.aiScore", { score: review.score })}</span>
+            <span className="font-normal">{fill(t, "review.aiScore", { score: review.score })}</span>
           )}
         </InlineNotice>
       )}
@@ -141,7 +145,7 @@ export function ReviewReport({ review, mode }: { review: Review; mode: "worker" 
               <Title>{t("review.workMatchTitle")}</Title>
               <p className="text-base font-semibold text-ink">
                 {checks.work_match.matches ? t("review.workMatchYes") : t("review.workMatchNo")}
-                {` · ${fill("review.confidence", { percent: Math.round(checks.work_match.confidence * 100) })}`}
+                {` · ${fill(t, "review.confidence", { percent: Math.round(checks.work_match.confidence * 100) })}`}
               </p>
               <p className="text-base text-ink">{checks.work_match.explanation}</p>
             </Card>
@@ -157,10 +161,10 @@ export function ReviewReport({ review, mode }: { review: Review; mode: "worker" 
                     <li>{checks.photo.same_equipment.value ? t("review.sameEquipmentYes") : t("review.sameEquipmentNo")}</li>
                   )}
                   {checks.photo.visible_problem_before && (
-                    <li>{fill("review.problemBefore", { text: checks.photo.visible_problem_before })}</li>
+                    <li>{fill(t, "review.problemBefore", { text: checks.photo.visible_problem_before })}</li>
                   )}
                   {checks.photo.visible_problem_after && (
-                    <li>{fill("review.problemAfter", { text: checks.photo.visible_problem_after })}</li>
+                    <li>{fill(t, "review.problemAfter", { text: checks.photo.visible_problem_after })}</li>
                   )}
                   {checks.photo.repair_visible !== null && (
                     <li>{checks.photo.repair_visible ? t("review.repairVisible") : t("review.repairNotVisible")}</li>

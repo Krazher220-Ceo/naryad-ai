@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
 import { requireRole } from "@/lib/auth/session";
-import { t } from "@/lib/i18n";
+import { getT } from "@/lib/i18n-server";
 import { createClient } from "@/lib/supabase/server";
 import { SettingsForm } from "./SettingsForm";
 
 export default async function MasterSettingsPage() {
+  const t = await getT();
   const employee = await requireRole("master");
   const supabase = await createClient();
 

@@ -1,7 +1,7 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { getRating } from "@/lib/analytics/rating";
-import { t } from "@/lib/i18n";
+import { getT } from "@/lib/i18n-server";
 import type { WorkerBoardStatus } from "./types";
 
 // Подбор исполнителя (п. 5.1.3 кейса): свободный, нужной специальности, с лучшим рейтингом.
@@ -22,6 +22,7 @@ export type Candidate = {
 const STATUS_RANK: Record<WorkerBoardStatus, number> = { free: 0, busy: 1, queue: 2, off: 3 };
 
 export async function suggestWorkers(specialty: string | null, limit = 3): Promise<Candidate[]> {
+  const t = await getT();
   const supabase = await createClient();
   const [{ data: board }, rating] = await Promise.all([
     supabase.from("worker_board").select("id, full_name, specialty, board_status, queue_count, pending_count"),
