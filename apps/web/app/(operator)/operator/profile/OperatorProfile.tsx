@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useT } from "@/components/LocaleProvider";
 import { LanguageSwitch } from "@/components/LanguageSwitch";
 import { Button, Card, Field, TextInput, useToast } from "@/components/ui";
-import { signOut } from "@/lib/auth/actions";
+import { SignOutButton } from "@/components/shell/SignOutButton";
 import { getReporterName, setReporterName } from "@/lib/requests/device";
 
 export function OperatorProfile({ accountName }: { accountName: string | null }) {
@@ -49,11 +49,9 @@ export function OperatorProfile({ accountName }: { accountName: string | null })
       </Card>
 
       {accountName ? (
-        <form action={signOut}>
-          <button type="submit" className="min-h-touch w-full rounded-xl border-2 border-danger bg-surface px-5 text-lg font-semibold text-danger hover:bg-danger-soft">
-            {t("profile.signOut")}
-          </button>
-        </form>
+        <SignOutButton className="min-h-touch w-full rounded-xl border-2 border-danger bg-surface px-5 text-lg font-semibold text-danger hover:bg-danger-soft">
+          {t("profile.signOut")}
+        </SignOutButton>
       ) : (
         <Card className="flex flex-col gap-3">
           <p className="text-base text-ink-muted">{t("opProfile.loginHint")}</p>
