@@ -195,7 +195,7 @@ export async function suggestForIssue(description: string): Promise<
   const me = await getCurrentEmployee();
   if (me?.role !== "master") return { ok: false, error: t("orders.errors.forbidden") };
   const classification = await classifyProblem(description);
-  const candidates = await suggestWorkers(classification?.specialty ?? null);
+  const candidates = await suggestWorkers(classification?.specialty ?? null, classification?.category ?? null);
   return { ok: true, data: { classification, candidates } };
 }
 
