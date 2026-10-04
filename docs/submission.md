@@ -42,7 +42,7 @@
 
 - Репозиторий с инструкцией запуска: https://github.com/Krazher220-Ceo/naryad-ai
 - Приложение: https://naryad-ai.vercel.app (стартовая страница для проверки — /demo)
-- Тестовые логины: мастер master1 / 111111, исполнитель worker1 / 222222, руководитель lead1 / 333333
+- Тестовые логины: мастер master1 / master2026, исполнитель worker1 / worker2026, руководитель lead1 / lead2026, оператор — без входа или operator1 / operator2026
 - Презентация (PDF): [ссылка]
 - Видео демо: [ссылка]
 - Тестовый набор данных: supabase/seed.sql и scripts/seed/generate.mjs в репозитории (592 наряда за 3 месяца, описание — docs/demo-data.md)

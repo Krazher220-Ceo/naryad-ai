@@ -13,17 +13,17 @@ export async function signIn(
 ): Promise<SignInState> {
   const t = await getT();
   const login = String(formData.get("login") ?? "").trim();
-  const pin = String(formData.get("pin") ?? "");
+  const password = String(formData.get("password") ?? "");
   const next = String(formData.get("next") ?? "");
 
-  if (login === "" || !/^\d{6}$/.test(pin)) {
-    return { error: t("auth.errorPinFormat") };
+  if (login === "" || password === "") {
+    return { error: t("auth.errorEmpty") };
   }
 
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithPassword({
     email: loginToEmail(login),
-    password: pin,
+    password,
   });
   if (error) return { error: t("auth.errorInvalid") };
 

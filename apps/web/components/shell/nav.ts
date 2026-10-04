@@ -80,6 +80,7 @@ export const NAV: Record<Role, RoleNav> = {
       { href: "/lead/downtime", label: "shell.nav.downtime", icon: "chart" },
       { href: "/lead/shift", label: "shell.nav.shiftReport", icon: "chart" },
       { href: "/lead/rating", label: "shell.nav.rating", icon: "chart" },
+      { href: "/lead/users", label: "shell.nav.users", icon: "user" },
       PROFILE,
     ],
   },

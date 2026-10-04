@@ -64,10 +64,10 @@ insert into materials (name, unit, typical_qty, fault_codes) values
 on conflict (name) do nothing;
 
 -- ---------- Учётные записи ----------
--- Вход по логину и ПИН-коду: логин -> <login>@naryad.local, ПИН -> пароль (lib/auth/roles.ts).
+-- Вход по логину и паролю: логин -> <login>@naryad.local (lib/auth/roles.ts).
 -- Функция создаёт пользователя Supabase Auth и связывает его с сотрудником.
 create or replace function pg_temp.demo_user(
-  p_login text, p_pin text, p_full_name text, p_role employee_role,
+  p_login text, p_password text, p_full_name text, p_role employee_role,
   p_specialty text, p_grade smallint, p_brigade text, p_shift text
 ) returns void
 language plpgsql as $$
@@ -84,7 +84,7 @@ begin
       confirmation_token, recovery_token, email_change_token_new, email_change
     ) values (
       '00000000-0000-0000-0000-000000000000', v_uid, 'authenticated', 'authenticated',
-      v_email, extensions.crypt(p_pin, extensions.gen_salt('bf')), now(),
+      v_email, extensions.crypt(p_password, extensions.gen_salt('bf')), now(),
       '{"provider":"email","providers":["email"]}', '{}', now(), now(),
       '', '', '', ''
     );
@@ -103,12 +103,15 @@ begin
 end;
 $$;
 
--- Демо-логины для жюри. ПИН-коды одинаковы для всех ролей одного вида, чтобы их было легко запомнить.
-select pg_temp.demo_user('master1', '111111', 'Сапаров Нурлан', 'master', null,          null, null,        'A');
-select pg_temp.demo_user('worker1', '222222', 'Ахметов Ерлан',  'worker', 'слесарь',     5::smallint,    'Бригада 1', 'A');
-select pg_temp.demo_user('worker2', '222222', 'Ким Виктор',     'worker', 'электрик',    4::smallint,    'Бригада 1', 'A');
-select pg_temp.demo_user('worker3', '222222', 'Жумабаев Арман', 'worker', 'сварщик',     4::smallint,    'Бригада 2', 'A');
-select pg_temp.demo_user('lead1',   '333333', 'Иванова Ольга',  'lead',   null,          null, null,        null);
+-- Демо-логины для жюри. Пароль одинаков для всех логинов одной роли, чтобы его было легко запомнить.
+-- Пароль не короче 8 символов, буквы и цифры (AGENTS.md).
+select pg_temp.demo_user('master1', 'master2026', 'Сапаров Нурлан', 'master', null,          null, null,        'A');
+select pg_temp.demo_user('worker1', 'worker2026', 'Ахметов Ерлан',  'worker', 'слесарь',     5::smallint,    'Бригада 1', 'A');
+select pg_temp.demo_user('worker2', 'worker2026', 'Ким Виктор',     'worker', 'электрик',    4::smallint,    'Бригада 1', 'A');
+select pg_temp.demo_user('worker3', 'worker2026', 'Жумабаев Арман', 'worker', 'сварщик',     4::smallint,    'Бригада 2', 'A');
+select pg_temp.demo_user('lead1',   'lead2026', 'Иванова Ольга',  'lead',   null,          null, null,        null);
+-- Общий логин участка для оператора. Без входа оператор тоже может сообщить о поломке.
+select pg_temp.demo_user('operator1', 'operator2026', 'Оператор участка дробления', 'operator', null, null, null, 'A');
 
 -- ---------- Уровень 4: допуски и шаблоны плановых работ ----------
 -- Допуски по специальности. Подбор исполнителя учитывает их (lib/orders/suggest.ts).
