@@ -13,10 +13,11 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
       </div>
       <div className="flex flex-1 flex-col justify-center gap-6">
         <div className="flex flex-col items-center text-center">
-          <h1 className="text-3xl font-black tracking-tight text-slate-900">
+          <span role="img" aria-label={t("brand.company")} className="km-logo mb-4 h-16 bg-brand" />
+          <h1 className="text-4xl font-bold tracking-tight text-ink">
             {t("app.name")}
           </h1>
-          <p className="mt-2 max-w-xs text-sm text-slate-600">
+          <p className="mt-2 max-w-xs text-sm text-ink-muted">
             {t("app.description")}
           </p>
         </div>
@@ -27,11 +28,11 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
       <div className="flex flex-col items-center gap-2 pt-4 text-center">
         <Link
           href="/demo"
-          className="text-sm font-semibold text-slate-700 underline hover:text-slate-900"
+          className="text-sm font-semibold text-ink-muted underline hover:text-ink"
         >
           {t("demo.loginLink")}
         </Link>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-ink-muted">
           {t("auth.demoHint")}
         </p>
       </div>

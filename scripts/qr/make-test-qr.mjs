@@ -13,8 +13,10 @@ const APP = (process.argv[2] ?? "https://naryad-ai.vercel.app").replace(/\/$/, "
 const OUT = new URL("../../docs/qr/", import.meta.url);
 
 const BRAND = new URL("../../docs/brand/", import.meta.url);
-const NAVY = "#0f172a";
-const AMBER = "#f59e0b";
+// Цвета сайта km.kz: тёмно-синий и жёлтый акцент.
+const NAVY = "#001636";
+const AMBER = "#ffc107";
+const BLUE = "#07316e";
 
 // Логотип: берём содержимое svg без обёртки. Знак и надпись лежат в рамке x 10…116, y 9…71.
 const LOGO = readFileSync(new URL("kostanay-minerals-logo.svg", BRAND), "utf8")
@@ -39,7 +41,7 @@ function lockup(cx, y, w, { dash = AMBER, text = "#ffffff", accent = AMBER, size
     svg:
       logo(cx - w / 2, y, w) +
       `<rect x="${cx - 24}" y="${dashY}" width="48" height="4" rx="2" fill="${dash}"/>` +
-      `<text x="${cx}" y="${textY}" text-anchor="middle" font-size="${size}" font-weight="800" fill="${text}">Наряд<tspan fill="${accent}">AI</tspan></text>`,
+      `<text x="${cx}" y="${textY}" text-anchor="middle" font-size="${size}" font-weight="700" fill="${text}" font-family="Oswald, Inter, sans-serif">Наряд<tspan fill="${accent}">AI</tspan></text>`,
     height: textY - y + 8,
   };
 }
@@ -84,19 +86,19 @@ function card({ url, title, subtitle, lines }) {
   <desc>QR-код: ${esc(url)}</desc>
   <defs><clipPath id="card"><rect width="${W}" height="${H}" rx="24"/></clipPath></defs>
   <rect width="${W}" height="${H}" rx="24" fill="#ffffff"/>
-  <rect width="${W}" height="10" fill="#f59e0b" clip-path="url(#card)"/>
-  <text x="${W / 2}" y="48" text-anchor="middle" font-size="26" font-weight="800" fill="#0f172a">${esc(title)}</text>
+  <rect width="${W}" height="10" fill="${AMBER}" clip-path="url(#card)"/>
+  <text x="${W / 2}" y="50" text-anchor="middle" font-size="30" font-weight="700" fill="${NAVY}" font-family="Oswald, Inter, sans-serif">${esc(title)}</text>
   <text x="${W / 2}" y="76" text-anchor="middle" font-size="16" fill="#475569">${esc(subtitle)}</text>
   <g transform="translate(${qrX} ${qrY})">
     <rect width="${qrSize}" height="${qrSize}" fill="#ffffff"/>
     <g transform="scale(${scale}) translate(${quiet} ${quiet})" shape-rendering="crispEdges">
-      <path d="${d}" fill="#0f172a"/>
+      <path d="${d}" fill="${BLUE}"/>
     </g>
     <rect x="${badgeX}" y="${badgeY}" width="${badgeW}" height="${badgeH}" rx="10" fill="${NAVY}" stroke="#ffffff" stroke-width="5"/>
     ${logo(qrSize / 2 - logoW / 2, qrSize / 2 - logoHeight(logoW) / 2, logoW)}
   </g>
 ${lines
-  .map((l, i) => `  <text x="${W / 2}" y="${textY + i * 24}" text-anchor="middle" font-size="17" font-weight="${i === 0 ? 700 : 400}" fill="#0f172a">${esc(l)}</text>`)
+  .map((l, i) => `  <text x="${W / 2}" y="${textY + i * 24}" text-anchor="middle" font-size="17" font-weight="${i === 0 ? 700 : 400}" fill="${NAVY}">${esc(l)}</text>`)
   .join("\n")}
   <text x="${W / 2}" y="${urlY}" text-anchor="middle" font-size="13" fill="#64748b">${esc(url)}</text>
   <rect y="${bandY}" width="${W}" height="${H - bandY}" fill="${NAVY}" clip-path="url(#card)"/>
