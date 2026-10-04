@@ -36,7 +36,8 @@ const ICONS: Record<NavIcon, (p: { className?: string }) => React.ReactNode> = {
 
 type ShellFrameProps = {
   role: Role;
-  employeeId: string;
+  // null — оператор без входа: нет колокольчика, вместо «Выйти» — «Войти».
+  employeeId: string | null;
   fullName: string;
   roleLabel: string;
   unread: number;
@@ -58,7 +59,8 @@ export function ShellFrame({ role, employeeId, fullName, roleLabel, unread, chil
   const nav = NAV[role];
   const showBottomNav = !hidesBottomNav(pathname);
   // Если профиля нет среди трёх кнопок (у мастера), он открывается из шапки.
-  const profileInNav = nav.phone.some((item) => item.href === "/profile");
+  const profileHref = role === "operator" ? "/operator/profile" : "/profile";
+  const profileInNav = nav.phone.some((item) => item.href === profileHref);
 
   return (
     <div className="shell flex min-h-dvh flex-1 flex-col lg:flex-row">
@@ -103,11 +105,11 @@ export function ShellFrame({ role, employeeId, fullName, roleLabel, unread, chil
             <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-brand-hover text-[15px] font-extrabold">
               {initials(fullName)}
             </span>
-            <Link href="/profile" className="flex min-w-0 flex-1 flex-col leading-tight hover:underline">
+            <Link href={profileHref} className="flex min-w-0 flex-1 flex-col leading-tight hover:underline">
               <b className="truncate text-[15px]" title={fullName}>{fullName}</b>
               <span className="text-[13px] text-white/70">{roleLabel}</span>
             </Link>
-            <NotificationBell employeeId={employeeId} initialUnread={unread} dark />
+            {employeeId && <NotificationBell employeeId={employeeId} initialUnread={unread} dark />}
           </div>
           <div className="flex flex-col gap-1.5">
             <span className="text-xs font-bold tracking-wider uppercase text-white/60">{t("shell.connection")}</span>
@@ -117,14 +119,23 @@ export function ShellFrame({ role, employeeId, fullName, roleLabel, unread, chil
             <span className="text-xs font-bold tracking-wider uppercase text-white/60">{t("shell.language")}</span>
             <LanguageSwitch full dark />
           </div>
-          <form action={signOut}>
-            <button
-              type="submit"
-              className="min-h-11 w-full rounded-xl border border-white/35 text-[15px] font-bold hover:bg-white/10"
+          {employeeId ? (
+            <form action={signOut}>
+              <button
+                type="submit"
+                className="min-h-11 w-full rounded-xl border border-white/35 text-[15px] font-bold hover:bg-white/10"
+              >
+                {t("shell.signOut")}
+              </button>
+            </form>
+          ) : (
+            <Link
+              href="/login"
+              className="flex min-h-11 w-full items-center justify-center rounded-xl border border-white/35 text-[15px] font-bold hover:bg-white/10"
             >
-              {t("shell.signOut")}
-            </button>
-          </form>
+              {t("shell.signIn")}
+            </Link>
+          )}
         </section>
       </aside>
 
@@ -139,10 +150,10 @@ export function ShellFrame({ role, employeeId, fullName, roleLabel, unread, chil
             </div>
             <div className="flex shrink-0 items-center gap-2">
               <ConnectionPill />
-              <NotificationBell employeeId={employeeId} initialUnread={unread} />
+              {employeeId && <NotificationBell employeeId={employeeId} initialUnread={unread} />}
               {!profileInNav && (
                 <Link
-                  href="/profile"
+                  href={profileHref}
                   aria-label={t("shell.profile")}
                   className="flex size-11 items-center justify-center rounded-xl border border-line text-ink hover:bg-canvas"
                 >

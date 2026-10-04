@@ -1,5 +1,5 @@
 // Роли совпадают с типом employee_role в базе (supabase/migrations/0001_init.sql).
-export const ROLES = ["master", "worker", "lead"] as const;
+export const ROLES = ["master", "worker", "lead", "operator"] as const;
 export type Role = (typeof ROLES)[number];
 
 // Стартовый экран каждой роли.
@@ -7,6 +7,8 @@ export const ROLE_HOME: Record<Role, string> = {
   master: "/master",
   worker: "/worker",
   lead: "/lead",
+  // Оператор с общим логином участка. Без входа оператор попадает сюда же.
+  operator: "/operator",
 };
 
 export function isRole(value: unknown): value is Role {
