@@ -14,7 +14,8 @@ export async function AppHeader({ fullName, roleLabel }: AppHeaderProps) {
       <div className="h-1 bg-accent" />
       <div className="mx-auto flex w-full max-w-sm items-center justify-between gap-3 px-4 py-3">
         <div className="flex min-w-0 flex-col">
-          <span className="text-sm font-bold tracking-wider uppercase text-accent-ink">
+          <span className="flex items-center gap-2 text-sm font-bold tracking-wider uppercase text-brand-hover">
+            <span aria-hidden="true" className="km-logo h-6 bg-brand" />
             {t("app.name")}
           </span>
           <span className="truncate text-lg font-bold text-ink" title={fullName}>

@@ -77,28 +77,29 @@ export default async function DemoPage() {
   const t = await getT();
   return (
     <div className="flex min-h-dvh flex-col bg-canvas text-ink">
-      <header className="border-b border-line bg-surface">
+      {/* Шапка в стиле km.kz: тёмно-синий фон, белый логотип, узкий заголовок */}
+      <header className="bg-[#001636] text-white">
         <div className="h-1 bg-accent" />
-        <div className="mx-auto flex w-full max-w-xl flex-col gap-2 px-4 py-6 lg:max-w-5xl">
+        <div className="mx-auto flex w-full max-w-xl flex-col gap-3 px-4 py-6 lg:max-w-5xl">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="text-sm font-bold uppercase tracking-wider text-accent-ink">
-              {t("demo.title")}
-            </span>
-            <Link
-              href="/demo/ui"
-              className="text-base font-semibold text-ink-muted underline hover:text-ink"
-            >
-              {t("demo.uiShowcaseLink")}
-            </Link>
-            <LanguageSwitch />
+            <span role="img" aria-label={t("brand.company")} className="km-logo h-12 bg-white" />
+            <div className="flex items-center gap-3">
+              <Link
+                href="/demo/ui"
+                className="text-base font-semibold text-white/80 underline hover:text-white"
+              >
+                {t("demo.uiShowcaseLink")}
+              </Link>
+              <LanguageSwitch />
+            </div>
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">
+          <h1 className="text-4xl font-bold tracking-wide text-white sm:text-5xl">
             {t("demo.title")}
           </h1>
-          <p className="text-xl font-semibold text-ink-muted">
+          <p className="text-xl font-semibold text-accent">
             {t("demo.subtitle")}
           </p>
-          <p className="mt-1 text-base text-ink-muted">
+          <p className="mt-1 text-base text-white/85">
             {t("demo.description")}
           </p>
         </div>
