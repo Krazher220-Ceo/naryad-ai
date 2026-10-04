@@ -20,7 +20,7 @@ const validateSummary = (v: unknown): { summary: string } | null =>
     ? { summary: (v as { summary: string }).summary }
     : null;
 
-async function provider(): Promise<AiProvider> {
+export async function provider(): Promise<AiProvider> {
   const { data } = await createAdminClient().from("settings").select("ai_provider").eq("id", 1).single();
   return (data?.ai_provider ?? process.env.AI_PROVIDER ?? "cloud") as AiProvider;
 }
@@ -91,10 +91,11 @@ function anomalyFallback(d: AnomalyDraft): AnomalyText {
   };
 }
 
-export async function describeAnomalies(drafts: AnomalyDraft[]): Promise<Record<string, AnomalyText>> {
+// useModel = false — только тексты по шаблону, без вызова модели (например, для чата-помощника).
+export async function describeAnomalies(drafts: AnomalyDraft[], useModel = true): Promise<Record<string, AnomalyText>> {
   const result: Record<string, AnomalyText> = {};
   for (const d of drafts) result[d.id] = anomalyFallback(d);
-  if (drafts.length === 0) return result;
+  if (drafts.length === 0 || !useModel) return result;
 
   // Имена исполнителей в карточках обезличиваем.
   const anon = createAnonymizer(drafts.filter((d) => d.kind === "worker_returns").map((d) => d.subject));

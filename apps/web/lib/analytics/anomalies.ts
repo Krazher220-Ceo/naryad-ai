@@ -220,7 +220,7 @@ function failureTrend(h: History, to: Date): Draft[] {
   return drafts;
 }
 
-export async function findAnomalies(days = 90): Promise<{ anomalies: Anomaly[]; period: { from: string; to: string } }> {
+export async function findAnomalies(days = 90, useModel = true): Promise<{ anomalies: Anomaly[]; period: { from: string; to: string } }> {
   const to = new Date();
   const from = new Date(to.getTime() - days * DAY);
   const history = await loadHistory(from, to);
@@ -243,7 +243,7 @@ export async function findAnomalies(days = 90): Promise<{ anomalies: Anomaly[]; 
   const rest = sorted.filter((d) => !firstOfKind.includes(d));
   const ordered = [...firstOfKind.sort((a, b) => rank(a) - rank(b)), ...rest];
 
-  const texts = await describeAnomalies(ordered);
+  const texts = await describeAnomalies(ordered, useModel);
   const anomalies = ordered.map((d) => ({ ...d, ...texts[d.id] }));
   return { anomalies, period: { from: from.toISOString(), to: to.toISOString() } };
 }
