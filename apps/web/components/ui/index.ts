@@ -22,3 +22,4 @@ export { InlineNotice, Toast, type NoticeTone } from "./Notice";
 export { ConfirmSheet } from "./ConfirmSheet";
 export { ToastProvider, useToast, type ToastKind } from "./ToastProvider";
 export { Sheet } from "./Sheet";
+export { Dictaphone, type DictatedFields } from "./Dictaphone";

@@ -23,6 +23,10 @@
 | Ollama + мультимодальная модель (план) | свой компьютер, режим `local` | Тот же набор задач без отправки данных наружу |
 | Распознавание речи браузера (Web Speech API) | в браузере телефона; Chrome отправляет звук на серверы Google | Голосовой ввод описания наряда, полей закрытия и вопроса помощнику (русский и казахский). Новых зависимостей нет |
 | Laya `laya-multilingual` (Convai Innovations, Apache 2.0), пакет `laya` (PyPI) | `services/fast-ai`, свой сервер | Быстрая классификация описания: категория шифра, приоритет, специальность с вероятностями. Пока без дообучения точность низкая, см. `docs/laya-eval.md` |
+| Whisper large-v3-turbo (OpenAI, MIT), модель `mlx-community/whisper-large-v3-turbo` | `services/fast-ai` на нашем Mac, `POST /transcribe` | Речь в текст для диктофона (русский и казахский). Без Mac — распознавание браузера |
+| mlx-whisper (Apple ml-explore, MIT), ffmpeg (LGPL, отдельная программа на Mac) | `services/fast-ai`, `requirements-voice.txt` | Запуск Whisper на чипе Apple M, чтение аудио |
+| python-multipart (Apache 2.0) | `services/fast-ai` | Приём файла записи в FastAPI |
+| Qwen3-4B-Instruct-2507 (Alibaba, Apache 2.0) через Ollama (MIT) | наш Mac, `OLLAMA_URL`, `OLLAMA_VOICE_MODEL` | Разбор надиктованного текста по полям наряда в строгий JSON. Без Mac — DeepSeek с обезличиванием, без него — текст без разбора |
 
 ## Зависимости приложения (`apps/web`)
 
@@ -51,6 +55,7 @@
 | Supabase (PostgreSQL, Auth, Storage, Realtime) | База, вход, фото, обновления в реальном времени |
 | Vercel | Хостинг приложения |
 | Telegram Bot API | Уведомления на телефон |
+| Bubblewrap (Google, Apache 2.0), Trusted Web Activity | Сборка Android-приложения (APK) поверх того же веб-приложения, `apps/android` |
 | Supabase pg_cron и pg_net | Расписание контроля сроков раз в минуту |
 
 ## Проверка лицензий зависимостей
