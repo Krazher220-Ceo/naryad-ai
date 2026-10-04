@@ -7,6 +7,7 @@ import type { ActionResult } from "@/lib/orders/types";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { passwordProblems } from "./password-rules";
+import { isDemoLogin } from "./roles";
 
 // Смена своего пароля: сначала проверяем текущий, потом ставим новый.
 export async function changePassword(current: string, next: string): Promise<ActionResult<null>> {
@@ -17,6 +18,7 @@ export async function changePassword(current: string, next: string): Promise<Act
   const { data: userData } = await supabase.auth.getUser();
   const email = userData.user?.email;
   if (!email) return { ok: false, error: t("password.errors.session") };
+  if (isDemoLogin(email.split("@")[0])) return { ok: false, error: t("password.errors.demo") };
 
   // Неверный текущий пароль — отказ. Вход тем же пользователем просто обновляет сессию.
   const check = await supabase.auth.signInWithPassword({ email, password: current });
@@ -36,8 +38,9 @@ export async function resetEmployeePassword(employeeId: string): Promise<ActionR
   if (!/^[0-9a-f-]{36}$/i.test(employeeId)) return { ok: false, error: t("orders.errors.notFound") };
 
   const admin = createAdminClient();
-  const { data: employee } = await admin.from("employees").select("auth_user_id").eq("id", employeeId).maybeSingle();
+  const { data: employee } = await admin.from("employees").select("auth_user_id, login").eq("id", employeeId).maybeSingle();
   if (!employee?.auth_user_id) return { ok: false, error: t("orders.errors.notFound") };
+  if (isDemoLogin(employee.login)) return { ok: false, error: t("password.errors.demo") };
 
   const password = temporaryPassword();
   const { error } = await admin.auth.admin.updateUserById(employee.auth_user_id, { password });

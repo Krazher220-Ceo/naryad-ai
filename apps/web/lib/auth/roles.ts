@@ -21,3 +21,11 @@ export const LOGIN_EMAIL_DOMAIN = "naryad.local";
 export function loginToEmail(login: string): string {
   return `${login.trim().toLowerCase()}@${LOGIN_EMAIL_DOMAIN}`;
 }
+
+// Демо-логины для жюри опубликованы на /demo и в README. Пароль у них не меняется и не сбрасывается,
+// иначе любой проверяющий может закрыть вход остальным.
+export const DEMO_LOGINS = ["master1", "worker1", "worker2", "worker3", "lead1", "operator1"] as const;
+
+export function isDemoLogin(login: string | null | undefined): boolean {
+  return typeof login === "string" && (DEMO_LOGINS as readonly string[]).includes(login);
+}
