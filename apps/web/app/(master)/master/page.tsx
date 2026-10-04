@@ -77,7 +77,7 @@ export default async function MasterPage() {
           <Tile label={t("master.counters.waiting")} value={count(["issued", "queued"])} />
         </div>
 
-        <SideRequests requests={requests} />
+        <SideRequests requests={requests} limit={4} />
 
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
           <section className="flex min-w-0 flex-col gap-3 lg:w-72 lg:shrink-0">

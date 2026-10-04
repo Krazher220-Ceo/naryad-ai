@@ -397,32 +397,53 @@ export type Database = {
       requests: {
         Row: {
           created_at: string
-          created_by: string
+          created_by: string | null
           description: string
           equipment_id: string | null
           id: string
+          device_id: string | null
+          dismiss_reason: string | null
+          machine_state: string | null
+          number: number
+          order_id: string | null
           parent_order_id: string | null
           photo_path: string | null
+          reporter_name: string | null
+          section_id: string | null
           status: Database["public"]["Enums"]["request_status"]
         }
         Insert: {
           created_at?: string
-          created_by: string
+          created_by?: string | null
           description: string
           equipment_id?: string | null
           id?: string
+          device_id?: string | null
+          dismiss_reason?: string | null
+          machine_state?: string | null
+          number?: number
+          order_id?: string | null
           parent_order_id?: string | null
           photo_path?: string | null
+          reporter_name?: string | null
+          section_id?: string | null
           status?: Database["public"]["Enums"]["request_status"]
         }
         Update: {
           created_at?: string
-          created_by?: string
+          created_by?: string | null
           description?: string
           equipment_id?: string | null
           id?: string
+          device_id?: string | null
+          dismiss_reason?: string | null
+          machine_state?: string | null
+          number?: number
+          order_id?: string | null
           parent_order_id?: string | null
           photo_path?: string | null
+          reporter_name?: string | null
+          section_id?: string | null
           status?: Database["public"]["Enums"]["request_status"]
         }
         Relationships: [
@@ -447,20 +468,37 @@ export type Database = {
             referencedRelation: "work_orders"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "requests_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "work_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "requests_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "sections"
+            referencedColumns: ["id"]
+          },
         ]
       }
       sections: {
         Row: {
           id: string
           name: string
+          qr_code: string | null
         }
         Insert: {
           id?: string
           name: string
+          qr_code?: string | null
         }
         Update: {
           id?: string
           name?: string
+          qr_code?: string | null
         }
         Relationships: []
       }
@@ -574,6 +612,7 @@ export type Database = {
           number: number
           parent_order_id: string | null
           priority: Database["public"]["Enums"]["order_priority"]
+          request_id: string | null
           section_id: string
           started_at: string | null
           status: Database["public"]["Enums"]["order_status"]
@@ -600,6 +639,7 @@ export type Database = {
           number?: never
           parent_order_id?: string | null
           priority: Database["public"]["Enums"]["order_priority"]
+          request_id?: string | null
           section_id: string
           started_at?: string | null
           status?: Database["public"]["Enums"]["order_status"]
@@ -626,6 +666,7 @@ export type Database = {
           number?: never
           parent_order_id?: string | null
           priority?: Database["public"]["Enums"]["order_priority"]
+          request_id?: string | null
           section_id?: string
           started_at?: string | null
           status?: Database["public"]["Enums"]["order_status"]
@@ -734,6 +775,15 @@ export type Database = {
         }
         Returns: string
       }
+      decide_request: {
+        Args: {
+          p_order_id?: string
+          p_reason?: string
+          p_request_id: string
+          p_status: Database["public"]["Enums"]["request_status"]
+        }
+        Returns: undefined
+      }
       equipment_recent_stats: {
         Args: { p_equipment_id: string }
         Returns: {
@@ -760,6 +810,21 @@ export type Database = {
       resolve_request: {
         Args: { p_request_id: string; p_status: Database["public"]["Enums"]["request_status"] }
         Returns: undefined
+      }
+      operator_requests_by_device: {
+        Args: { p_device_id: string }
+        Returns: {
+          created_at: string
+          description: string
+          dismiss_reason: string | null
+          equipment_name: string | null
+          id: string
+          machine_state: string | null
+          number: number
+          order_number: number | null
+          section_name: string | null
+          status: Database["public"]["Enums"]["request_status"]
+        }[]
       }
       reassign_order: {
         Args: {
@@ -800,6 +865,19 @@ export type Database = {
         }
         Returns: undefined
       }
+      submit_operator_request: {
+        Args: {
+          p_author?: string
+          p_code: string
+          p_description: string
+          p_device_id: string
+          p_equipment_id?: string
+          p_machine_state: string
+          p_photo_path?: string
+          p_reporter_name: string
+        }
+        Returns: { id: string; number: number }[]
+      }
       set_master_score: {
         Args: {
           p_reason: string
@@ -823,7 +901,7 @@ export type Database = {
     Enums: {
       ai_source: "laya" | "llm" | "vlm" | "rules"
       ai_verdict: "accept" | "accept_with_note" | "rework" | "needs_master"
-      employee_role: "master" | "worker" | "lead"
+      employee_role: "master" | "worker" | "lead" | "operator"
       notification_kind:
         | "new_order"
         | "remind"
@@ -832,6 +910,7 @@ export type Database = {
         | "lead_overdue"
         | "review_ready"
         | "status_change"
+        | "new_request"
       order_priority: "emergency" | "high" | "normal" | "planned"
       order_status:
         | "issued"

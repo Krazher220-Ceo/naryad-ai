@@ -1,34 +1,31 @@
 import { NextResponse } from "next/server";
 import { getCurrentEmployee } from "@/lib/auth/session";
 import { ROLE_HOME } from "@/lib/auth/roles";
+import { cleanCode } from "@/lib/requests/lookup";
 import { createClient } from "@/lib/supabase/server";
 
-// Сюда ведёт QR-код на оборудовании и ручной ввод номера в сканере.
-// Экран зависит от роли: мастер — выдача наряда с выбранной машиной,
-// исполнитель — экран «Отсканировал машину». Оператор без входа появится в M7.
+// Сюда ведёт QR-код на машине, на входе в цех и ручной ввод номера в сканере.
+// Экран зависит от того, кто сканирует (PLAN.md, раздел 4):
+// не вошёл или оператор — заявка о поломке; исполнитель — экран «Отсканировал машину»;
+// мастер — выдача наряда с выбранной машиной; руководитель — его стартовый экран.
 export async function GET(request: Request, ctx: RouteContext<"/q/[code]">) {
-  const { code } = await ctx.params;
+  const { code: raw } = await ctx.params;
+  const code = cleanCode(raw);
+  const go = (path: string) => NextResponse.redirect(new URL(path, request.url));
+
   const employee = await getCurrentEmployee();
-  // Без входа proxy уже отправил бы на /login, это запасной путь
-  if (!employee) return NextResponse.redirect(new URL("/login", request.url));
+  if (!employee || employee.role === "operator") return go(`/operator/report/${encodeURIComponent(code)}`);
 
   const supabase = await createClient();
   // На табличке у машины виден инвентарный номер, поэтому подходит и он.
-  // Оставляем только буквы, цифры и дефис: строка идёт в фильтр запроса.
-  const value = decodeURIComponent(code).trim().toUpperCase().replace(/[^A-Z0-9_-]/g, "");
   const { data } = await supabase
     .from("equipment")
     .select("id")
-    .or(`qr_code.eq.${value},inventory_no.eq.${value}`)
+    .or(`qr_code.eq.${code},inventory_no.eq.${code}`)
     .limit(1)
     .maybeSingle();
 
-  if (employee.role === "worker") {
-    const target = data ? `/worker/equipment/${data.id}` : "/worker/scan?notFound=1";
-    return NextResponse.redirect(new URL(target, request.url));
-  }
-  if (employee.role === "master" && data) {
-    return NextResponse.redirect(new URL(`/master/orders/new?equipment=${data.id}`, request.url));
-  }
-  return NextResponse.redirect(new URL(ROLE_HOME[employee.role], request.url));
+  if (employee.role === "worker") return go(data ? `/worker/equipment/${data.id}` : "/worker/scan?notFound=1");
+  if (employee.role === "master" && data) return go(`/master/orders/new?equipment=${data.id}`);
+  return go(ROLE_HOME[employee.role]);
 }

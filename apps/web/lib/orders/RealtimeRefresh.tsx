@@ -36,6 +36,8 @@ export function RealtimeRefresh() {
         .channel("orders-live")
         .on("postgres_changes", { event: "*", schema: "public", table: "work_orders" }, scheduleRefresh)
         .on("postgres_changes", { event: "*", schema: "public", table: "employees" }, scheduleRefresh)
+        // Новые заявки операторов: мастер видит их сразу (правила доступа пропускают только мастеру и руководителю).
+        .on("postgres_changes", { event: "*", schema: "public", table: "requests" }, scheduleRefresh)
         .subscribe();
     });
 

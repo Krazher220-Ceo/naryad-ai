@@ -8,7 +8,7 @@ const DEMO_LOGINS = [
   {
     roleKey: "demo.roleMaster" as const,
     login: "master1",
-    pin: "111111",
+    password: "master2026",
     buttonKey: "demo.loginMaster" as const,
     href: "/login?next=/master",
     descKey: "demo.masterDesc" as const,
@@ -17,7 +17,7 @@ const DEMO_LOGINS = [
   {
     roleKey: "demo.roleWorker" as const,
     login: "worker1, worker2, worker3",
-    pin: "222222",
+    password: "worker2026",
     buttonKey: "demo.loginWorker" as const,
     href: "/login?next=/worker",
     descKey: "demo.workerDesc" as const,
@@ -26,10 +26,20 @@ const DEMO_LOGINS = [
   {
     roleKey: "demo.roleLead" as const,
     login: "lead1",
-    pin: "333333",
+    password: "lead2026",
     buttonKey: "demo.loginLead" as const,
     href: "/login?next=/lead",
     descKey: "demo.leadDesc" as const,
+    highlight: false,
+  },
+  {
+    // Оператору вход не нужен. Общий логин участка — если телефон на смене один на всех.
+    roleKey: "demo.roleOperator" as const,
+    login: "operator1",
+    password: "operator2026",
+    buttonKey: "demo.loginOperator" as const,
+    href: "/operator",
+    descKey: "demo.operatorDesc" as const,
     highlight: false,
   },
 ];
@@ -122,7 +132,7 @@ export default async function DemoPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
             {DEMO_LOGINS.map((item) => (
               <Card key={item.href} className="flex flex-col justify-between gap-4">
                 <div className="flex flex-col gap-2">
@@ -138,8 +148,8 @@ export default async function DemoPage() {
                       <span className="font-mono font-bold text-ink">{item.login}</span>
                     </div>
                     <div className="flex justify-between py-0.5">
-                      <span className="font-semibold text-ink-muted">{t("demo.pinLabel")}:</span>
-                      <span className="font-mono font-bold text-ink">{item.pin}</span>
+                      <span className="font-semibold text-ink-muted">{t("demo.passwordLabel")}:</span>
+                      <span className="font-mono font-bold text-ink">{item.password}</span>
                     </div>
                   </div>
                 </div>

@@ -23,6 +23,13 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
         </div>
 
         <LoginForm next={typeof next === "string" ? next : undefined} />
+        {/* Оператору вход не нужен: заявку о поломке можно отправить без логина. */}
+        <Link
+          href="/operator"
+          className="flex min-h-touch items-center justify-center rounded-xl border-2 border-danger bg-surface px-4 text-lg font-semibold text-danger hover:bg-danger-soft"
+        >
+          {t("auth.operatorLink")}
+        </Link>
       </div>
 
       <div className="flex flex-col items-center gap-2 pt-4 text-center">
