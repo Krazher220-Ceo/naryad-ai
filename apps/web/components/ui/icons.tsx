@@ -127,3 +127,32 @@ export function IconSpinner({ className = "size-6" }: IconProps) {
     </svg>
   );
 }
+
+// Иконки каркаса: нижнее меню, колокольчик, профиль.
+export function IconBell(p: IconProps) {
+  return <Svg {...p}><path d="M6 8a6 6 0 0112 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 003.4 0" /></Svg>;
+}
+
+export function IconScan(p: IconProps) {
+  return <Svg {...p}><path d="M4 8V5a1 1 0 011-1h3M16 4h3a1 1 0 011 1v3M20 16v3a1 1 0 01-1 1h-3M8 20H5a1 1 0 01-1-1v-3M8 12h8" /></Svg>;
+}
+
+export function IconUser(p: IconProps) {
+  return <Svg {...p}><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0116 0" /></Svg>;
+}
+
+export function IconClipboard(p: IconProps) {
+  return <Svg {...p}><rect x="5" y="3" width="14" height="18" rx="2" /><path d="M9 8h6M9 12h6M9 16h4" /></Svg>;
+}
+
+export function IconChart(p: IconProps) {
+  return <Svg {...p}><path d="M4 20V10M10 20V4M16 20v-8M22 20H2" /></Svg>;
+}
+
+export function IconChat(p: IconProps) {
+  return <Svg {...p}><path d="M21 12a8 8 0 01-11.6 7.1L4 20l1-4.4A8 8 0 1121 12z" /></Svg>;
+}
+
+export function IconWarning(p: IconProps) {
+  return <Svg {...p}><path d="M12 3l10 18H2zM12 10v4M12 17.5v.01" /></Svg>;
+}

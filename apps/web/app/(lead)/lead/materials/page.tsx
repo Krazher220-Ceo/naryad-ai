@@ -19,7 +19,7 @@ const ROWS_OF: Record<Tab, "byMaterial" | "bySection" | "byEquipment" | "byWorke
 
 export default async function LeadMaterialsPage({ searchParams }: PageProps<"/lead/materials">) {
   const t = await getT();
-  const employee = await requireRole("lead");
+  await requireRole("lead");
   const query = await searchParams;
   const days = parseDaysIn(query.days, PERIODS, 30);
   const tabParam = Array.isArray(query.tab) ? query.tab[0] : query.tab;
@@ -29,8 +29,6 @@ export default async function LeadMaterialsPage({ searchParams }: PageProps<"/le
 
   return (
     <ReportPage
-      fullName={employee.fullName}
-      roleLabel={t("roles.lead")}
       backHref="/lead"
       backLabel={t("materialsReport.back")}
       title={t("materialsReport.title")}
