@@ -155,19 +155,29 @@ export type OrderDetails = NonNullable<Awaited<ReturnType<typeof getOrderDetails
 // Справочники для формы выдачи наряда.
 export async function getIssueFormData() {
   const supabase = await createClient();
-  const [sections, equipment, workers, faultCodes] = await Promise.all([
+  const [sections, equipment, workers, faultCodes, openOrders, templates] = await Promise.all([
     supabase.from("sections").select("id, name").order("name"),
     supabase.from("equipment").select("id, name, inventory_no, section_id, type").order("name"),
     supabase.from("worker_board").select("*").order("full_name"),
     supabase.from("fault_codes").select("code, category, name, norm_hours").order("code"),
+    // Открытые наряды: предупреждение о дубле, если по оборудованию уже есть незакрытый наряд.
+    supabase
+      .from("work_orders")
+      .select("id, number, equipment_id, status, description")
+      .not("status", "in", "(closed,cancelled)")
+      .order("created_at", { ascending: false }),
+    // Шаблоны плановых работ.
+    supabase.from("order_templates").select("id, name, type, fault_code, description").order("name"),
   ]);
-  for (const res of [sections, equipment, workers, faultCodes]) if (res.error) throw res.error;
+  for (const res of [sections, equipment, workers, faultCodes, openOrders, templates]) if (res.error) throw res.error;
 
   return {
     sections: sections.data ?? [],
     equipment: equipment.data ?? [],
     workers: (workers.data ?? []).map((w) => ({ ...w, board_status: w.board_status as WorkerBoardStatus })),
     faultCodes: faultCodes.data ?? [],
+    openOrders: openOrders.data ?? [],
+    templates: templates.data ?? [],
   };
 }
 
