@@ -74,16 +74,21 @@ export function IssueOrderForm({
   data,
   employeeId,
   initialEquipmentId = null,
+  initialDescription = "",
+  requestId,
 }: {
   data: IssueFormData;
   employeeId: string;
   initialEquipmentId?: string | null;
+  // Наряд по попутной заявке исполнителя: описание из заявки, заявка закрывается при выдаче.
+  initialDescription?: string;
+  requestId?: string;
 }) {
   const t = useT();
   const router = useRouter();
   const [equipmentId, setEquipmentId] = useState<string | null>(initialEquipmentId);
   const [search, setSearch] = useState("");
-  const [description, setDescription] = useState("");
+  const [description, setDescription] = useState(initialDescription);
   const [priority, setPriority] = useState<OrderPriority>("normal");
   const [type, setType] = useState<OrderType>("unplanned");
   const [faultCode, setFaultCode] = useState("");
@@ -231,6 +236,7 @@ export function IssueOrderForm({
           dueAt: dueMode === "demo2min" ? dueAtMinutesIso(2) : dueAtIso(hours),
           assigneeId: assignee?.id ?? undefined,
           faultCode: faultCode || undefined,
+          requestId,
           clientActionId: actionId.current,
         });
         if (!result.ok) {

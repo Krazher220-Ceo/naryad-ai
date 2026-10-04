@@ -89,7 +89,7 @@ export function reviewReadyText(r: { number: number; verdict: string; score: num
 }
 
 // Смена статуса: доработка, отмена, закрытие — исполнителю; отказ и пауза — мастеру.
-export type StatusNotifyAction = "rework" | "cancel" | "close" | "reject" | "pause";
+export type StatusNotifyAction = "rework" | "cancel" | "close" | "reject" | "pause" | "help" | "side_request";
 
 export function statusChangeText(
   action: StatusNotifyAction,

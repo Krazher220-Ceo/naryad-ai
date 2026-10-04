@@ -9,7 +9,7 @@ import { reviewOrder } from "@/lib/ai/review";
 import { getCurrentEmployee } from "@/lib/auth/session";
 import { classifyProblem, type Classification } from "@/lib/ai/classify";
 import { suggestWorkers, type Candidate } from "./suggest";
-import { notifyNewOrder, notifyStatusChange } from "./notifications";
+import { notifyNewOrder, notifySideRequest, notifyStatusChange } from "./notifications";
 import type { ActionResult, OrderAction, OrderPriority, OrderStatus, OrderType } from "./types";
 
 // Серверные действия с нарядом. Единственный путь изменить наряд из интерфейса.
@@ -41,6 +41,8 @@ export type CreateOrderInput = {
   brigade?: string;
   comment?: string;
   faultCode?: string;
+  // Наряд выдан по попутной заявке исполнителя: заявка отмечается «превращена в наряд».
+  requestId?: string;
   clientActionId: string;
 };
 
@@ -60,6 +62,7 @@ export async function createOrder(input: CreateOrderInput): Promise<ActionResult
     p_client_action_id: input.clientActionId,
   });
   if (error) return { ok: false, error: toErrorText(await getT(), error) };
+  if (input.requestId) await supabase.rpc("resolve_request", { p_request_id: input.requestId, p_status: "converted" });
   // Сообщение исполнителю отправляем после ответа: мастер не ждёт Telegram.
   after(() => notifyNewOrder(data));
   refresh();
@@ -222,4 +225,55 @@ export async function updateSettings(input: SettingsInput): Promise<ActionResult
   if (error) return { ok: false, error: toErrorText(await getT(), error) };
   refresh();
   return { ok: true, data: { saved: true } };
+}
+
+// «Нужна помощь»: статус не меняется, в журнал пишется событие, мастеру уходит сообщение.
+export async function requestHelp(input: {
+  orderId: string;
+  comment?: string;
+  clientActionId: string;
+}): Promise<ActionResult<{ sent: true }>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("request_help", {
+    p_order_id: input.orderId,
+    p_comment: input.comment,
+    p_client_action_id: input.clientActionId,
+  });
+  if (error) return { ok: false, error: toErrorText(await getT(), error) };
+  after(() => notifyStatusChange({ orderId: input.orderId, action: "help", reason: input.comment }));
+  refresh();
+  return { ok: true, data: { sent: true } };
+}
+
+// Попутная находка: исполнитель заметил другую неисправность и отправляет заявку мастеру.
+// Права проверяет база: заявку можно создать только от своего имени (правило insert_requests).
+export async function createSideRequest(input: {
+  orderId: string;
+  equipmentId: string;
+  description: string;
+}): Promise<ActionResult<{ sent: true }>> {
+  const t = await getT();
+  const me = await getCurrentEmployee();
+  if (!me) return { ok: false, error: t("orders.errors.forbidden") };
+  if (!input.description.trim()) return { ok: false, error: t("sideRequest.descriptionRequired") };
+  const supabase = await createClient();
+  const { error } = await supabase.from("requests").insert({
+    created_by: me.id,
+    equipment_id: input.equipmentId,
+    parent_order_id: input.orderId,
+    description: input.description.trim(),
+  });
+  if (error) return { ok: false, error: toErrorText(t, error) };
+  after(() => notifySideRequest(input.orderId, input.description.trim()));
+  refresh();
+  return { ok: true, data: { sent: true } };
+}
+
+// Мастер отклоняет заявку. Превращение в наряд отмечается в createOrder.
+export async function dismissRequest(requestId: string): Promise<ActionResult<{ done: true }>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("resolve_request", { p_request_id: requestId, p_status: "dismissed" });
+  if (error) return { ok: false, error: toErrorText(await getT(), error) };
+  refresh();
+  return { ok: true, data: { done: true } };
 }
