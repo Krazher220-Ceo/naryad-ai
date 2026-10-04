@@ -42,7 +42,7 @@ insert into v select 'o1', order_id::text from work_order_events where client_ac
 select pg_temp.try('create_order repeat returns same id', format($q$select create_order('unplanned','Течь масла на насосе', %L, %L, 'emergency', now()+interval '2 hours', %L, null, null, null, '11111111-1111-1111-1111-111111111111')::text$q$, (select val from v where k='sec'), (select val from v where k='eq'), (select val from v where k='w1')));
 
 select pg_temp.as_user('worker3');
-select pg_temp.try('worker3 sees 0 orders', $q$select count(*)::text from work_orders$q$);
+select pg_temp.try('worker3 does not see order 1 (expect 0)', format($q$select count(*)::text from work_orders where id=%L$q$, (select val from v where k='o1')));
 select pg_temp.try('worker3 accept -> must fail', format($q$select transition_order(%L,'accept')::text$q$, (select val from v where k='o1')));
 
 select pg_temp.as_user('worker1');
@@ -74,6 +74,24 @@ select pg_temp.try('change priority', format($q$select change_order_priority(%L,
 select pg_temp.try('cancel without reason -> must fail', format($q$select transition_order(%L,'cancel')::text$q$, (select val from v where k='o2')));
 select pg_temp.try('cancel', format($q$select transition_order(%L,'cancel','Дубль')::text$q$, (select val from v where k='o2')));
 select pg_temp.try('journal order 2', format($q$select string_agg(action||':'||coalesce(to_status::text,''), ' > ' order by created_at) from work_order_events where order_id=%L$q$, (select val from v where k='o2')));
+
+-- Уровень 4: «Нужна помощь», попутная заявка, история ремонтов (миграция 0011).
+select pg_temp.as_user('master1');
+select pg_temp.try('order 3', format($q$select create_order('unplanned','Стук в насосе', %L, %L, 'normal', now()+interval '2 hours', %L, null, null, null, '33333333-3333-3333-3333-333333333333')::text$q$, (select val from v where k='sec'), (select val from v where k='eq'), (select val from v where k='w1')));
+insert into v select 'o3', order_id::text from work_order_events where client_action_id = '33333333-3333-3333-3333-333333333333';
+select pg_temp.as_user('worker1');
+select pg_temp.try('accept order 3', format($q$select transition_order(%L,'accept')::text$q$, (select val from v where k='o3')));
+select pg_temp.try('help', format($q$select request_help(%L,'Нужен второй человек','44444444-4444-4444-4444-444444444444')::text$q$, (select val from v where k='o3')));
+select pg_temp.try('help repeat does not duplicate', format($q$select request_help(%L,'Нужен второй человек','44444444-4444-4444-4444-444444444444')::text$q$, (select val from v where k='o3')));
+select pg_temp.try('help events = 1', format($q$select count(*)::text from work_order_events where order_id=%L and action='help'$q$, (select val from v where k='o3')));
+select pg_temp.try('side request', format($q$insert into requests(created_by, equipment_id, parent_order_id, description) values (app.auth_employee_id(), %L, %L, 'Трещина на кожухе') returning 'ok'$q$, (select val from v where k='eq'), (select val from v where k='o3')));
+insert into v select 'r1', id::text from requests where description = 'Трещина на кожухе' order by created_at desc limit 1;
+select pg_temp.try('worker resolve request -> must fail', format($q$select resolve_request(%L,'dismissed')::text$q$, (select val from v where k='r1')));
+select pg_temp.try('repair history for worker', format($q$select count(*)::text from equipment_repair_history(%L)$q$, (select val from v where k='eq')));
+select pg_temp.as_user('worker2');
+select pg_temp.try('help on foreign order -> must fail', format($q$select request_help(%L)::text$q$, (select val from v where k='o3')));
+select pg_temp.as_user('master1');
+select pg_temp.try('master dismiss request', format($q$select resolve_request(%L,'dismissed')::text$q$, (select val from v where k='r1')));
 
 reset role;
 select step, what, result from t_log order by step;
