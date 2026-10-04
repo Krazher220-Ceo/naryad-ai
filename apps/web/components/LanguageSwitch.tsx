@@ -31,7 +31,7 @@ export function LanguageSwitch() {
           }
           className={cx(
             "min-h-touch-sm min-w-12 rounded-xl border-2 px-2 text-base font-semibold",
-            locale === current ? "border-brand bg-brand text-white" : "border-line-strong bg-surface text-ink hover:bg-canvas",
+            locale === current ? "border-brand bg-brand text-white ring-2 ring-white/70" : "border-line-strong bg-surface text-ink hover:bg-canvas",
           )}
         >
           {t(`language.short.${locale}`)}
