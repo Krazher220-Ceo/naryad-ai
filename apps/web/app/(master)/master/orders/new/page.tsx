@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { IssueOrderForm } from "@/components/master/IssueOrderForm";
-import { IconChevronLeft } from "@/components/ui";
+import { IconChevronLeft, InlineNotice } from "@/components/ui";
 import { requireRole } from "@/lib/auth/session";
 import { getT } from "@/lib/i18n-server";
 import { getIssueFormData, getRequest } from "@/lib/orders/queries";
 
 // ?equipment=<id> приходит с QR-кода оборудования: форма откроется с уже выбранным оборудованием.
-// ?request=<id> — наряд по попутной заявке исполнителя: описание берётся из заявки.
+// ?request=<id> — наряд по заявке оператора или попутной находке исполнителя: описание и машина из заявки.
 export default async function NewOrderPage({ searchParams }: PageProps<"/master/orders/new">) {
   const t = await getT();
   const { equipment, request } = await searchParams;
@@ -25,6 +25,7 @@ export default async function NewOrderPage({ searchParams }: PageProps<"/master/
           {t("master.card.back")}
         </Link>
         <h1 className="text-2xl font-bold text-ink">{t("master.issue.title")}</h1>
+        {fromRequest && <InlineNotice>{t("requests.fromRequest").replace("{n}", String(fromRequest.number))}</InlineNotice>}
         <IssueOrderForm
           data={data}
           employeeId={employee.id}

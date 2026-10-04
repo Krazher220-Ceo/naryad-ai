@@ -39,12 +39,13 @@ export async function getMasterBoard() {
     supabase.from("worker_board").select("*").order("full_name"),
     supabase.from("work_orders").select(ORDER_LIST_FIELDS).not("status", "in", "(closed,cancelled)"),
     supabase.from("work_orders").select("status, done_at").gte("created_at", startOfToday()),
-    // Попутные находки исполнителей, которые ждут решения мастера.
+    // Заявки, которые ждут решения мастера: операторов по QR и попутные находки исполнителей.
     supabase
       .from("requests")
       .select(
-        `id, description, created_at, equipment_id,
-         equipment:equipment_id ( name ), author:created_by ( full_name ), parent:parent_order_id ( number )`,
+        `id, number, description, created_at, equipment_id, machine_state, reporter_name, photo_path,
+         equipment:equipment_id ( name ), section:section_id ( name ),
+         author:created_by ( full_name, role ), parent:parent_order_id ( number )`,
       )
       .eq("status", "new")
       .order("created_at", { ascending: false }),
@@ -221,7 +222,7 @@ export async function getRequest(requestId: string) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("requests")
-    .select("id, description, equipment_id")
+    .select("id, number, description, equipment_id")
     .eq("id", requestId)
     .eq("status", "new")
     .maybeSingle();

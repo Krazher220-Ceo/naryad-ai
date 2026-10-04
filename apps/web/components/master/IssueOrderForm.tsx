@@ -33,6 +33,7 @@ import {
   type IssueCandidate,
   type IssueClassification,
 } from "./IssueSuggestion";
+import { EquipmentPicker } from "./EquipmentPicker";
 
 const DESCRIPTION_CHIPS = [
   "master.issue.chips.leak",
@@ -297,41 +298,53 @@ export function IssueOrderForm({
             placeholder={t("master.issue.search")}
             aria-label={t("master.issue.search")}
           />
-          {filtered.length === 0 && <p className="text-base text-ink-muted">{t("master.issue.noEquipment")}</p>}
-          {data.sections.map((section) => {
-            const items = filtered.filter((e) => e.section_id === section.id);
-            if (items.length === 0) return null;
-            return (
-              <div key={section.id} className="flex flex-col gap-2">
-                <h3 className="text-base font-bold text-ink-muted">{section.name}</h3>
-                {items.map((e) => {
-                  const selected = e.id === equipmentId;
-                  return (
-                    <button
-                      key={e.id}
-                      type="button"
-                      aria-pressed={selected}
-                      onClick={() => setEquipmentId(e.id)}
-                      className={cx(
-                        "flex min-h-touch items-center justify-between gap-2 rounded-xl border-2 px-4 text-left text-lg font-semibold",
-                        selected ? "border-brand bg-brand text-white" : "border-line-strong bg-surface text-ink hover:bg-canvas",
-                      )}
-                    >
-                      <span>
-                        {e.name} <span className="font-normal">· {e.inventory_no}</span>
-                        {openCountByEquipment.has(e.id) && (
-                          <span className={cx("block text-base font-normal", selected ? "text-white" : "text-ink-muted")}>
-                            {t("master.issue.openOrdersBadge").replace("{n}", String(openCountByEquipment.get(e.id)))}
-                          </span>
+          {query ? (
+            <>
+              {filtered.length === 0 && <p className="text-base text-ink-muted">{t("master.issue.noEquipment")}</p>}
+              {data.sections.map((section) => {
+              const items = filtered.filter((e) => e.section_id === section.id);
+              if (items.length === 0) return null;
+              return (
+                <div key={section.id} className="flex flex-col gap-2">
+                  <h3 className="text-base font-bold text-ink-muted">{section.name}</h3>
+                  {items.map((e) => {
+                    const selected = e.id === equipmentId;
+                    return (
+                      <button
+                        key={e.id}
+                        type="button"
+                        aria-pressed={selected}
+                        onClick={() => setEquipmentId(e.id)}
+                        className={cx(
+                          "flex min-h-touch items-center justify-between gap-2 rounded-xl border-2 px-4 text-left text-lg font-semibold",
+                          selected ? "border-brand bg-brand text-white" : "border-line-strong bg-surface text-ink hover:bg-canvas",
                         )}
-                      </span>
-                      {selected && <IconCheck className="size-6 shrink-0" />}
-                    </button>
-                  );
-                })}
-              </div>
-            );
-          })}
+                      >
+                        <span>
+                          {e.name} <span className="font-normal">· {e.inventory_no}</span>
+                          {openCountByEquipment.has(e.id) && (
+                            <span className={cx("block text-base font-normal", selected ? "text-white" : "text-ink-muted")}>
+                              {t("master.issue.openOrdersBadge").replace("{n}", String(openCountByEquipment.get(e.id)))}
+                            </span>
+                          )}
+                        </span>
+                        {selected && <IconCheck className="size-6 shrink-0" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              );
+            })}
+            </>
+          ) : (
+            <EquipmentPicker
+              sections={data.sections}
+              equipment={data.equipment}
+              selectedId={equipmentId}
+              openCount={openCountByEquipment}
+              onSelect={setEquipmentId}
+            />
+          )}
         </>
       ),
     },
