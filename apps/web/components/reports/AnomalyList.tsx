@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { Card, cx } from "@/components/ui";
 import { findAnomalies, type Anomaly } from "@/lib/analytics/anomalies";
-import { t, type MessageKey } from "@/lib/i18n";
+import { type MessageKey } from "@/lib/i18n";
+import { getT } from "@/lib/i18n-server";
 import { factLabel, factValue } from "./format";
 
-export function AnomalyCard({ anomaly }: { anomaly: Anomaly }) {
+export async function AnomalyCard({ anomaly }: { anomaly: Anomaly }) {
+  const t = await getT();
   const high = anomaly.severity === "high";
   return (
     <Card tone={high ? "emergency" : "default"} className="flex flex-col gap-3">
@@ -32,7 +34,7 @@ export function AnomalyCard({ anomaly }: { anomaly: Anomaly }) {
       <ul aria-label={t("anomalies.factsTitle")} className="flex flex-wrap gap-2">
         {Object.entries(anomaly.facts).map(([key, value]) => (
           <li key={key} className="rounded-full border border-line-strong bg-canvas px-3 py-1 text-base text-ink">
-            {factLabel(key)}: <span className="font-semibold">{factValue(key, value)}</span>
+            {factLabel(t, key)}: <span className="font-semibold">{factValue(t, key, value)}</span>
           </li>
         ))}
       </ul>
@@ -44,6 +46,7 @@ export function AnomalyCard({ anomaly }: { anomaly: Anomaly }) {
 
 // Список карточек. Вызывает модель (до 15 секунд), поэтому страница оборачивает его в <Suspense>.
 export async function AnomalyList({ days, limit, allHref }: { days: number; limit?: number; allHref?: string }) {
+  const t = await getT();
   const { anomalies } = await findAnomalies(days);
   const shown = limit ? anomalies.slice(0, limit) : anomalies;
 

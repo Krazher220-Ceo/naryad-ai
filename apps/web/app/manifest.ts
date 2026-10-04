@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { t } from "@/lib/i18n";
+import { tRu as t } from "@/lib/i18n";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {

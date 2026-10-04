@@ -3,11 +3,12 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { InlineNotice } from "@/components/ui";
-import { t } from "@/lib/i18n";
+import { useT } from "@/components/LocaleProvider";
 import { flushQueue, pendingActions, QUEUE_EVENT } from "./queue";
 
 // Полоса «нет сети» и отправка очереди при появлении сети. Кладётся один раз в layout исполнителя.
 export function OfflineSync() {
+  const t = useT();
   const router = useRouter();
   const [pending, setPending] = useState(0);
   const [online, setOnline] = useState(true);

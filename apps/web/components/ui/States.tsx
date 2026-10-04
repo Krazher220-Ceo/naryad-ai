@@ -1,4 +1,6 @@
-import { t } from "@/lib/i18n";
+"use client";
+
+import { useT } from "@/components/LocaleProvider";
 import { Button } from "./Button";
 import { cx } from "./cx";
 import { IconAlert, IconInbox } from "./icons";
@@ -27,19 +29,20 @@ export function EmptyState({
 
 // Ошибка загрузки: что случилось и кнопка «Повторить».
 export function ErrorState({
-  title = t("ui.error.title"),
-  text = t("ui.error.text"),
+  title,
+  text,
   onRetry,
 }: {
   title?: string;
   text?: string;
   onRetry?: () => void;
 }) {
+  const t = useT();
   return (
     <div role="alert" className="flex flex-col items-center gap-3 rounded-2xl border-2 border-danger bg-danger-soft p-6 text-center">
       <IconAlert className="size-10 text-danger" />
-      <p className="text-xl font-bold text-ink">{title}</p>
-      <p className="max-w-sm text-base text-ink">{text}</p>
+      <p className="text-xl font-bold text-ink">{title ?? t("ui.error.title")}</p>
+      <p className="max-w-sm text-base text-ink">{text ?? t("ui.error.text")}</p>
       {onRetry && (
         <Button variant="secondary" size="md" onClick={onRetry}>
           {t("ui.action.retry")}

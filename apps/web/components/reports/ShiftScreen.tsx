@@ -4,7 +4,7 @@ import { ExportButtons } from "@/components/reports/ExportButtons";
 import { ShiftReportView } from "@/components/reports/ShiftReportView";
 import { cx } from "@/components/ui";
 import { currentShift, getShiftReport, type Shift } from "@/lib/analytics/shift";
-import { t } from "@/lib/i18n";
+import { getT } from "@/lib/i18n-server";
 
 // Разбор ?date=...&shift=...: неверные значения заменяются текущей сменой.
 export function parseShift(date: string | string[] | undefined, shift: string | string[] | undefined): { date: string; shift: Shift } {
@@ -41,6 +41,7 @@ export async function ShiftScreen({
   date: string;
   shift: Shift;
 }) {
+  const t = await getT();
   const now = currentShift();
   const isCurrent = now.date === date && now.shift === shift;
   // Даты и смены сравниваются строкой: «2026-10-03A» < «2026-10-03B» < «2026-10-04A».

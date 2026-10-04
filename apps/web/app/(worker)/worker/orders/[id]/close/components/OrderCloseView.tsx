@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { t } from "@/lib/i18n";
+import { useT } from "@/components/LocaleProvider";
 import { uploadOrderPhoto } from "@/lib/orders/photos";
 import { completeOrder } from "@/lib/orders/actions";
 import type { OrderDetails, CloseFormData } from "@/lib/orders/queries";
@@ -12,6 +12,8 @@ import {
   StepForm,
   Field,
   TextArea,
+  VoiceButton,
+  appendSpoken,
   Select,
   NumberStepper,
   PhotoPicker,
@@ -27,6 +29,8 @@ type OrderCloseViewProps = {
   faultCodes: CloseFormData["faultCodes"];
   allMaterials: CloseFormData["materials"];
   employee: CurrentEmployee;
+  // Первое фото «до»: показывается как ориентир, чтобы снять «после» с того же ракурса.
+  beforePhotoUrl: string | null;
 };
 
 type SelectedMaterial = {
@@ -41,7 +45,9 @@ export function OrderCloseView({
   faultCodes,
   allMaterials,
   employee,
+  beforePhotoUrl,
 }: OrderCloseViewProps) {
+  const t = useT();
   const router = useRouter();
 
   // Шаг 1: Работы
@@ -206,6 +212,7 @@ export function OrderCloseView({
             onChange={(e) => setWorkDone(e.target.value)}
             rows={4}
           />
+          <VoiceButton onText={(spoken) => setWorkDone((prev) => appendSpoken(prev, spoken))} />
         </Field>
       ),
     },
@@ -334,6 +341,20 @@ export function OrderCloseView({
             <InlineNotice tone="danger">{photoError}</InlineNotice>
           )}
 
+          {beforePhotoUrl && (
+            <figure className="flex flex-col gap-2">
+              <figcaption className="text-base font-semibold text-ink">{t("worker.close.silhouetteTitle")}</figcaption>
+              {/* Силуэт: фото «до» в сером цвете и полупрозрачно, как контур для ракурса. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={beforePhotoUrl}
+                alt={t("worker.beforePhotos")}
+                className="aspect-video w-full rounded-xl border-2 border-dashed border-line-strong object-cover opacity-60 grayscale contrast-150"
+              />
+              <p className="text-base text-ink-muted">{t("worker.close.silhouetteHint")}</p>
+            </figure>
+          )}
+
           <PhotoPicker
             value={afterPhotos}
             onChange={(files) => {
@@ -361,6 +382,7 @@ export function OrderCloseView({
             onChange={(e) => setComment(e.target.value)}
             rows={3}
           />
+          <VoiceButton onText={(spoken) => setComment((prev) => appendSpoken(prev, spoken))} />
         </Field>
       ),
     },

@@ -7,7 +7,7 @@ import { ReviewWaiting } from "@/components/review/ReviewPolling";
 import { OrderActions, type WorkerOption } from "@/components/master/OrderActions";
 import { Card, ErrorState, IconChevronLeft, OverdueTag, PriorityBadge, StatusBadge } from "@/components/ui";
 import { requireRole } from "@/lib/auth/session";
-import { t } from "@/lib/i18n";
+import { getT } from "@/lib/i18n-server";
 import { getOrderDetails } from "@/lib/orders/queries";
 import { RealtimeRefresh } from "@/lib/orders/RealtimeRefresh";
 import { canReassign, masterActions } from "@/lib/orders/transitions";
@@ -47,6 +47,7 @@ function PhotoGrid({ title, items }: { title: string; items: PhotoItem[] }) {
 }
 
 export default async function MasterOrderPage({ params }: PageProps<"/master/orders/[id]">) {
+  const t = await getT();
   const { id } = await params;
   const employee = await requireRole("master");
 
@@ -184,7 +185,7 @@ export default async function MasterOrderPage({ params }: PageProps<"/master/ord
                           {formatDateTime(e.created_at)}
                           {e.actor?.full_name ? ` · ${e.actor.full_name}` : ""}
                         </span>
-                        <span className="text-lg font-semibold text-ink">{eventLabel(e.action)}</span>
+                        <span className="text-lg font-semibold text-ink">{eventLabel(t, e.action)}</span>
                         {(e.reason || e.comment) && <span className="text-base text-ink">{e.reason ?? e.comment}</span>}
                       </li>
                     ))}

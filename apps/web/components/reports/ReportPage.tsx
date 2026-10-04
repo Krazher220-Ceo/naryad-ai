@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
 import { cx } from "@/components/ui";
-import { t } from "@/lib/i18n";
+import { getT } from "@/lib/i18n-server";
 
 // Общая оболочка страниц отчётов руководителя: шапка, «Назад», заголовок.
 export function ReportPage({
@@ -34,7 +34,7 @@ export function ReportPage({
 }
 
 // Переключатель периода: ссылки, состояние в адресе.
-export function PeriodSwitch({
+export async function PeriodSwitch({
   basePath,
   days,
   options,
@@ -45,6 +45,7 @@ export function PeriodSwitch({
   options: readonly number[];
   extraQuery?: string;
 }) {
+  const t = await getT();
   return (
     <nav
       aria-label={t("rating.period")}

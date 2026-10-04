@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { t, type MessageKey } from "@/lib/i18n";
+import { type MessageKey } from "@/lib/i18n";
+import { useT } from "@/components/LocaleProvider";
 import { REJECT_REASONS } from "@/lib/orders/transitions";
 import {
   BottomActionBar,
@@ -48,11 +49,11 @@ const swatches: { key: MessageKey; className: string; token: string }[] = [
   { key: "ui.demo.colorSuccess", className: "bg-success", token: "success" },
 ];
 
-const faultCodes = [
-  { value: "M-01", label: t("ui.demo.code1") },
-  { value: "M-02", label: t("ui.demo.code2") },
-  { value: "E-05", label: t("ui.demo.code3") },
-];
+const FAULT_CODES = [
+  { value: "M-01", key: "ui.demo.code1" },
+  { value: "M-02", key: "ui.demo.code2" },
+  { value: "E-05", key: "ui.demo.code3" },
+] as const;
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -64,6 +65,8 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 export default function UiDemoPage() {
+  const t = useT();
+  const faultCodes = FAULT_CODES.map((c) => ({ value: c.value, label: t(c.key) }));
   const [workType, setWorkType] = useState<WorkType | null>("unplanned");
   const [priority, setPriority] = useState<Priority | null>("normal");
   const [qty, setQty] = useState(2);

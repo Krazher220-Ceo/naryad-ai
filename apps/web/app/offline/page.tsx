@@ -1,6 +1,7 @@
-import { t } from "@/lib/i18n";
+import { getT } from "@/lib/i18n-server";
 
-export default function OfflinePage() {
+export default async function OfflinePage() {
+  const t = await getT();
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-6 text-center">
       <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">

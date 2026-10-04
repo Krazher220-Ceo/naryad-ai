@@ -2,7 +2,7 @@
 
 import { refresh } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { t } from "@/lib/i18n";
+import { getT } from "@/lib/i18n-server";
 
 // «Сбросить демо» (страница для жюри /demo). Возвращает наряды к снимку демо-данных
 // и сдвигает даты так, чтобы история заканчивалась сегодня (миграция 0009, restore_demo).
@@ -15,6 +15,7 @@ let lastResetAt = 0;
 const COOLDOWN_MS = 60_000;
 
 export async function resetDemo(): Promise<{ ok: true } | { ok: false; error: string }> {
+  const t = await getT();
   if (Date.now() - lastResetAt < COOLDOWN_MS) return { ok: false, error: t("demo.resetTooOften") };
   lastResetAt = Date.now();
 

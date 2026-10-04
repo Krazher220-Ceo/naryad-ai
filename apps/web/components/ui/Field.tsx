@@ -1,4 +1,6 @@
-import { t } from "@/lib/i18n";
+"use client";
+
+import { useT } from "@/components/LocaleProvider";
 import { cx } from "./cx";
 import { IconChevronDown } from "./icons";
 
@@ -14,6 +16,7 @@ type FieldProps = {
 
 // Подпись, подсказка и ошибка вокруг любого поля.
 export function Field({ label, htmlFor, hint, error, required, children }: FieldProps) {
+  const t = useT();
   const caption = (
     <>
       {label}
@@ -91,6 +94,7 @@ type SelectProps = React.SelectHTMLAttributes<HTMLSelectElement> &
 
 // Обычный выпадающий список. Если вариантов 2–4, лучше SegmentedControl.
 export function Select({ invalid, className, options, placeholder, ...rest }: SelectProps) {
+  const t = useT();
   return (
     <div className="relative">
       <select
