@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { AppHeader } from "@/components/AppHeader";
 import { ExportButtons } from "@/components/reports/ExportButtons";
 import { ShiftReportView } from "@/components/reports/ShiftReportView";
 import { cx } from "@/components/ui";
@@ -29,14 +28,10 @@ const linkClass =
 
 // Одна страница отчёта за смену для мастера и руководителя.
 export async function ShiftScreen({
-  fullName,
-  roleLabel,
   basePath,
   date,
   shift,
 }: {
-  fullName: string;
-  roleLabel: string;
   basePath: "/master" | "/lead";
   date: string;
   shift: Shift;
@@ -53,8 +48,7 @@ export async function ShiftScreen({
   const report = await getShiftReport(date, shift);
 
   return (
-    <div className="flex min-h-dvh flex-col bg-canvas">
-      <AppHeader fullName={fullName} roleLabel={roleLabel} />
+    <div className="flex flex-1 flex-col bg-canvas">
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 py-4 pb-8 lg:max-w-6xl">
         <Link href={basePath} className="inline-flex min-h-touch-sm items-center text-base font-semibold text-ink underline">
           ← {t("shiftReport.back")}

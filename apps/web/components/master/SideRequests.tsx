@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useT } from "@/components/LocaleProvider";
-import { Button, Card, Toast } from "@/components/ui";
+import { Button, Card, useToast } from "@/components/ui";
 import { dismissRequest } from "@/lib/orders/actions";
 import type { MasterBoard } from "@/lib/orders/queries";
 
@@ -11,7 +11,7 @@ import type { MasterBoard } from "@/lib/orders/queries";
 export function SideRequests({ requests }: { requests: MasterBoard["requests"] }) {
   const t = useT();
   const [busyId, setBusyId] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ message: string; tone: "success" | "danger" } | null>(null);
+  const toast = useToast();
 
   if (requests.length === 0) return null;
 
@@ -19,9 +19,10 @@ export function SideRequests({ requests }: { requests: MasterBoard["requests"] }
     setBusyId(id);
     try {
       const res = await dismissRequest(id);
-      setToast(res.ok ? { message: t("requests.dismissed"), tone: "success" } : { message: res.error, tone: "danger" });
+      if (res.ok) toast.show("saved", { detail: t("requests.dismissed") });
+      else toast.show("error", { detail: res.error });
     } catch {
-      setToast({ message: t("orders.errors.unknown"), tone: "danger" });
+      toast.show("error");
     } finally {
       setBusyId(null);
     }
@@ -29,7 +30,6 @@ export function SideRequests({ requests }: { requests: MasterBoard["requests"] }
 
   return (
     <section className="flex flex-col gap-3">
-      <Toast open={toast !== null} tone={toast?.tone ?? "success"} message={toast?.message ?? ""} onClose={() => setToast(null)} />
       <h2 className="text-xl font-bold text-ink">{t("requests.title")}</h2>
       <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2">
         {requests.map((r) => (

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { AppHeader } from "@/components/AppHeader";
 import { requireRole } from "@/lib/auth/session";
 import { getT } from "@/lib/i18n-server";
 import { createClient } from "@/lib/supabase/server";
@@ -7,7 +6,7 @@ import { SettingsForm } from "./SettingsForm";
 
 export default async function MasterSettingsPage() {
   const t = await getT();
-  const employee = await requireRole("master");
+  await requireRole("master");
   const supabase = await createClient();
 
   const { data: settings } = await supabase
@@ -17,8 +16,7 @@ export default async function MasterSettingsPage() {
     .single();
 
   return (
-    <div className="flex min-h-dvh flex-col bg-canvas">
-      <AppHeader fullName={employee.fullName} roleLabel={t("roles.master")} />
+    <div className="flex flex-1 flex-col bg-canvas">
 
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 py-6 lg:max-w-2xl">
         <div className="flex flex-col gap-2">

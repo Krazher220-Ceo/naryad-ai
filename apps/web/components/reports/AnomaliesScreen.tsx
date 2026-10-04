@@ -9,19 +9,15 @@ export const ANOMALY_PERIODS = [30, 90] as const;
 
 // Одна страница аномалий для мастера и руководителя.
 export async function AnomaliesScreen({
-  fullName,
-  roleLabel,
   basePath,
   days,
 }: {
-  fullName: string;
-  roleLabel: string;
   basePath: "/master" | "/lead";
   days: number;
 }) {
   const t = await getT();
   return (
-    <ReportPage fullName={fullName} roleLabel={roleLabel} backHref={basePath} backLabel={t("anomalies.back")} title={t("anomalies.title")}>
+    <ReportPage backHref={basePath} backLabel={t("anomalies.back")} title={t("anomalies.title")}>
       <p className="text-base text-ink-muted">{t("anomalies.intro")}</p>
       <PeriodSwitch basePath={`${basePath}/anomalies`} days={days} options={ANOMALY_PERIODS} />
       <ExportButtons report="anomalies" params={{ days }} />
