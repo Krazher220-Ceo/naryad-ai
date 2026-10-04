@@ -4,7 +4,7 @@ import { ExportButtons } from "@/components/reports/ExportButtons";
 import { RatingFormula, RatingTable } from "@/components/reports/RatingTable";
 import { EmptyState, cx } from "@/components/ui";
 import { getRating } from "@/lib/analytics/rating";
-import { t } from "@/lib/i18n";
+import { getT } from "@/lib/i18n-server";
 
 const PERIODS = [7, 30, 90] as const;
 type Days = (typeof PERIODS)[number];
@@ -26,6 +26,7 @@ export async function RatingScreen({
   basePath: "/master" | "/lead";
   days: Days;
 }) {
+  const t = await getT();
   const to = new Date();
   const from = new Date(to.getTime() - days * 24 * 3600_000);
   const rows = await getRating(from, to);

@@ -3,14 +3,20 @@ import { AppHeader } from "@/components/AppHeader";
 import { IssueOrderForm } from "@/components/master/IssueOrderForm";
 import { IconChevronLeft } from "@/components/ui";
 import { requireRole } from "@/lib/auth/session";
-import { t } from "@/lib/i18n";
-import { getIssueFormData } from "@/lib/orders/queries";
+import { getT } from "@/lib/i18n-server";
+import { getIssueFormData, getRequest } from "@/lib/orders/queries";
 
 // ?equipment=<id> приходит с QR-кода оборудования: форма откроется с уже выбранным оборудованием.
+// ?request=<id> — наряд по попутной заявке исполнителя: описание берётся из заявки.
 export default async function NewOrderPage({ searchParams }: PageProps<"/master/orders/new">) {
-  const { equipment } = await searchParams;
+  const t = await getT();
+  const { equipment, request } = await searchParams;
   const employee = await requireRole("master");
-  const data = await getIssueFormData();
+  const [data, fromRequest] = await Promise.all([
+    getIssueFormData(),
+    typeof request === "string" ? getRequest(request) : Promise.resolve(null),
+  ]);
+  const equipmentId = fromRequest?.equipment_id ?? (typeof equipment === "string" ? equipment : null);
 
   return (
     <div className="flex min-h-dvh flex-col bg-canvas">
@@ -24,7 +30,9 @@ export default async function NewOrderPage({ searchParams }: PageProps<"/master/
         <IssueOrderForm
           data={data}
           employeeId={employee.id}
-          initialEquipmentId={typeof equipment === "string" && data.equipment.some((e) => e.id === equipment) ? equipment : null}
+          initialEquipmentId={equipmentId && data.equipment.some((e) => e.id === equipmentId) ? equipmentId : null}
+          initialDescription={fromRequest?.description ?? ""}
+          requestId={fromRequest?.id}
         />
       </main>
     </div>

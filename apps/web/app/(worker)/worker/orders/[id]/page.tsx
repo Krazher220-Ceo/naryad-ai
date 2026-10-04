@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireRole } from "@/lib/auth/session";
-import { t } from "@/lib/i18n";
+import { getT } from "@/lib/i18n-server";
 import { AppHeader } from "@/components/AppHeader";
 import { getOrderDetails } from "@/lib/orders/queries";
 import { Button, ErrorState } from "@/components/ui";
@@ -11,6 +11,7 @@ type OrderPageProps = {
 };
 
 export default async function OrderPage({ params }: OrderPageProps) {
+  const t = await getT();
   const { id } = await params;
   const employee = await requireRole("worker");
   const data = await getOrderDetails(id);
@@ -40,6 +41,8 @@ export default async function OrderPage({ params }: OrderPageProps) {
         photos={data.photos}
         materials={data.materials}
         review={data.review}
+        toBring={data.toBring}
+        repairHistory={data.repairHistory}
       />
     </div>
   );

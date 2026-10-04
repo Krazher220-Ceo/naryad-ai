@@ -2,9 +2,10 @@ import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
 import { TelegramLinkCard } from "@/components/TelegramLinkCard";
 import { OrderRow } from "@/components/master/OrderRow";
+import { SideRequests } from "@/components/master/SideRequests";
 import { BottomActionBar, EmptyState, WorkerChip, cx } from "@/components/ui";
 import { requireRole } from "@/lib/auth/session";
-import { t } from "@/lib/i18n";
+import { getT } from "@/lib/i18n-server";
 import { getMasterBoard } from "@/lib/orders/queries";
 import { RealtimeRefresh } from "@/lib/orders/RealtimeRefresh";
 import type { OrderStatus, WorkerBoardStatus } from "@/lib/orders/types";
@@ -36,8 +37,9 @@ function Tile({ label, value, alert }: { label: string; value: number; alert?: b
 }
 
 export default async function MasterPage() {
+  const t = await getT();
   const employee = await requireRole("master");
-  const { workers, orders } = await getMasterBoard();
+  const { workers, orders, requests } = await getMasterBoard();
 
   const count = (statuses: OrderStatus[]) => orders.filter((o) => statuses.includes(o.status)).length;
   const sortedWorkers = [...workers].sort((a, b) => WORKER_RANK[a.board_status] - WORKER_RANK[b.board_status]);
@@ -55,6 +57,7 @@ export default async function MasterPage() {
               ["/master/shift", "shiftReport.title"],
               ["/master/rating", "rating.linkShort"],
               ["/master/anomalies", "anomalies.linkShort"],
+              ["/master/assistant", "assistant.link"],
               ["/master/equipment/qr", "equipmentQr.link"],
               ["/master/settings", "settings.title"],
             ] as const
@@ -75,6 +78,8 @@ export default async function MasterPage() {
           <Tile label={t("master.counters.inWork")} value={count(["in_progress", "paused"])} />
           <Tile label={t("master.counters.waiting")} value={count(["issued", "queued"])} />
         </div>
+
+        <SideRequests requests={requests} />
 
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
           <section className="flex min-w-0 flex-col gap-3 lg:w-72 lg:shrink-0">

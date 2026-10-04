@@ -1,6 +1,6 @@
 "use client";
 
-import { t } from "@/lib/i18n";
+import { useT } from "@/components/LocaleProvider";
 import { IconMinus, IconPlus } from "./icons";
 
 type NumberStepperProps = {
@@ -15,6 +15,7 @@ type NumberStepperProps = {
 
 // Количество крупными кнопками − и + (56 px, можно в перчатках). Число можно и ввести.
 export function NumberStepper({ value, onChange, min = 0, max = 9999, step = 1, id, label }: NumberStepperProps) {
+  const t = useT();
   // Округление убирает хвосты вида 0.30000000000000004.
   const clamp = (n: number) => Math.round(Math.min(max, Math.max(min, n)) * 1000) / 1000;
 

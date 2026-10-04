@@ -1,5 +1,5 @@
 import { Card, cx, formatMinutes } from "@/components/ui";
-import { t } from "@/lib/i18n";
+import { getT } from "@/lib/i18n-server";
 import type { ShiftReport } from "@/lib/analytics/shift";
 
 const fill = (template: string, values: Record<string, string | number>) =>
@@ -16,7 +16,8 @@ function Tile({ label, value, alert, note }: { label: string; value: number; ale
   );
 }
 
-export function ShiftReportView({ report }: { report: ShiftReport }) {
+export async function ShiftReportView({ report }: { report: ShiftReport }) {
+  const t = await getT();
   const { counters, load, downtime, overdue, summary } = report;
   const maxHours = Math.max(1, ...load.map((l) => l.normHours));
   const maxMinutes = Math.max(1, ...downtime.map((d) => d.minutes));
@@ -81,7 +82,7 @@ export function ShiftReportView({ report }: { report: ShiftReport }) {
                   <Card className="flex flex-col gap-2">
                     <div className="flex items-baseline justify-between gap-2">
                       <span className="text-base font-bold text-ink">{d.name}</span>
-                      <span className="shrink-0 text-base font-semibold text-danger">{formatMinutes(d.minutes)}</span>
+                      <span className="shrink-0 text-base font-semibold text-danger">{formatMinutes(t, d.minutes)}</span>
                     </div>
                     <div className="h-3 w-full overflow-hidden rounded-full bg-line" aria-hidden="true">
                       <div className="h-full rounded-full bg-danger" style={{ width: `${(d.minutes / maxMinutes) * 100}%` }} />

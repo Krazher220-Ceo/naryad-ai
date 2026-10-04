@@ -1,7 +1,8 @@
 "use client";
 
 import { Card, IconCheck, IconInfo, WorkerStatusDot, cx } from "@/components/ui";
-import { t, type MessageKey } from "@/lib/i18n";
+import { type MessageKey } from "@/lib/i18n";
+import { useT } from "@/components/LocaleProvider";
 
 export type IssueClassification = {
   faultCode: string | null;
@@ -35,6 +36,7 @@ export function IssueSuggestion({
   selectedWorkerId,
   onSelectCandidate,
 }: IssueSuggestionProps) {
+  const t = useT();
   const codeText = classification.faultCode ?? t("issueAi.noCode");
   const priorityText = classification.priority
     ? t(`orders.priority.${classification.priority}` as MessageKey)

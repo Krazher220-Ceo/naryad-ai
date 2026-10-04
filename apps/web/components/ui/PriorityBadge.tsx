@@ -1,4 +1,7 @@
-import { t, type MessageKey } from "@/lib/i18n";
+"use client";
+
+import { type MessageKey } from "@/lib/i18n";
+import { useT } from "@/components/LocaleProvider";
 import { cx } from "./cx";
 import { IconAlert } from "./icons";
 import type { Priority } from "./types";
@@ -12,6 +15,7 @@ const priorityClass: Record<Priority, string> = {
 
 // Приоритет: сплошная заливка, белый текст. У аварийного ещё и значок.
 export function PriorityBadge({ priority }: { priority: Priority }) {
+  const t = useT();
   return (
     <span
       className={cx(

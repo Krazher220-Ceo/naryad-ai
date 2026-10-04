@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { t } from "@/lib/i18n";
+import { useT } from "@/components/LocaleProvider";
 import { BottomActionBar } from "./BottomActionBar";
 import { Button } from "./Button";
 import { cx } from "./cx";
@@ -26,6 +26,7 @@ type StepFormProps = {
 // Телефон (до md): по одному шагу, «Назад» и «Далее» внизу экрана.
 // Ноутбук (от md): все шаги одной страницей и одна кнопка отправки.
 export function StepForm({ steps, submitLabel, onSubmit, loading }: StepFormProps) {
+  const t = useT();
   const [current, setCurrent] = useState(0);
   const isLast = current === steps.length - 1;
   const currentValid = steps[current]?.valid !== false;

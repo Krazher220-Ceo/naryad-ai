@@ -35,10 +35,19 @@ function startOfToday(): string {
 export async function getMasterBoard() {
   const supabase = await createClient();
 
-  const [workersRes, ordersRes, todayRes] = await Promise.all([
+  const [workersRes, ordersRes, todayRes, requestsRes] = await Promise.all([
     supabase.from("worker_board").select("*").order("full_name"),
     supabase.from("work_orders").select(ORDER_LIST_FIELDS).not("status", "in", "(closed,cancelled)"),
     supabase.from("work_orders").select("status, done_at").gte("created_at", startOfToday()),
+    // Попутные находки исполнителей, которые ждут решения мастера.
+    supabase
+      .from("requests")
+      .select(
+        `id, description, created_at, equipment_id,
+         equipment:equipment_id ( name ), author:created_by ( full_name ), parent:parent_order_id ( number )`,
+      )
+      .eq("status", "new")
+      .order("created_at", { ascending: false }),
   ]);
   if (workersRes.error) throw workersRes.error;
   if (ordersRes.error) throw ordersRes.error;
@@ -55,7 +64,7 @@ export async function getMasterBoard() {
     equipmentDown: new Set(orders.filter((o) => o.type === "unplanned").map((o) => o.equipment?.id)).size,
   };
 
-  return { workers, orders, counters };
+  return { workers, orders, counters, requests: requestsRes.data ?? [] };
 }
 
 export type MasterBoard = Awaited<ReturnType<typeof getMasterBoard>>;
@@ -109,7 +118,7 @@ export async function getOrderDetails(orderId: string) {
   if (error) throw error;
   if (!order) return null;
 
-  const [eventsRes, photosRes, materialsRes, reviewRes] = await Promise.all([
+  const [eventsRes, photosRes, materialsRes, reviewRes, toBringRes, historyRes] = await Promise.all([
     supabase
       .from("work_order_events")
       .select("id, action, from_status, to_status, comment, reason, reason_code, created_at, actor:actor_id ( full_name )")
@@ -128,6 +137,12 @@ export async function getOrderDetails(orderId: string) {
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle(),
+    // «Что взять с собой»: типовые материалы по шифру наряда.
+    order.fault_code
+      ? supabase.from("materials").select("id, name, unit, typical_qty").contains("fault_codes", [order.fault_code]).order("name")
+      : Promise.resolve({ data: [] as { id: string; name: string; unit: string; typical_qty: number }[], error: null }),
+    // «Как чинили в прошлый раз»: последние закрытые наряды по этому оборудованию (без имён).
+    supabase.rpc("equipment_repair_history", { p_equipment_id: order.equipment_id, p_exclude_order_id: order.id }),
   ]);
   if (eventsRes.error) throw eventsRes.error;
   if (photosRes.error) throw photosRes.error;
@@ -147,6 +162,9 @@ export async function getOrderDetails(orderId: string) {
     photos,
     materials: materialsRes.data,
     review: reviewRes.data ? { ...reviewRes.data, checks: reviewRes.data.checks as unknown as ReviewChecks } : null,
+    // Подсказки не обязательны: если запрос не удался, карточка открывается без них.
+    toBring: toBringRes.data ?? [],
+    repairHistory: historyRes.data ?? [],
   };
 }
 
@@ -155,19 +173,29 @@ export type OrderDetails = NonNullable<Awaited<ReturnType<typeof getOrderDetails
 // Справочники для формы выдачи наряда.
 export async function getIssueFormData() {
   const supabase = await createClient();
-  const [sections, equipment, workers, faultCodes] = await Promise.all([
+  const [sections, equipment, workers, faultCodes, openOrders, templates] = await Promise.all([
     supabase.from("sections").select("id, name").order("name"),
     supabase.from("equipment").select("id, name, inventory_no, section_id, type").order("name"),
     supabase.from("worker_board").select("*").order("full_name"),
     supabase.from("fault_codes").select("code, category, name, norm_hours").order("code"),
+    // Открытые наряды: предупреждение о дубле, если по оборудованию уже есть незакрытый наряд.
+    supabase
+      .from("work_orders")
+      .select("id, number, equipment_id, status, description")
+      .not("status", "in", "(closed,cancelled)")
+      .order("created_at", { ascending: false }),
+    // Шаблоны плановых работ.
+    supabase.from("order_templates").select("id, name, type, fault_code, description").order("name"),
   ]);
-  for (const res of [sections, equipment, workers, faultCodes]) if (res.error) throw res.error;
+  for (const res of [sections, equipment, workers, faultCodes, openOrders, templates]) if (res.error) throw res.error;
 
   return {
     sections: sections.data ?? [],
     equipment: equipment.data ?? [],
     workers: (workers.data ?? []).map((w) => ({ ...w, board_status: w.board_status as WorkerBoardStatus })),
     faultCodes: faultCodes.data ?? [],
+    openOrders: openOrders.data ?? [],
+    templates: templates.data ?? [],
   };
 }
 
@@ -186,3 +214,16 @@ export async function getCloseFormData() {
 }
 
 export type CloseFormData = Awaited<ReturnType<typeof getCloseFormData>>;
+
+// Попутная заявка для формы выдачи. Только новые: обработанную заявку повторно не выдаём.
+export async function getRequest(requestId: string) {
+  if (!UUID_RE.test(requestId)) return null;
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("requests")
+    .select("id, description, equipment_id")
+    .eq("id", requestId)
+    .eq("status", "new")
+    .maybeSingle();
+  return data;
+}

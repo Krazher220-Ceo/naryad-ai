@@ -3,7 +3,8 @@
 import { useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { t, type MessageKey } from "@/lib/i18n";
+import { tRu, type MessageKey } from "@/lib/i18n";
+import { useT } from "@/components/LocaleProvider";
 import { RealtimeRefresh } from "@/lib/orders/RealtimeRefresh";
 import { sendTransition } from "@/lib/offline/queue";
 import {
@@ -35,6 +36,7 @@ import { eventLabel } from "@/components/review/eventLabel";
 import { ReviewReport } from "@/components/review/ReviewReport";
 import { ReviewWaiting } from "@/components/review/ReviewPolling";
 import { formatOrderTime, getOverdueMinutes } from "@/app/(worker)/worker/components/utils";
+import { RepairHistory, SafetySheet, ToBring, WorkerHelpActions } from "@/components/worker/OrderExtras";
 
 type OrderDetailViewProps = {
   order: OrderDetails["order"];
@@ -42,9 +44,12 @@ type OrderDetailViewProps = {
   photos: OrderDetails["photos"];
   materials: OrderDetails["materials"];
   review: OrderDetails["review"];
+  toBring: OrderDetails["toBring"];
+  repairHistory: OrderDetails["repairHistory"];
 };
 
-export function OrderDetailView({ order, events, photos, materials, review }: OrderDetailViewProps) {
+export function OrderDetailView({ order, events, photos, materials, review, toBring, repairHistory }: OrderDetailViewProps) {
+  const t = useT();
   const router = useRouter();
 
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
@@ -60,6 +65,8 @@ export function OrderDetailView({ order, events, photos, materials, review }: Or
   const [pauseReason, setPauseReason] = useState<ReasonValue>({ code: "", text: "" });
 
   const [sheetLoading, setSheetLoading] = useState(false);
+  // Проверка безопасности перед «Начать исполнение».
+  const [safetyOpen, setSafetyOpen] = useState(false);
   const [fullscreenPhoto, setFullscreenPhoto] = useState<string | null>(null);
 
   // Idempotency: сохранение clientActionId на попытку
@@ -85,7 +92,7 @@ export function OrderDetailView({ order, events, photos, materials, review }: Or
   const afterPhotos = photos.filter((p) => p.kind === "after" && p.url);
 
   // Выполнение действия перехода
-  async function handleAction(action: OrderAction) {
+  async function handleAction(action: OrderAction, comment?: string) {
     const actionKey = `${order.id}-${action}`;
     setLoadingAction(action);
     const clientActionId = getClientActionId(actionKey);
@@ -94,6 +101,7 @@ export function OrderDetailView({ order, events, photos, materials, review }: Or
       const res = await sendTransition({
         orderId: order.id,
         action,
+        comment,
         clientActionId,
       });
 
@@ -363,6 +371,12 @@ export function OrderDetailView({ order, events, photos, materials, review }: Or
               </section>
             )}
 
+            <WorkerHelpActions orderId={order.id} equipmentId={order.equipment_id} status={order.status} />
+
+            {["issued", "accepted", "queued", "in_progress", "paused", "rework"].includes(order.status) && (
+              <ToBring faultCode={order.fault_code} items={toBring} />
+            )}
+
             {/* Материалы */}
             {materials.length > 0 && (
               <section className="flex flex-col gap-2">
@@ -381,8 +395,9 @@ export function OrderDetailView({ order, events, photos, materials, review }: Or
             )}
           </div>
 
-          {/* Правая колонка: История событий */}
+          {/* Правая колонка: история ремонтов оборудования и журнал наряда */}
           <div className="flex flex-col gap-4">
+            <RepairHistory items={repairHistory} />
             <h3 className="text-lg font-bold text-ink">{t("worker.history")}</h3>
             <div className="flex flex-col gap-3 rounded-2xl border border-line bg-surface p-4">
               {events.map((event, i) => {
@@ -404,7 +419,7 @@ export function OrderDetailView({ order, events, photos, materials, review }: Or
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-base font-semibold text-ink">
-                        {eventLabel(event.action)}
+                        {eventLabel(t, event.action)}
                       </span>
                       <span className="shrink-0 text-sm text-ink-muted">
                         {formatOrderTime(event.created_at)}
@@ -462,7 +477,7 @@ export function OrderDetailView({ order, events, photos, materials, review }: Or
               variant="primary"
               size="lg"
               loading={loadingAction === "start"}
-              onClick={() => handleAction("start")}
+              onClick={() => setSafetyOpen(true)}
             >
               {t("orders.action.start")}
             </Button>
@@ -525,6 +540,18 @@ export function OrderDetailView({ order, events, photos, materials, review }: Or
           )}
         </BottomActionBar>
       )}
+
+      <SafetySheet
+        open={safetyOpen}
+        needsPermit={order.needs_permit}
+        loading={loadingAction === "start"}
+        onCancel={() => setSafetyOpen(false)}
+        onConfirm={() => {
+          setSafetyOpen(false);
+          // Комментарий в журнале на русском: журнал — документ, а не надпись интерфейса.
+          handleAction("start", tRu("safety.comment"));
+        }}
+      />
 
       {/* ConfirmSheet для отклонения наряда */}
       <ConfirmSheet

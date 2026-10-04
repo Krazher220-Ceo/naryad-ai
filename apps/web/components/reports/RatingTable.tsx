@@ -1,5 +1,6 @@
 import { Card, cx } from "@/components/ui";
-import { t } from "@/lib/i18n";
+import type { Translate } from "@/lib/i18n";
+import { getT } from "@/lib/i18n-server";
 import { MIN_ORDERS, WEIGHTS, type RatingRow } from "@/lib/analytics/rating";
 
 type PartKey = keyof RatingRow["parts"];
@@ -11,7 +12,7 @@ const fill = (template: string, values: Record<string, string | number>) =>
 const oneDecimal = (n: number) => (Math.round(n * 10) / 10).toString().replace(".", ",");
 
 // Факт, из которого получилась составляющая: «опозданий 1», «2 возврата» и т.п.
-function factText(key: PartKey, f: RatingRow["facts"]): string {
+function factText(t: Translate, key: PartKey, f: RatingRow["facts"]): string {
   switch (key) {
     case "quality":
       return f.avgScore === null ? t("rating.fact.qualityNone") : fill(t("rating.fact.quality"), { avg: oneDecimal(f.avgScore) });
@@ -27,7 +28,7 @@ function factText(key: PartKey, f: RatingRow["facts"]): string {
 }
 
 // Пояснение одной строкой, собранное из фактов (без ИИ).
-export function explainText(f: RatingRow["facts"]): string {
+export function explainText(t: Translate, f: RatingRow["facts"]): string {
   const bad = f.returns + f.repeats;
   const parts = [
     f.avgScore === null ? t("rating.explain.noAvg") : fill(t("rating.explain.avg"), { avg: oneDecimal(f.avgScore) }),
@@ -39,7 +40,8 @@ export function explainText(f: RatingRow["facts"]): string {
   return parts.join("; ");
 }
 
-function LowDataBadge() {
+async function LowDataBadge() {
+  const t = await getT();
   return (
     <span className="inline-flex items-center rounded-full bg-warning-soft px-3 py-1 text-sm font-bold text-st-in-progress-fg">
       {t("rating.lowData")}
@@ -56,7 +58,8 @@ function Bar({ value }: { value: number }) {
 }
 
 // Формула и веса — чтобы исполнитель понимал, как считается балл.
-export function RatingFormula() {
+export async function RatingFormula() {
+  const t = await getT();
   return (
     <Card>
       <h2 className="text-lg font-bold text-ink">{t("rating.formulaTitle")}</h2>
@@ -73,7 +76,8 @@ export function RatingFormula() {
   );
 }
 
-export function RatingTable({ rows }: { rows: RatingRow[] }) {
+export async function RatingTable({ rows }: { rows: RatingRow[] }) {
+  const t = await getT();
   return (
     <>
       {/* Телефон: карточки */}
@@ -103,13 +107,13 @@ export function RatingTable({ rows }: { rows: RatingRow[] }) {
                       <span className="text-base font-bold text-ink">{r.parts[k]}%</span>
                     </div>
                     <Bar value={r.parts[k]} />
-                    <span className="text-sm text-ink-muted">{factText(k, r.facts)}</span>
+                    <span className="text-sm text-ink-muted">{factText(t, k, r.facts)}</span>
                   </li>
                 ))}
               </ul>
               <p className="mt-4 border-t border-line pt-3 text-sm text-ink-muted">
                 <span className="font-semibold text-ink">{t("rating.explainTitle")}: </span>
-                {explainText(r.facts)}
+                {explainText(t, r.facts)}
               </p>
             </Card>
           </li>
@@ -146,11 +150,11 @@ export function RatingTable({ rows }: { rows: RatingRow[] }) {
                 {PART_KEYS.map((k) => (
                   <td key={k} className="px-3 py-3 text-right">
                     <span className="font-semibold text-ink">{r.parts[k]}%</span>
-                    <span className="block text-xs text-ink-muted">{factText(k, r.facts)}</span>
+                    <span className="block text-xs text-ink-muted">{factText(t, k, r.facts)}</span>
                   </td>
                 ))}
                 <td className="px-3 py-3 text-right text-ink">{r.closedOrders}</td>
-                <td className="max-w-64 px-3 py-3 text-sm text-ink-muted">{explainText(r.facts)}</td>
+                <td className="max-w-64 px-3 py-3 text-sm text-ink-muted">{explainText(t, r.facts)}</td>
               </tr>
             ))}
           </tbody>

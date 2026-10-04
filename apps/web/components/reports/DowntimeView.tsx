@@ -1,6 +1,6 @@
 import { Card, EmptyState } from "@/components/ui";
 import type { DowntimeReport } from "@/lib/analytics/reports";
-import { t } from "@/lib/i18n";
+import { getT } from "@/lib/i18n-server";
 import { categoryLabel, fill, oneDecimal } from "./format";
 
 // Полоса: ширина — доля от максимума. Число рядом, поэтому цвет не несёт смысл.
@@ -22,7 +22,8 @@ function Tile({ label, value, hint }: { label: string; value: string; hint?: str
   );
 }
 
-export function DowntimeView({ report }: { report: DowntimeReport }) {
+export async function DowntimeView({ report }: { report: DowntimeReport }) {
+  const t = await getT();
   const { rows, totalHours, byCategory, plannedSharePct } = report;
   if (rows.length === 0) {
     return <EmptyState title={t("downtimeReport.emptyTitle")} text={t("downtimeReport.emptyText")} />;
@@ -44,7 +45,7 @@ export function DowntimeView({ report }: { report: DowntimeReport }) {
             {byCategory.map((c) => (
               <div key={c.category} className="flex flex-col gap-1">
                 <div className="flex items-baseline justify-between gap-2 text-base">
-                  <span className="font-semibold text-ink">{categoryLabel(c.category)}</span>
+                  <span className="font-semibold text-ink">{categoryLabel(t, c.category)}</span>
                   <span className="text-ink">{fill(t("downtimeReport.totalValue"), { h: oneDecimal(c.hours) })}</span>
                 </div>
                 <Bar value={c.hours} max={maxCategory} />
@@ -69,7 +70,7 @@ export function DowntimeView({ report }: { report: DowntimeReport }) {
                     {fill(t("downtimeReport.unplannedCount"), { n: r.unplanned })}, {fill(t("downtimeReport.plannedCount"), { n: r.planned })} ·{" "}
                     {fill(t("downtimeReport.unplannedShareValue"), { n: r.unplannedSharePct })}
                   </p>
-                  <p className="text-base text-ink">{fill(t("downtimeReport.topCauseValue"), { cause: categoryLabel(r.topCategory) })}</p>
+                  <p className="text-base text-ink">{fill(t("downtimeReport.topCauseValue"), { cause: categoryLabel(t, r.topCategory) })}</p>
                 </Card>
               </li>
             ))}
@@ -102,7 +103,7 @@ export function DowntimeView({ report }: { report: DowntimeReport }) {
                     <td className="px-4 py-3 text-right text-ink">{r.unplanned}</td>
                     <td className="px-4 py-3 text-right text-ink">{r.planned}</td>
                     <td className="px-4 py-3 text-right text-ink">{r.unplannedSharePct}%</td>
-                    <td className="px-4 py-3 text-ink">{categoryLabel(r.topCategory)}</td>
+                    <td className="px-4 py-3 text-ink">{categoryLabel(t, r.topCategory)}</td>
                   </tr>
                 ))}
               </tbody>

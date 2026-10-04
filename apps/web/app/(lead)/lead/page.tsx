@@ -7,7 +7,7 @@ import { PeriodSwitch } from "@/components/reports/ReportPage";
 import { Card, EmptyState, Skeleton, cx, formatMinutes } from "@/components/ui";
 import { getDashboard } from "@/lib/analytics/reports";
 import { requireRole } from "@/lib/auth/session";
-import { t } from "@/lib/i18n";
+import { getT } from "@/lib/i18n-server";
 
 const NAV = [
   { href: "/lead/rating", label: "rating.linkShort" },
@@ -27,12 +27,13 @@ function Tile({ label, value, alert }: { label: string; value: string; alert?: b
 }
 
 export default async function LeadPage({ searchParams }: PageProps<"/lead">) {
+  const t = await getT();
   const employee = await requireRole("lead");
   const { days: daysParam } = await searchParams;
   const days = parseDaysIn(daysParam, PERIODS, 30);
   const d = await getDashboard(days);
 
-  const minutes = (value: number | null) => (value === null ? t("dashboard.noValue") : formatMinutes(value));
+  const minutes = (value: number | null) => (value === null ? t("dashboard.noValue") : formatMinutes(t, value));
   const maxHours = Math.max(0.1, ...d.topEquipment.map((e) => e.hours));
 
   return (

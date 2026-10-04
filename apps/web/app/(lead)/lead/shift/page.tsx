@@ -1,8 +1,9 @@
 import { ShiftScreen, parseShift } from "@/components/reports/ShiftScreen";
 import { requireRole } from "@/lib/auth/session";
-import { t } from "@/lib/i18n";
+import { getT } from "@/lib/i18n-server";
 
 export default async function LeadShiftPage({ searchParams }: PageProps<"/lead/shift">) {
+  const t = await getT();
   const employee = await requireRole("lead");
   const { date, shift } = await searchParams;
   const current = parseShift(date, shift);

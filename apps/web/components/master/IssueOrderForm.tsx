@@ -16,11 +16,14 @@ import {
   StepForm,
   TextArea,
   TextInput,
+  VoiceButton,
   WORK_TYPES,
+  appendSpoken,
   WorkerChip,
   cx,
 } from "@/components/ui";
-import { t, type MessageKey } from "@/lib/i18n";
+import { type MessageKey } from "@/lib/i18n";
+import { useT } from "@/components/LocaleProvider";
 import { createOrder, suggestForIssue } from "@/lib/orders/actions";
 import { uploadOrderPhoto } from "@/lib/orders/photos";
 import type { IssueFormData } from "@/lib/orders/queries";
@@ -71,15 +74,21 @@ export function IssueOrderForm({
   data,
   employeeId,
   initialEquipmentId = null,
+  initialDescription = "",
+  requestId,
 }: {
   data: IssueFormData;
   employeeId: string;
   initialEquipmentId?: string | null;
+  // Наряд по попутной заявке исполнителя: описание из заявки, заявка закрывается при выдаче.
+  initialDescription?: string;
+  requestId?: string;
 }) {
+  const t = useT();
   const router = useRouter();
   const [equipmentId, setEquipmentId] = useState<string | null>(initialEquipmentId);
   const [search, setSearch] = useState("");
-  const [description, setDescription] = useState("");
+  const [description, setDescription] = useState(initialDescription);
   const [priority, setPriority] = useState<OrderPriority>("normal");
   const [type, setType] = useState<OrderType>("unplanned");
   const [faultCode, setFaultCode] = useState("");
@@ -227,6 +236,7 @@ export function IssueOrderForm({
           dueAt: dueMode === "demo2min" ? dueAtMinutesIso(2) : dueAtIso(hours),
           assigneeId: assignee?.id ?? undefined,
           faultCode: faultCode || undefined,
+          requestId,
           clientActionId: actionId.current,
         });
         if (!result.ok) {
@@ -251,6 +261,25 @@ export function IssueOrderForm({
       setError(createdOrderId.current ? t("orders.errors.photoUpload") : t("orders.errors.unknown"));
     } finally {
       setLoading(false);
+    }
+  }
+
+  // Защита от дублей: открытые наряды по выбранному оборудованию.
+  const duplicates = data.openOrders.filter((o) => o.equipment_id === equipmentId);
+  const openCountByEquipment = new Map<string, number>();
+  for (const o of data.openOrders) openCountByEquipment.set(o.equipment_id, (openCountByEquipment.get(o.equipment_id) ?? 0) + 1);
+
+  // Шаблон плановой работы заполняет описание, шифр и приоритет.
+  function applyTemplate(template: IssueFormData["templates"][number]) {
+    setDescription(template.description);
+    setType(template.type);
+    if (template.fault_code) {
+      hasManuallyChangedFaultCode.current = true;
+      setFaultCode(template.fault_code);
+    }
+    if (template.type === "planned") {
+      hasManuallyChangedPriority.current = true;
+      setPriority("planned");
     }
   }
 
@@ -290,6 +319,11 @@ export function IssueOrderForm({
                     >
                       <span>
                         {e.name} <span className="font-normal">· {e.inventory_no}</span>
+                        {openCountByEquipment.has(e.id) && (
+                          <span className={cx("block text-base font-normal", selected ? "text-white" : "text-ink-muted")}>
+                            {t("master.issue.openOrdersBadge").replace("{n}", String(openCountByEquipment.get(e.id)))}
+                          </span>
+                        )}
                       </span>
                       {selected && <IconCheck className="size-6 shrink-0" />}
                     </button>
@@ -307,6 +341,22 @@ export function IssueOrderForm({
       valid: description.trim().length > 0,
       content: (
         <>
+          {duplicates.length > 0 && (
+            <InlineNotice tone="warning">
+              <div className="flex flex-col gap-2">
+                <span className="font-semibold">{t("master.issue.duplicateTitle")}</span>
+                {duplicates.map((o) => (
+                  <Link key={o.id} href={`/master/orders/${o.id}`} className="underline">
+                    {t("master.issue.duplicateItem")
+                      .replace("{number}", String(o.number))
+                      .replace("{status}", t(`orders.status.${o.status}`).toLowerCase())
+                      .replace("{description}", o.description)}
+                  </Link>
+                ))}
+                <span>{t("master.issue.duplicateHint")}</span>
+              </div>
+            </InlineNotice>
+          )}
           <div className="flex flex-wrap gap-2">
             {DESCRIPTION_CHIPS.map((key) => (
               <button
@@ -321,6 +371,7 @@ export function IssueOrderForm({
           </div>
           <Field label={t("master.issue.description")} htmlFor="issue-description" hint={t("master.issue.descriptionHint")} required>
             <TextArea id="issue-description" value={description} onChange={(e) => setDescription(e.target.value)} />
+            <VoiceButton onText={(spoken) => setDescription((prev) => appendSpoken(prev, spoken))} />
           </Field>
           <Field label={t("master.issue.priority")}>
             <SegmentedControl
@@ -345,6 +396,23 @@ export function IssueOrderForm({
               options={WORK_TYPES.map((w) => ({ value: w, label: t(`orders.type.${w}`) }))}
             />
           </Field>
+          {type === "planned" && data.templates.length > 0 && (
+            <Field label={t("master.issue.templates")}>
+              <div className="flex flex-col gap-2">
+                {data.templates.map((tpl) => (
+                  <button
+                    key={tpl.id}
+                    type="button"
+                    onClick={() => applyTemplate(tpl)}
+                    className="min-h-touch rounded-xl border-2 border-line-strong bg-surface px-4 text-left text-base font-semibold text-ink hover:bg-canvas active:bg-line"
+                  >
+                    {tpl.name}
+                    {tpl.fault_code && <span className="font-normal text-ink-muted"> · {tpl.fault_code}</span>}
+                  </button>
+                ))}
+              </div>
+            </Field>
+          )}
         </>
       ),
     },

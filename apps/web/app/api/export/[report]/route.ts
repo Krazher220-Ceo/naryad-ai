@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { currentShift } from "@/lib/analytics/shift";
 import { getCurrentEmployee } from "@/lib/auth/session";
-import { t } from "@/lib/i18n";
+import { tRu as t } from "@/lib/i18n";
 import { BUILDERS, isReportName, type ReportParams } from "../_build";
 import { renderPdf } from "../_pdf";
 import { renderXlsx } from "../_xlsx";

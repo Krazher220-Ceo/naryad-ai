@@ -707,6 +707,25 @@ export type Database = {
         }
         Returns: string
       }
+      equipment_repair_history: {
+        Args: { p_equipment_id: string; p_exclude_order_id?: string }
+        Returns: {
+          closed_at: string | null
+          fault_code: string | null
+          fault_name: string | null
+          materials: string | null
+          number: number
+          work_done: string | null
+        }[]
+      }
+      request_help: {
+        Args: { p_client_action_id?: string; p_comment?: string; p_order_id: string }
+        Returns: undefined
+      }
+      resolve_request: {
+        Args: { p_request_id: string; p_status: Database["public"]["Enums"]["request_status"] }
+        Returns: undefined
+      }
       reassign_order: {
         Args: {
           p_assignee_id?: string

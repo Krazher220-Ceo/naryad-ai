@@ -1,4 +1,4 @@
-import { t } from "@/lib/i18n";
+import { tRu as t } from "@/lib/i18n";
 import { sendTelegramMessage } from "@/lib/notify/telegram";
 import { createAdminClient } from "@/lib/supabase/admin";
 

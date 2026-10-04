@@ -1,8 +1,9 @@
 import { Card, IconInfo } from "@/components/ui";
-import { t } from "@/lib/i18n";
+import { getT } from "@/lib/i18n-server";
 import { createClient } from "@/lib/supabase/server";
 
 export async function TelegramLinkCard() {
+  const t = await getT();
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("my_telegram_link");
 

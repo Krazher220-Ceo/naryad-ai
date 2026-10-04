@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isRole, loginToEmail, ROLE_HOME } from "@/lib/auth/roles";
-import { t } from "@/lib/i18n";
+import { getT } from "@/lib/i18n-server";
 
 export type SignInState = { error: string | null };
 
@@ -11,6 +11,7 @@ export async function signIn(
   _prevState: SignInState,
   formData: FormData,
 ): Promise<SignInState> {
+  const t = await getT();
   const login = String(formData.get("login") ?? "").trim();
   const pin = String(formData.get("pin") ?? "");
   const next = String(formData.get("next") ?? "");
