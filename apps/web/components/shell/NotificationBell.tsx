@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useId, useState } from "react";
 import Link from "next/link";
 import { useT } from "@/components/LocaleProvider";
 import { IconBell, cx } from "@/components/ui";
@@ -19,6 +19,8 @@ export function NotificationBell({
 }) {
   const t = useT();
   const [unread, setUnread] = useState(initialUnread);
+  // Колокольчиков на странице два (шапка телефона и меню ПК), у каждого свой канал.
+  const channelId = useId();
 
   const recount = useCallback(async () => {
     const supabase = createClient();
@@ -39,7 +41,7 @@ export function NotificationBell({
       if (cancelled) return;
       if (data.session) supabase.realtime.setAuth(data.session.access_token);
       channel = supabase
-        .channel(`bell-${employeeId}`)
+        .channel(`bell-${employeeId}-${channelId}`)
         .on(
           "postgres_changes",
           { event: "*", schema: "public", table: "notifications", filter: `employee_id=eq.${employeeId}` },
@@ -57,7 +59,7 @@ export function NotificationBell({
       document.removeEventListener("visibilitychange", onVisible);
       if (channel) supabase.removeChannel(channel);
     };
-  }, [employeeId, recount]);
+  }, [employeeId, channelId, recount]);
 
   const label = unread > 0 ? t("shell.bellUnread").replace("{n}", String(unread)) : t("shell.bell");
 
