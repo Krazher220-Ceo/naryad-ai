@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { AppHeader } from "@/components/AppHeader";
 import { ExportButtons } from "@/components/reports/ExportButtons";
 import { RatingFormula, RatingTable } from "@/components/reports/RatingTable";
 import { EmptyState, cx } from "@/components/ui";
@@ -16,13 +15,9 @@ export function parseDays(value: string | string[] | undefined): Days {
 
 // Одна страница рейтинга для мастера и руководителя: отличаются только базовый путь и подпись роли.
 export async function RatingScreen({
-  fullName,
-  roleLabel,
   basePath,
   days,
 }: {
-  fullName: string;
-  roleLabel: string;
   basePath: "/master" | "/lead";
   days: Days;
 }) {
@@ -32,8 +27,7 @@ export async function RatingScreen({
   const rows = await getRating(from, to);
 
   return (
-    <div className="flex min-h-dvh flex-col bg-canvas">
-      <AppHeader fullName={fullName} roleLabel={roleLabel} />
+    <div className="flex flex-1 flex-col bg-canvas">
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 py-4 pb-8 lg:max-w-6xl">
         <Link href={basePath} className="inline-flex min-h-touch-sm items-center text-base font-semibold text-ink underline">
           ← {t("rating.back")}

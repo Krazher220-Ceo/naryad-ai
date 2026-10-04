@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { AppHeader } from "@/components/AppHeader";
 import { formatDateTime, minutesLate } from "@/components/master/format";
 import { eventLabel } from "@/components/review/eventLabel";
 import { ReviewReport } from "@/components/review/ReviewReport";
@@ -49,12 +48,11 @@ function PhotoGrid({ title, items }: { title: string; items: PhotoItem[] }) {
 export default async function MasterOrderPage({ params }: PageProps<"/master/orders/[id]">) {
   const t = await getT();
   const { id } = await params;
-  const employee = await requireRole("master");
+  await requireRole("master");
 
   // Неверный id (не uuid) база отвечает ошибкой: для мастера это то же «не найден».
   const details = await getOrderDetails(id).catch(() => null);
 
-  const header = <AppHeader fullName={employee.fullName} roleLabel={t("roles.master")} />;
   const back = (
     <Link href="/master" className="inline-flex min-h-touch-sm items-center gap-1 self-start text-lg font-semibold text-ink">
       <IconChevronLeft />
@@ -64,8 +62,7 @@ export default async function MasterOrderPage({ params }: PageProps<"/master/ord
 
   if (!details) {
     return (
-      <div className="flex min-h-dvh flex-col bg-canvas">
-        {header}
+      <div className="flex flex-1 flex-col bg-canvas">
         <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 py-4">
           {back}
           <ErrorState title={t("orders.errors.notFound")} text={t("master.card.back")} />
@@ -103,9 +100,8 @@ export default async function MasterOrderPage({ params }: PageProps<"/master/ord
   const photosAfter = photos.filter((p) => p.kind === "after");
 
   return (
-    <div className="flex min-h-dvh flex-col bg-canvas">
+    <div className="flex flex-1 flex-col bg-canvas">
       <RealtimeRefresh />
-      {header}
       <main
         className={`mx-auto flex w-full max-w-xl flex-1 flex-col gap-5 px-4 py-4 lg:max-w-5xl ${hasBottomBar ? "pb-36" : "pb-8"}`}
       >

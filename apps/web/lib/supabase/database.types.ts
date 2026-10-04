@@ -233,6 +233,30 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_prefs: {
+        Row: {
+          employee_id: string
+          quiet_from: string | null
+          quiet_to: string | null
+          telegram_off_kinds: Database["public"]["Enums"]["notification_kind"][]
+          updated_at: string
+        }
+        Insert: {
+          employee_id: string
+          quiet_from?: string | null
+          quiet_to?: string | null
+          telegram_off_kinds?: Database["public"]["Enums"]["notification_kind"][]
+          updated_at?: string
+        }
+        Update: {
+          employee_id?: string
+          quiet_from?: string | null
+          quiet_to?: string | null
+          telegram_off_kinds?: Database["public"]["Enums"]["notification_kind"][]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -242,6 +266,7 @@ export type Database = {
           id: string
           kind: Database["public"]["Enums"]["notification_kind"]
           order_id: string | null
+          read_at: string | null
           text: string
         }
         Insert: {
@@ -252,6 +277,7 @@ export type Database = {
           id?: string
           kind: Database["public"]["Enums"]["notification_kind"]
           order_id?: string | null
+          read_at?: string | null
           text: string
         }
         Update: {
@@ -262,6 +288,7 @@ export type Database = {
           id?: string
           kind?: Database["public"]["Enums"]["notification_kind"]
           order_id?: string | null
+          read_at?: string | null
           text?: string
         }
         Relationships: [
@@ -707,6 +734,14 @@ export type Database = {
         }
         Returns: string
       }
+      equipment_recent_stats: {
+        Args: { p_equipment_id: string }
+        Returns: {
+          breakdowns_30d: number
+          downtime_hours: number
+          open_orders: number
+        }[]
+      }
       equipment_repair_history: {
         Args: { p_equipment_id: string; p_exclude_order_id?: string }
         Returns: {
@@ -736,6 +771,7 @@ export type Database = {
         }
         Returns: Database["public"]["Enums"]["order_status"]
       }
+      mark_notifications_read: { Args: { p_ids?: string[] }; Returns: number }
       my_telegram_link: {
         Args: Record<string, never>
         Returns: { link_code: string | null; linked: boolean }[]
@@ -744,6 +780,7 @@ export type Database = {
         Args: Record<string, never>
         Returns: undefined
       }
+      unlink_telegram: { Args: Record<string, never>; Returns: undefined }
       update_settings: {
         Args: {
           p_remind_before_min: number
@@ -752,6 +789,14 @@ export type Database = {
           p_overdue_repeat_min: number
           p_lead_escalate_after_min: number
           p_ai_provider: string
+        }
+        Returns: undefined
+      }
+      save_notification_prefs: {
+        Args: {
+          p_quiet_from: string | null
+          p_quiet_to: string | null
+          p_telegram_off_kinds: Database["public"]["Enums"]["notification_kind"][]
         }
         Returns: undefined
       }

@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useT } from "@/components/LocaleProvider";
-import { Button, ConfirmSheet, Field, TextArea, Toast, VoiceButton, appendSpoken, cx } from "@/components/ui";
+import { Button, ConfirmSheet, Field, TextArea, useToast, VoiceButton, appendSpoken, cx } from "@/components/ui";
 import { createSideRequest, requestHelp } from "@/lib/orders/actions";
 import type { OrderDetails } from "@/lib/orders/queries";
 import type { OrderStatus } from "@/lib/orders/types";
@@ -134,7 +134,7 @@ export function WorkerHelpActions({ orderId, equipmentId, status }: { orderId: s
   const [sheet, setSheet] = useState<"help" | "side" | null>(null);
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
-  const [toast, setToast] = useState<{ message: string; tone: "success" | "danger" } | null>(null);
+  const toast = useToast();
   // Повтор после сбоя связи не создаст второе событие «Нужна помощь».
   const helpActionId = useRef<string | null>(null);
 
@@ -151,17 +151,17 @@ export function WorkerHelpActions({ orderId, equipmentId, status }: { orderId: s
       if (sheet === "help") {
         helpActionId.current ??= crypto.randomUUID();
         const res = await requestHelp({ orderId, comment: text.trim() || undefined, clientActionId: helpActionId.current });
-        if (!res.ok) return setToast({ message: res.error, tone: "danger" });
+        if (!res.ok) return toast.show("error", { detail: res.error });
         helpActionId.current = null;
-        setToast({ message: t("help.sent"), tone: "success" });
+        toast.show("saved", { detail: t("help.sent") });
       } else {
         const res = await createSideRequest({ orderId, equipmentId, description: text });
-        if (!res.ok) return setToast({ message: res.error, tone: "danger" });
-        setToast({ message: t("sideRequest.sent"), tone: "success" });
+        if (!res.ok) return toast.show("error", { detail: res.error });
+        toast.show("saved", { detail: t("sideRequest.sent") });
       }
       close();
     } catch {
-      setToast({ message: t("orders.errors.unknown"), tone: "danger" });
+      toast.show("error");
     } finally {
       setLoading(false);
     }
@@ -170,7 +170,6 @@ export function WorkerHelpActions({ orderId, equipmentId, status }: { orderId: s
   const isHelp = sheet === "help";
   return (
     <>
-      <Toast open={toast !== null} tone={toast?.tone ?? "success"} message={toast?.message ?? ""} onClose={() => setToast(null)} />
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <Button variant="secondary" onClick={() => setSheet("help")}>
           {t("help.button")}

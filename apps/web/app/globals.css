@@ -79,6 +79,11 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+/* «Крупный текст» из профиля: все размеры в rem растут на восьмую часть */
+html.big-text {
+  font-size: 112.5%;
+}
+
 body {
   font-family: var(--font-sans);
   font-size: 1rem;

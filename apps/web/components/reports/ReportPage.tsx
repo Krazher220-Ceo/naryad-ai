@@ -1,27 +1,21 @@
 import Link from "next/link";
-import { AppHeader } from "@/components/AppHeader";
 import { cx } from "@/components/ui";
 import { getT } from "@/lib/i18n-server";
 
 // Общая оболочка страниц отчётов руководителя: шапка, «Назад», заголовок.
 export function ReportPage({
-  fullName,
-  roleLabel,
   backHref,
   backLabel,
   title,
   children,
 }: {
-  fullName: string;
-  roleLabel: string;
   backHref: string;
   backLabel: string;
   title: string;
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-dvh flex-col bg-canvas">
-      <AppHeader fullName={fullName} roleLabel={roleLabel} />
+    <div className="flex flex-1 flex-col bg-canvas">
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 py-4 pb-8 lg:max-w-6xl">
         <Link href={backHref} className="inline-flex min-h-touch-sm items-center text-base font-semibold text-ink underline">
           ← {backLabel}

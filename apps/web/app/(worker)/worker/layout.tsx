@@ -1,12 +1,7 @@
 import { requireRole } from "@/lib/auth/session";
-import { OfflineSync } from "@/lib/offline/OfflineSync";
+import { AppShell } from "@/components/shell/AppShell";
 
 export default async function WorkerLayout({ children }: LayoutProps<"/worker">) {
-  await requireRole("worker");
-  return (
-    <>
-      <OfflineSync />
-      {children}
-    </>
-  );
+  const employee = await requireRole("worker");
+  return <AppShell employee={employee}>{children}</AppShell>;
 }

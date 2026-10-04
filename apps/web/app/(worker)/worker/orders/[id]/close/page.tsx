@@ -2,7 +2,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth/session";
 import { getT } from "@/lib/i18n-server";
-import { AppHeader } from "@/components/AppHeader";
 import { getOrderDetails, getCloseFormData } from "@/lib/orders/queries";
 import { canComplete } from "@/lib/orders/transitions";
 import { Button, ErrorState } from "@/components/ui";
@@ -24,8 +23,7 @@ export default async function ClosePage({ params }: ClosePageProps) {
 
   if (!details) {
     return (
-      <div className="flex min-h-dvh flex-col bg-canvas">
-        <AppHeader fullName={employee.fullName} roleLabel={t("roles.worker")} />
+      <div className="flex flex-1 flex-col bg-canvas">
         <main className="mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center gap-4 p-4">
           <ErrorState title={t("orders.errors.notFound")} text="" />
           <Link href="/worker" className="w-full">
@@ -44,8 +42,7 @@ export default async function ClosePage({ params }: ClosePageProps) {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col bg-canvas">
-      <AppHeader fullName={employee.fullName} roleLabel={t("roles.worker")} />
+    <div className="flex flex-1 flex-col bg-canvas">
       <OrderCloseView
         order={details.order}
         faultCodes={formData.faultCodes}

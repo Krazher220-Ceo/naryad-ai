@@ -8,15 +8,13 @@ import { getT } from "@/lib/i18n-server";
 
 export default async function LeadDowntimePage({ searchParams }: PageProps<"/lead/downtime">) {
   const t = await getT();
-  const employee = await requireRole("lead");
+  await requireRole("lead");
   const { days: daysParam } = await searchParams;
   const days = parseDaysIn(daysParam, PERIODS, 30);
   const report = await getDowntimeReport(days);
 
   return (
     <ReportPage
-      fullName={employee.fullName}
-      roleLabel={t("roles.lead")}
       backHref="/lead"
       backLabel={t("downtimeReport.back")}
       title={t("downtimeReport.title")}

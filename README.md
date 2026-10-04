@@ -262,7 +262,7 @@ cd apps/web && npm install && cp ../../.env.example .env.local && npm run dev
 <details>
 <summary><b>База данных</b> — один раз на новый проект Supabase</summary>
 
-1. Выполнить по порядку файлы `supabase/migrations/0001…0011` в SQL Editor (или `npx supabase db push`).
+1. Выполнить по порядку файлы `supabase/migrations/0001…0013` в SQL Editor (или `npx supabase db push`).
 2. Выполнить `supabase/seed.sql` — справочники и демо-логины.
 3. Демо-история за 3 месяца: `node scripts/seed/generate.mjs`, затем в SQL Editor `select snapshot_demo();`
    (снимок для кнопки «Сбросить демо»).
