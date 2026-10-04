@@ -1291,5 +1291,16 @@
     "newPassword": "Временный пароль для {name}",
     "copy": "Скопировать",
     "done": "Готово"
+  },
+  "leadNow": {
+    "title": "Сводка на сейчас",
+    "overdue": "Просрочено",
+    "emergency": "Аварийных",
+    "inWork": "В работе",
+    "downtime": "Простой за период",
+    "escalation": "Эскалация: просрочка {time}",
+    "escalationItem": "№{number} · {equipment} · {worker} · мастер {master}",
+    "noEscalations": "Просроченных нарядов нет.",
+    "reports": "Отчёты"
   }
 }

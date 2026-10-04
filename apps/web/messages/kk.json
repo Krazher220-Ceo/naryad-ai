@@ -1291,5 +1291,16 @@
     "newPassword": "{name} үшін уақытша құпиясөз",
     "copy": "Көшіру",
     "done": "Дайын"
+  },
+  "leadNow": {
+    "title": "Қазіргі жиынтық",
+    "overdue": "Мерзімі өткен",
+    "emergency": "Апаттық",
+    "inWork": "Жұмыста",
+    "downtime": "Кезеңдегі тұрып қалу",
+    "escalation": "Эскалация: {time} кешігу",
+    "escalationItem": "№{number} · {equipment} · {worker} · шебер {master}",
+    "noEscalations": "Мерзімі өткен наряд жоқ.",
+    "reports": "Есептер"
   }
 }

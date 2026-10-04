@@ -5,6 +5,7 @@ import { PERIODS, fill, parseDaysIn } from "@/components/reports/format";
 import { PeriodSwitch } from "@/components/reports/ReportPage";
 import { Card, EmptyState, Skeleton, cx, formatMinutes } from "@/components/ui";
 import { getDashboard } from "@/lib/analytics/reports";
+import { getLeadSummary } from "@/lib/orders/queries";
 import { requireRole } from "@/lib/auth/session";
 import { getT } from "@/lib/i18n-server";
 
@@ -30,7 +31,7 @@ export default async function LeadPage({ searchParams }: PageProps<"/lead">) {
   await requireRole("lead");
   const { days: daysParam } = await searchParams;
   const days = parseDaysIn(daysParam, PERIODS, 30);
-  const d = await getDashboard(days);
+  const [d, now] = await Promise.all([getDashboard(days), getLeadSummary()]);
 
   const minutes = (value: number | null) => (value === null ? t("dashboard.noValue") : formatMinutes(t, value));
   const maxHours = Math.max(0.1, ...d.topEquipment.map((e) => e.hours));
@@ -41,7 +42,38 @@ export default async function LeadPage({ searchParams }: PageProps<"/lead">) {
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 py-4 pb-8 lg:max-w-6xl">
         <h1 className="text-2xl font-bold text-ink">{t("home.lead")}</h1>
 
-        <nav aria-label={t("dashboard.navTitle")} className="grid grid-cols-2 gap-2 lg:grid-cols-5">
+        {/* Сводка на сейчас: на телефоне руководитель видит её первой, на ПК — над показателями */}
+        <section aria-label={t("leadNow.title")} className="flex flex-col gap-3">
+          <h2 className="text-xl font-bold text-ink">{t("leadNow.title")}</h2>
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <Tile label={t("leadNow.overdue")} value={String(now.overdue)} alert={now.overdue > 0} />
+            <Tile label={t("leadNow.emergency")} value={String(now.emergency)} alert={now.emergency > 0} />
+            <Tile label={t("leadNow.inWork")} value={String(now.inWork)} />
+            <Tile label={t("leadNow.downtime")} value={fill(t("dashboard.downtimeValue"), { h: Math.round(d.downtimeHours) })} />
+          </div>
+          {now.escalations.length === 0 ? (
+            <p className="text-base text-ink-muted">{t("leadNow.noEscalations")}</p>
+          ) : (
+            <div className="grid gap-3 lg:grid-cols-3">
+              {now.escalations.map((o) => (
+                <Card key={o.id} tone="emergency" className="flex flex-col gap-1.5">
+                  <b className="text-base text-ink">{t("leadNow.escalation").replace("{time}", formatMinutes(t, o.lateMin))}</b>
+                  <span className="text-base text-ink">{o.description}</span>
+                  <span className="text-sm text-ink-muted">
+                    {t("leadNow.escalationItem")
+                      .replace("{number}", String(o.number))
+                      .replace("{equipment}", o.equipment?.name ?? "—")
+                      .replace("{worker}", o.assignee?.full_name ?? "—")
+                      .replace("{master}", o.master?.full_name ?? "—")}
+                  </span>
+                </Card>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* На ПК отчёты в меню слева, на телефоне — кнопками здесь */}
+        <nav aria-label={t("dashboard.navTitle")} className="grid grid-cols-2 gap-2 lg:hidden">
           {NAV.map((n) => (
             <Link
               key={n.href}
