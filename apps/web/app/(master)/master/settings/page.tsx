@@ -16,7 +16,7 @@ export default async function MasterSettingsPage() {
     .single();
 
   return (
-    <div className="flex min-h-dvh flex-col bg-canvas">
+    <div className="flex flex-1 flex-col bg-canvas">
 
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 py-6 lg:max-w-2xl">
         <div className="flex flex-col gap-2">

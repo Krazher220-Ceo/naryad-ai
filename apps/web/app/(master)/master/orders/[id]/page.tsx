@@ -62,7 +62,7 @@ export default async function MasterOrderPage({ params }: PageProps<"/master/ord
 
   if (!details) {
     return (
-      <div className="flex min-h-dvh flex-col bg-canvas">
+      <div className="flex flex-1 flex-col bg-canvas">
         <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 py-4">
           {back}
           <ErrorState title={t("orders.errors.notFound")} text={t("master.card.back")} />
@@ -100,7 +100,7 @@ export default async function MasterOrderPage({ params }: PageProps<"/master/ord
   const photosAfter = photos.filter((p) => p.kind === "after");
 
   return (
-    <div className="flex min-h-dvh flex-col bg-canvas">
+    <div className="flex flex-1 flex-col bg-canvas">
       <RealtimeRefresh />
       <main
         className={`mx-auto flex w-full max-w-xl flex-1 flex-col gap-5 px-4 py-4 lg:max-w-5xl ${hasBottomBar ? "pb-36" : "pb-8"}`}

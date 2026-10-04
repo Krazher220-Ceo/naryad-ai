@@ -23,27 +23,26 @@ import {
   ReasonPicker,
   isReasonValid,
   EmptyState,
-  Toast,
-  type NoticeTone,
+  useToast,
   type ReasonValue,
 } from "@/components/ui";
 import { formatOrderTime, getOverdueMinutes } from "./utils";
 
 type WorkerOrdersViewProps = {
+  fullName: string;
   open: WorkerOrders["open"];
   recent: WorkerOrders["recent"];
 };
 
 type OrderItem = WorkerOrders["open"][number];
 
-export function WorkerOrdersView({ open, recent }: WorkerOrdersViewProps) {
+export function WorkerOrdersView({ fullName, open, recent }: WorkerOrdersViewProps) {
   const t = useT();
   const router = useRouter();
 
   // Состояния действий
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [toastTone, setToastTone] = useState<NoticeTone>("success");
+  const toast = useToast();
 
   // Отклонение наряда (ConfirmSheet)
   const [rejectingOrder, setRejectingOrder] = useState<OrderItem | null>(null);
@@ -111,18 +110,16 @@ export function WorkerOrdersView({ open, recent }: WorkerOrdersViewProps) {
       if (res.ok) {
         clearClientActionId(actionKey);
         if (res.queued) {
-          setToastMessage(t("offline.queued"));
-          setToastTone("offline");
+          toast.show("offline");
         } else {
+          toast.show("saved");
           router.refresh();
         }
       } else {
-        setToastMessage(res.error);
-        setToastTone("danger");
+        toast.show("error", { detail: res.error });
       }
     } catch {
-      setToastMessage(t("orders.errors.unknown"));
-      setToastTone("danger");
+      toast.show("error");
     } finally {
       setLoadingAction(null);
     }
@@ -149,18 +146,16 @@ export function WorkerOrdersView({ open, recent }: WorkerOrdersViewProps) {
         setRejectingOrder(null);
         setRejectReason({ code: "", text: "" });
         if (res.queued) {
-          setToastMessage(t("offline.queued"));
-          setToastTone("offline");
+          toast.show("offline");
         } else {
+          toast.show("saved");
           router.refresh();
         }
       } else {
-        setToastMessage(res.error);
-        setToastTone("danger");
+        toast.show("error", { detail: res.error });
       }
     } catch {
-      setToastMessage(t("orders.errors.unknown"));
-      setToastTone("danger");
+      toast.show("error");
     } finally {
       setSheetLoading(false);
     }
@@ -187,18 +182,16 @@ export function WorkerOrdersView({ open, recent }: WorkerOrdersViewProps) {
         setPausingOrder(null);
         setPauseReason({ code: "", text: "" });
         if (res.queued) {
-          setToastMessage(t("offline.queued"));
-          setToastTone("offline");
+          toast.show("offline");
         } else {
+          toast.show("saved");
           router.refresh();
         }
       } else {
-        setToastMessage(res.error);
-        setToastTone("danger");
+        toast.show("error", { detail: res.error });
       }
     } catch {
-      setToastMessage(t("orders.errors.unknown"));
-      setToastTone("danger");
+      toast.show("error");
     } finally {
       setSheetLoading(false);
     }
@@ -208,15 +201,28 @@ export function WorkerOrdersView({ open, recent }: WorkerOrdersViewProps) {
     <>
       <RealtimeRefresh />
 
-      <Toast
-        open={Boolean(toastMessage)}
-        tone={toastTone}
-        message={toastMessage ?? ""}
-        onClose={() => setToastMessage(null)}
-      />
 
-      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 py-4 pb-36">
-        <h1 className="text-2xl font-bold text-ink">{t("worker.myOrders")}</h1>
+      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 py-4 lg:py-8">
+        {/* На телефоне заголовок уже в шапке, на ПК — здесь */}
+        <h1 className="hidden text-3xl font-semibold text-ink lg:block">{t("worker.myOrders")}</h1>
+
+        {!isEmpty && (
+          <div className="flex flex-col gap-2.5">
+            <p className="text-base text-ink-muted">{fullName}</p>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { n: nowOrders.length, label: t("worker.countNow") },
+                { n: queuedOrders.length + issuedOrders.length, label: t("worker.countQueue") },
+                { n: doneOrders.length, label: t("worker.countDone") },
+              ].map((c) => (
+                <div key={c.label} className="rounded-2xl border border-line bg-surface px-3 py-2.5">
+                  <div className="font-display text-[26px] leading-tight font-semibold text-ink">{c.n}</div>
+                  <div className="text-sm text-ink-muted">{c.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {isEmpty ? (
           <EmptyState
@@ -361,15 +367,12 @@ export function WorkerOrdersView({ open, recent }: WorkerOrdersViewProps) {
 
                       {(currentOrder.status === "accepted" ||
                         currentOrder.status === "rework") && (
-                        <Button
-                          fullWidth
-                          variant="primary"
-                          size="lg"
-                          loading={loadingAction === `${currentOrder.id}-start`}
-                          onClick={() => handleAction(currentOrder.id, "start")}
-                        >
-                          {t("orders.action.start")}
-                        </Button>
+                        // Начать можно только после проверки безопасности — она в карточке наряда.
+                        <Link href={`/worker/orders/${currentOrder.id}`}>
+                          <Button fullWidth variant="primary" size="lg">
+                            {t("orders.action.start")}
+                          </Button>
+                        </Link>
                       )}
                     </div>
                   </div>

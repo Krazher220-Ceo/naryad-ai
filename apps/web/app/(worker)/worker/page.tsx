@@ -4,13 +4,13 @@ import { getWorkerOrders } from "@/lib/orders/queries";
 import { WorkerOrdersView } from "./components/WorkerOrdersView";
 
 export default async function WorkerPage() {
-  await requireRole("worker");
+  const employee = await requireRole("worker");
   const { open, recent } = await getWorkerOrders();
 
   return (
-    <div className="flex min-h-dvh flex-col bg-canvas">
+    <div className="flex flex-1 flex-col">
       <TelegramLinkCard />
-      <WorkerOrdersView open={open} recent={recent} />
+      <WorkerOrdersView fullName={employee.fullName} open={open} recent={recent} />
     </div>
   );
 }

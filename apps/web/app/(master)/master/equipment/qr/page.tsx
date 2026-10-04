@@ -43,7 +43,7 @@ export default async function EquipmentQrPage() {
   for (const s of stickers) groups.set(s.sectionName, [...(groups.get(s.sectionName) ?? []), s]);
 
   return (
-    <div className="flex min-h-dvh flex-col bg-canvas print:bg-white">
+    <div className="flex flex-1 flex-col bg-canvas print:bg-white">
       <div className="print:hidden">
       </div>
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 py-4 lg:max-w-6xl print:max-w-none print:p-0">

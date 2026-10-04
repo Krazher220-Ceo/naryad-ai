@@ -44,7 +44,7 @@ export default async function MasterPage() {
   const sortedWorkers = [...workers].sort((a, b) => WORKER_RANK[a.board_status] - WORKER_RANK[b.board_status]);
 
   return (
-    <div className="flex min-h-dvh flex-col bg-canvas">
+    <div className="flex flex-1 flex-col bg-canvas">
       <RealtimeRefresh />
       <TelegramLinkCard />
 

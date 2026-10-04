@@ -734,6 +734,14 @@ export type Database = {
         }
         Returns: string
       }
+      equipment_recent_stats: {
+        Args: { p_equipment_id: string }
+        Returns: {
+          breakdowns_30d: number
+          downtime_hours: number
+          open_orders: number
+        }[]
+      }
       equipment_repair_history: {
         Args: { p_equipment_id: string; p_exclude_order_id?: string }
         Returns: {

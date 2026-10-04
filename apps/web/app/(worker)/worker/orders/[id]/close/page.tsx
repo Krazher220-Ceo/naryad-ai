@@ -23,7 +23,7 @@ export default async function ClosePage({ params }: ClosePageProps) {
 
   if (!details) {
     return (
-      <div className="flex min-h-dvh flex-col bg-canvas">
+      <div className="flex flex-1 flex-col bg-canvas">
         <main className="mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center gap-4 p-4">
           <ErrorState title={t("orders.errors.notFound")} text="" />
           <Link href="/worker" className="w-full">
@@ -42,7 +42,7 @@ export default async function ClosePage({ params }: ClosePageProps) {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col bg-canvas">
+    <div className="flex flex-1 flex-col bg-canvas">
       <OrderCloseView
         order={details.order}
         faultCodes={formData.faultCodes}
