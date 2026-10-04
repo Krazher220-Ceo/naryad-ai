@@ -14,6 +14,7 @@ export { NumberStepper } from "./NumberStepper";
 export { SegmentedControl } from "./SegmentedControl";
 export { ReasonPicker, isReasonValid, OTHER_REASON, type ReasonValue } from "./ReasonPicker";
 export { PhotoPicker } from "./PhotoPicker";
+export { VoiceButton, appendSpoken } from "./VoiceButton";
 export { StepForm, type Step } from "./StepForm";
 export { EmptyState, ErrorState, Skeleton } from "./States";
 export { InlineNotice, Toast, type NoticeTone } from "./Notice";

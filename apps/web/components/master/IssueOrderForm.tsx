@@ -16,7 +16,9 @@ import {
   StepForm,
   TextArea,
   TextInput,
+  VoiceButton,
   WORK_TYPES,
+  appendSpoken,
   WorkerChip,
   cx,
 } from "@/components/ui";
@@ -321,6 +323,7 @@ export function IssueOrderForm({
           </div>
           <Field label={t("master.issue.description")} htmlFor="issue-description" hint={t("master.issue.descriptionHint")} required>
             <TextArea id="issue-description" value={description} onChange={(e) => setDescription(e.target.value)} />
+            <VoiceButton onText={(spoken) => setDescription((prev) => appendSpoken(prev, spoken))} />
           </Field>
           <Field label={t("master.issue.priority")}>
             <SegmentedControl
