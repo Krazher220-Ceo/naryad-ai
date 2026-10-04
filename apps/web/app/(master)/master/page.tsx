@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { AppHeader } from "@/components/AppHeader";
 import { TelegramLinkCard } from "@/components/TelegramLinkCard";
 import { OrderRow } from "@/components/master/OrderRow";
 import { SideRequests } from "@/components/master/SideRequests";
@@ -38,7 +37,7 @@ function Tile({ label, value, alert }: { label: string; value: number; alert?: b
 
 export default async function MasterPage() {
   const t = await getT();
-  const employee = await requireRole("master");
+  await requireRole("master");
   const { workers, orders, requests } = await getMasterBoard();
 
   const count = (statuses: OrderStatus[]) => orders.filter((o) => statuses.includes(o.status)).length;
@@ -47,7 +46,6 @@ export default async function MasterPage() {
   return (
     <div className="flex min-h-dvh flex-col bg-canvas">
       <RealtimeRefresh />
-      <AppHeader fullName={employee.fullName} roleLabel={t("roles.master")} />
       <TelegramLinkCard />
 
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 py-4 pb-36 lg:max-w-6xl">

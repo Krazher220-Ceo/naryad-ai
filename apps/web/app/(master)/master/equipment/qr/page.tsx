@@ -1,6 +1,5 @@
 import { headers } from "next/headers";
 import Link from "next/link";
-import { AppHeader } from "@/components/AppHeader";
 import { EquipmentIcon } from "@/components/equipment/EquipmentIcon";
 import { PrintButton } from "@/components/equipment/PrintButton";
 import { equipmentQrSvg } from "@/components/equipment/qr";
@@ -13,7 +12,7 @@ type Sticker = { id: string; name: string; inventoryNo: string; type: string; se
 
 export default async function EquipmentQrPage() {
   const t = await getT();
-  const employee = await requireRole("master");
+  await requireRole("master");
 
   // Адрес сайта берём из запроса: работает и на localhost, и на Vercel
   const h = await headers();
@@ -46,7 +45,6 @@ export default async function EquipmentQrPage() {
   return (
     <div className="flex min-h-dvh flex-col bg-canvas print:bg-white">
       <div className="print:hidden">
-        <AppHeader fullName={employee.fullName} roleLabel={t("roles.master")} />
       </div>
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 py-4 lg:max-w-6xl print:max-w-none print:p-0">
         <div className="flex flex-col gap-3 print:hidden">

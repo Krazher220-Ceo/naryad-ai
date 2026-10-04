@@ -12,7 +12,7 @@ export function BottomActionBar({
   return (
     <div
       className={cx(
-        "fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface/95 px-4 pt-3 backdrop-blur-sm",
+        "fixed right-0 bottom-0 left-0 z-30 border-t lg:left-72 border-line bg-surface/95 px-4 pt-3 backdrop-blur-sm",
         "pb-[calc(0.75rem+env(safe-area-inset-bottom))]",
         className,
       )}

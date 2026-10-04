@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { AppHeader } from "@/components/AppHeader";
 import { AnomalyList } from "@/components/reports/AnomalyList";
 import { PERIODS, fill, parseDaysIn } from "@/components/reports/format";
 import { PeriodSwitch } from "@/components/reports/ReportPage";
@@ -28,7 +27,7 @@ function Tile({ label, value, alert }: { label: string; value: string; alert?: b
 
 export default async function LeadPage({ searchParams }: PageProps<"/lead">) {
   const t = await getT();
-  const employee = await requireRole("lead");
+  await requireRole("lead");
   const { days: daysParam } = await searchParams;
   const days = parseDaysIn(daysParam, PERIODS, 30);
   const d = await getDashboard(days);
@@ -38,7 +37,6 @@ export default async function LeadPage({ searchParams }: PageProps<"/lead">) {
 
   return (
     <div className="flex min-h-dvh flex-col bg-canvas">
-      <AppHeader fullName={employee.fullName} roleLabel={t("roles.lead")} />
 
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 py-4 pb-8 lg:max-w-6xl">
         <h1 className="text-2xl font-bold text-ink">{t("home.lead")}</h1>
