@@ -41,6 +41,8 @@ export default async function OrderPage({ params }: OrderPageProps) {
         photos={data.photos}
         materials={data.materials}
         review={data.review}
+        toBring={data.toBring}
+        repairHistory={data.repairHistory}
       />
     </div>
   );

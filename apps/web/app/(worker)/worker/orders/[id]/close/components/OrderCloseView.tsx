@@ -29,6 +29,8 @@ type OrderCloseViewProps = {
   faultCodes: CloseFormData["faultCodes"];
   allMaterials: CloseFormData["materials"];
   employee: CurrentEmployee;
+  // Первое фото «до»: показывается как ориентир, чтобы снять «после» с того же ракурса.
+  beforePhotoUrl: string | null;
 };
 
 type SelectedMaterial = {
@@ -43,6 +45,7 @@ export function OrderCloseView({
   faultCodes,
   allMaterials,
   employee,
+  beforePhotoUrl,
 }: OrderCloseViewProps) {
   const t = useT();
   const router = useRouter();
@@ -336,6 +339,20 @@ export function OrderCloseView({
 
           {photoError && (
             <InlineNotice tone="danger">{photoError}</InlineNotice>
+          )}
+
+          {beforePhotoUrl && (
+            <figure className="flex flex-col gap-2">
+              <figcaption className="text-base font-semibold text-ink">{t("worker.close.silhouetteTitle")}</figcaption>
+              {/* Силуэт: фото «до» в сером цвете и полупрозрачно, как контур для ракурса. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={beforePhotoUrl}
+                alt={t("worker.beforePhotos")}
+                className="aspect-video w-full rounded-xl border-2 border-dashed border-line-strong object-cover opacity-60 grayscale contrast-150"
+              />
+              <p className="text-base text-ink-muted">{t("worker.close.silhouetteHint")}</p>
+            </figure>
           )}
 
           <PhotoPicker

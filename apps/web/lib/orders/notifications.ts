@@ -42,7 +42,7 @@ export async function notifyNewOrder(orderId: string): Promise<void> {
 // Уведомление о смене статуса. Кому — зависит от действия:
 // доработка, отмена, закрытие — исполнителю; отказ и пауза — мастеру.
 const TO_WORKER: StatusNotifyAction[] = ["rework", "cancel", "close"];
-const TO_MASTER: StatusNotifyAction[] = ["reject", "pause"];
+const TO_MASTER: StatusNotifyAction[] = ["reject", "pause", "help"];
 
 export async function notifyStatusChange(params: {
   orderId: string;
@@ -76,4 +76,25 @@ export async function notifyStatusChange(params: {
   );
   const employeeId = TO_WORKER.includes(action) ? o.assignee_id : o.master_id;
   if (employeeId) await notifyEmployee({ employeeId, kind: "status_change", text, orderId: params.orderId });
+}
+
+// Попутная находка исполнителя — мастеру наряда.
+export async function notifySideRequest(orderId: string, description: string): Promise<void> {
+  const db = createAdminClient();
+  const { data: o } = await db
+    .from("work_orders")
+    .select(
+      `number, master_id,
+       equipment:equipment_id ( name ), section:section_id ( name ),
+       assignee:employees!work_orders_assignee_id_fkey ( full_name )`,
+    )
+    .eq("id", orderId)
+    .maybeSingle();
+  if (!o) return;
+  const text = statusChangeText(
+    "side_request",
+    { number: o.number, equipment: o.equipment?.name ?? "—", section: o.section?.name ?? "—", workerName: o.assignee?.full_name ?? null },
+    description,
+  );
+  await notifyEmployee({ employeeId: o.master_id, kind: "status_change", text, orderId });
 }

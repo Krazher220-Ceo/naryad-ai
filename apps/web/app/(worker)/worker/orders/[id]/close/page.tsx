@@ -51,6 +51,7 @@ export default async function ClosePage({ params }: ClosePageProps) {
         faultCodes={formData.faultCodes}
         allMaterials={formData.materials}
         employee={employee}
+        beforePhotoUrl={details.photos.find((p) => p.kind === "before" && p.url)?.url ?? null}
       />
     </div>
   );
