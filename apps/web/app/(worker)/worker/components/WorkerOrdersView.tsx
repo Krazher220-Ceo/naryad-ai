@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { t } from "@/lib/i18n";
+import { useT } from "@/components/LocaleProvider";
 import { RealtimeRefresh } from "@/lib/orders/RealtimeRefresh";
 import { sendTransition } from "@/lib/offline/queue";
 import {
@@ -37,6 +37,7 @@ type WorkerOrdersViewProps = {
 type OrderItem = WorkerOrders["open"][number];
 
 export function WorkerOrdersView({ open, recent }: WorkerOrdersViewProps) {
+  const t = useT();
   const router = useRouter();
 
   // Состояния действий

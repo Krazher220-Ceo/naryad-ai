@@ -1,6 +1,6 @@
 "use client";
 
-import { t } from "@/lib/i18n";
+import { useT } from "@/components/LocaleProvider";
 import { cx } from "./cx";
 import { IconCheck } from "./icons";
 import { TextArea } from "./Field";
@@ -29,6 +29,7 @@ export function isReasonValid(value: ReasonValue): boolean {
 
 // Причина отказа или паузы: крупные готовые варианты плюс «Другое» с текстом.
 export function ReasonPicker({ codes, value, onChange, showError }: ReasonPickerProps) {
+  const t = useT();
 
   return (
     <div className="flex flex-col gap-2">

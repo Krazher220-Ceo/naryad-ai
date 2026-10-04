@@ -1,4 +1,4 @@
-import { t } from "@/lib/i18n";
+import type { Translate } from "@/lib/i18n";
 import ru from "@/messages/ru.json";
 
 // Мелкие помощники форматирования для отчётов.
@@ -19,7 +19,7 @@ export function parseDaysIn(value: string | string[] | undefined, allowed: reado
 }
 
 // Название категории шифра по первой букве: М → «Механика».
-export function categoryLabel(letter: string | null): string {
+export function categoryLabel(t: Translate, letter: string | null): string {
   if (!letter) return t("downtimeReport.noCause");
   const key = letter in ru.faultCategory ? (letter as keyof typeof ru.faultCategory) : "?";
   return t(`faultCategory.${key}`);
@@ -28,11 +28,11 @@ export function categoryLabel(letter: string | null): string {
 // Подписи цифр аномалий. Ключи фактов задаёт lib/analytics/anomalies.
 const isFactKey = (key: string): key is keyof typeof ru.anomalies.fact => key in ru.anomalies.fact;
 
-export function factLabel(key: string): string {
+export function factLabel(t: Translate, key: string): string {
   return isFactKey(key) ? t(`anomalies.fact.${key}`) : key;
 }
 
-export function factValue(key: string, value: number | string): string {
+export function factValue(t: Translate, key: string, value: number | string): string {
   if (typeof value === "number") return oneDecimal(value);
   if (key === "shift" && (value === "night" || value === "day")) return t(`anomaly.shiftName.${value}`);
   if (value === "*") return t("anomaly.allEquipment");

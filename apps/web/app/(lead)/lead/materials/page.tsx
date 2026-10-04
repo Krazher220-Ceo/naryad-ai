@@ -6,7 +6,7 @@ import { PeriodSwitch, ReportPage } from "@/components/reports/ReportPage";
 import { cx } from "@/components/ui";
 import { getMaterialsReport } from "@/lib/analytics/reports";
 import { requireRole } from "@/lib/auth/session";
-import { t } from "@/lib/i18n";
+import { getT } from "@/lib/i18n-server";
 
 const TABS = ["material", "section", "equipment", "worker"] as const;
 type Tab = (typeof TABS)[number];
@@ -18,6 +18,7 @@ const ROWS_OF: Record<Tab, "byMaterial" | "bySection" | "byEquipment" | "byWorke
 };
 
 export default async function LeadMaterialsPage({ searchParams }: PageProps<"/lead/materials">) {
+  const t = await getT();
   const employee = await requireRole("lead");
   const query = await searchParams;
   const days = parseDaysIn(query.days, PERIODS, 30);

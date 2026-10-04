@@ -1,4 +1,4 @@
-import { t, type MessageKey } from "@/lib/i18n";
+import { tRu as t, type MessageKey } from "@/lib/i18n";
 import type { OrderPriority, OrderStatus } from "@/lib/orders/types";
 
 // Тексты уведомлений. Шаблоны — в словаре (раздел notify), здесь только подстановка значений.

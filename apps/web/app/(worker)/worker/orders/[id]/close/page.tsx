@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth/session";
-import { t } from "@/lib/i18n";
+import { getT } from "@/lib/i18n-server";
 import { AppHeader } from "@/components/AppHeader";
 import { getOrderDetails, getCloseFormData } from "@/lib/orders/queries";
 import { canComplete } from "@/lib/orders/transitions";
@@ -13,6 +13,7 @@ type ClosePageProps = {
 };
 
 export default async function ClosePage({ params }: ClosePageProps) {
+  const t = await getT();
   const { id } = await params;
   const employee = await requireRole("worker");
 

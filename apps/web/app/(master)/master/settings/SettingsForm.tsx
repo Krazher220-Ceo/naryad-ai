@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button, Card, Field, InlineNotice, NumberStepper, SegmentedControl } from "@/components/ui";
 import { updateSettings } from "@/lib/orders/actions";
-import { t } from "@/lib/i18n";
+import { useT } from "@/components/LocaleProvider";
 
 type SettingsData = {
   remind_before_min: number | null;
@@ -15,6 +15,7 @@ type SettingsData = {
 };
 
 export function SettingsForm({ initialSettings }: { initialSettings: SettingsData | null }) {
+  const t = useT();
   const [remindBeforeMin, setRemindBeforeMin] = useState(initialSettings?.remind_before_min ?? 30);
   const [acceptTimeoutMin, setAcceptTimeoutMin] = useState(initialSettings?.accept_timeout_min ?? 10);
   const [acceptTimeoutUrgentMin, setAcceptTimeoutUrgentMin] = useState(initialSettings?.accept_timeout_urgent_min ?? 3);

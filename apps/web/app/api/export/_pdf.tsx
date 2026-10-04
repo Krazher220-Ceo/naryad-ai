@@ -1,6 +1,6 @@
 import path from "node:path";
 import { Document, Font, Page, StyleSheet, Text, View, renderToBuffer } from "@react-pdf/renderer";
-import { t } from "@/lib/i18n";
+import { tRu as t } from "@/lib/i18n";
 import type { ReportDoc, Table } from "./_build";
 
 // В стандартном шрифте PDF нет кириллицы, поэтому подключаем IBM Plex Sans (OFL), файлы лежат в public/fonts.

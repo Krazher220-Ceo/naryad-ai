@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { t } from "@/lib/i18n";
+import { useT } from "@/components/LocaleProvider";
 import { uploadOrderPhoto } from "@/lib/orders/photos";
 import { completeOrder } from "@/lib/orders/actions";
 import type { OrderDetails, CloseFormData } from "@/lib/orders/queries";
@@ -44,6 +44,7 @@ export function OrderCloseView({
   allMaterials,
   employee,
 }: OrderCloseViewProps) {
+  const t = useT();
   const router = useRouter();
 
   // Шаг 1: Работы

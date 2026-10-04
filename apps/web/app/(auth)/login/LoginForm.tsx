@@ -2,11 +2,12 @@
 
 import { useActionState } from "react";
 import { signIn, type SignInState } from "@/lib/auth/actions";
-import { t } from "@/lib/i18n";
+import { useT } from "@/components/LocaleProvider";
 
 const initialState: SignInState = { error: null };
 
 export function LoginForm({ next }: { next?: string }) {
+  const t = useT();
   const [state, formAction, pending] = useActionState(signIn, initialState);
 
   return (

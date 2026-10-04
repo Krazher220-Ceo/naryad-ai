@@ -1,6 +1,6 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { t } from "@/lib/i18n";
+import { tRu as t } from "@/lib/i18n";
 import { createAnonymizer } from "./anonymize";
 import { chatJson, type AiProvider } from "./provider";
 

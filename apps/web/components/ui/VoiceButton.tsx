@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useSyncExternalStore } from "react";
-import { t } from "@/lib/i18n";
+import { useSpeechLang, useT } from "@/components/LocaleProvider";
 import { Button } from "./Button";
 import { IconMic } from "./icons";
 
@@ -32,10 +32,12 @@ const noop = () => () => {};
 type VoiceButtonProps = {
   // Распознанный текст. Экран сам решает, дописать его или заменить.
   onText: (text: string) => void;
-  lang?: string;
 };
 
-export function VoiceButton({ onText, lang = "ru-RU" }: VoiceButtonProps) {
+export function VoiceButton({ onText }: VoiceButtonProps) {
+  const t = useT();
+  // Язык распознавания совпадает с языком интерфейса: ru-RU или kk-KZ.
+  const lang = useSpeechLang();
   // На сервере кнопки нет, в браузере — если API доступен. Так нет расхождения при гидратации.
   const supported = useSyncExternalStore(noop, () => getRecognitionCtor() !== null, () => false);
   const [listening, setListening] = useState(false);

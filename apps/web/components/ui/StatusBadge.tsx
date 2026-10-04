@@ -1,4 +1,7 @@
-import { t, type MessageKey } from "@/lib/i18n";
+"use client";
+
+import { type MessageKey } from "@/lib/i18n";
+import { useT } from "@/components/LocaleProvider";
 import { cx } from "./cx";
 import type { OrderStatus } from "./types";
 
@@ -19,6 +22,7 @@ const statusClass: Record<OrderStatus, string> = {
 
 // Статус наряда: цвет и текст вместе, чтобы различал и дальтоник.
 export function StatusBadge({ status }: { status: OrderStatus }) {
+  const t = useT();
   return (
     <span
       className={cx(

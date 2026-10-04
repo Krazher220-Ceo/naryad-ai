@@ -1,7 +1,7 @@
 import "server-only";
 import { findAnomalies } from "@/lib/analytics/anomalies";
 import { getRating } from "@/lib/analytics/rating";
-import { t, type MessageKey } from "@/lib/i18n";
+import { tRu, translator, type Locale, type MessageKey, type Translate } from "@/lib/i18n";
 import { getMasterBoard } from "@/lib/orders/queries";
 import { createAnonymizer } from "./anonymize";
 import { chatJson } from "./provider";
@@ -11,6 +11,7 @@ import { provider } from "./summaries";
 // Модель получает готовые факты и только отвечает на вопрос словами. Ничего не считает и не придумывает.
 // ФИО заменяются на метки до отправки и подставляются обратно после ответа.
 // Без модели отвечает шаблон по ключевым словам вопроса.
+// Факты для модели всегда на русском, отвечает она на языке интерфейса.
 
 export type AssistantTurn = { role: "user" | "assistant"; text: string };
 export type AssistantAnswer = { answer: string; source: "llm" | "rules" };
@@ -24,7 +25,7 @@ const SYSTEM = `Ты помощник мастера смены ремонтно
 Отвечай только по этим фактам. Не пересчитывай и не придумывай цифры, людей, наряды и оборудование.
 Если в фактах нет ответа, так и скажи и подскажи, где посмотреть (отчёт за смену, рейтинг, аномалии).
 Решение всегда принимает мастер: ты советуешь, а не приказываешь.
-Пиши коротко, по-русски, простыми словами, 1–5 предложений или короткий список. Номера нарядов пиши со знаком №.
+Пиши коротко, простыми словами, 1–5 предложений или короткий список. Номера нарядов пиши со знаком №.
 Ответ строго JSON: {"answer": "..."}`;
 
 const time = (iso: string) =>
@@ -32,6 +33,7 @@ const time = (iso: string) =>
 
 // Факты для ответа. Всё посчитано здесь, в коде.
 async function collectFacts() {
+  const t = tRu;
   const now = new Date();
   const [board, anomalies, rating] = await Promise.all([
     getMasterBoard(),
@@ -81,7 +83,7 @@ async function collectFacts() {
 
 type Facts = Awaited<ReturnType<typeof collectFacts>>;
 
-export async function answerQuestion(question: string, history: AssistantTurn[]): Promise<AssistantAnswer> {
+export async function answerQuestion(question: string, history: AssistantTurn[], locale: Locale): Promise<AssistantAnswer> {
   const q = question.trim().slice(0, MAX_QUESTION);
   const facts = await collectFacts();
   const { raw, ...forModel } = facts;
@@ -95,7 +97,7 @@ export async function answerQuestion(question: string, history: AssistantTurn[])
 
   const res = await chatJson({
     provider: await provider(),
-    system: SYSTEM,
+    system: `${SYSTEM}\n${locale === "kk" ? "Отвечай на казахском языке." : "Отвечай на русском языке."}`,
     user: anon.hide(payload),
     validate: (v) => {
       const answer = (v as { answer?: unknown } | null)?.answer;
@@ -105,11 +107,11 @@ export async function answerQuestion(question: string, history: AssistantTurn[])
     maxTokens: 1200,
   });
   if (res.ok) return { answer: anon.restore(res.data.answer), source: "llm" };
-  return { answer: rulesAnswer(q, facts, raw), source: "rules" };
+  return { answer: rulesAnswer(translator(locale), q, facts, raw), source: "rules" };
 }
 
 // Запасной ответ без модели: тема вопроса определяется по ключевым словам.
-function rulesAnswer(question: string, facts: Facts, raw: Facts["raw"]): string {
+function rulesAnswer(t: Translate, question: string, facts: Facts, raw: Facts["raw"]): string {
   const q = question.toLowerCase();
   const list = (items: string[]) => (items.length > 0 ? items.join("\n") : t("assistant.rules.none"));
   const orderLine = (o: Facts["orders"][number]) =>

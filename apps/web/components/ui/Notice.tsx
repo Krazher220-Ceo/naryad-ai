@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { t } from "@/lib/i18n";
+import { useT } from "@/components/LocaleProvider";
 import { cx } from "./cx";
 import { IconAlert, IconCheck, IconInfo, IconWifiOff, IconX } from "./icons";
 
@@ -62,6 +62,7 @@ export function Toast({
   onClose: () => void;
   duration?: number;
 }) {
+  const t = useT();
   useEffect(() => {
     if (!open) return;
     const timer = setTimeout(onClose, duration);

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui";
-import { t } from "@/lib/i18n";
+import { getT } from "@/lib/i18n-server";
 import { AnomalyList } from "./AnomalyList";
 import { ExportButtons } from "./ExportButtons";
 import { PeriodSwitch, ReportPage } from "./ReportPage";
@@ -8,7 +8,7 @@ import { PeriodSwitch, ReportPage } from "./ReportPage";
 export const ANOMALY_PERIODS = [30, 90] as const;
 
 // Одна страница аномалий для мастера и руководителя.
-export function AnomaliesScreen({
+export async function AnomaliesScreen({
   fullName,
   roleLabel,
   basePath,
@@ -19,6 +19,7 @@ export function AnomaliesScreen({
   basePath: "/master" | "/lead";
   days: number;
 }) {
+  const t = await getT();
   return (
     <ReportPage fullName={fullName} roleLabel={roleLabel} backHref={basePath} backLabel={t("anomalies.back")} title={t("anomalies.title")}>
       <p className="text-base text-ink-muted">{t("anomalies.intro")}</p>

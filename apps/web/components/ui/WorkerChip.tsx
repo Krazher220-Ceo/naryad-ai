@@ -1,5 +1,8 @@
-import { t } from "@/lib/i18n";
+"use client";
+
+import { useT } from "@/components/LocaleProvider";
 import { cx } from "./cx";
+import { workerStateLabel } from "./labels";
 import type { WorkerState } from "./types";
 
 const dotClass: Record<WorkerState, string> = {
@@ -19,13 +22,6 @@ export function WorkerStatusDot({ state, className }: { state: WorkerState; clas
   );
 }
 
-// Подпись состояния: «Свободен», «Выполняет наряд №1042», «В очереди: 2», «Не на смене».
-export function workerStateLabel(state: WorkerState, orderNumber?: string | number, queueCount?: number) {
-  if (state === "busy" && orderNumber !== undefined) return `${t("workers.currentOrder")}${orderNumber}`;
-  if (state === "queue" && queueCount !== undefined) return `${t("workers.queueCount")} ${queueCount}`;
-  return t(`workers.status.${state}`);
-}
-
 type WorkerChipProps = {
   name: string;
   state: WorkerState;
@@ -35,6 +31,7 @@ type WorkerChipProps = {
 
 // Исполнитель с цветом и подписью состояния. Не на смене — приглушён, но текст остаётся тёмным.
 export function WorkerChip({ name, state, orderNumber, queueCount }: WorkerChipProps) {
+  const t = useT();
   return (
     <div
       className={cx(
@@ -45,7 +42,7 @@ export function WorkerChip({ name, state, orderNumber, queueCount }: WorkerChipP
       <WorkerStatusDot state={state} />
       <div className="flex min-w-0 flex-col">
         <span className="truncate text-base font-semibold text-ink">{name}</span>
-        <span className="text-base text-ink-muted">{workerStateLabel(state, orderNumber, queueCount)}</span>
+        <span className="text-base text-ink-muted">{workerStateLabel(t, state, orderNumber, queueCount)}</span>
       </div>
     </div>
   );

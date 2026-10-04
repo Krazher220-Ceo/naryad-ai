@@ -22,7 +22,8 @@ import {
   WorkerChip,
   cx,
 } from "@/components/ui";
-import { t, type MessageKey } from "@/lib/i18n";
+import { type MessageKey } from "@/lib/i18n";
+import { useT } from "@/components/LocaleProvider";
 import { createOrder, suggestForIssue } from "@/lib/orders/actions";
 import { uploadOrderPhoto } from "@/lib/orders/photos";
 import type { IssueFormData } from "@/lib/orders/queries";
@@ -78,6 +79,7 @@ export function IssueOrderForm({
   employeeId: string;
   initialEquipmentId?: string | null;
 }) {
+  const t = useT();
   const router = useRouter();
   const [equipmentId, setEquipmentId] = useState<string | null>(initialEquipmentId);
   const [search, setSearch] = useState("");

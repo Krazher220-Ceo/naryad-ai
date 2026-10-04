@@ -15,7 +15,7 @@ import {
   WorkerChip,
   cx,
 } from "@/components/ui";
-import { t } from "@/lib/i18n";
+import { useT } from "@/components/LocaleProvider";
 import {
   changeOrderPriority,
   reassignOrder,
@@ -64,6 +64,7 @@ type Props = {
 };
 
 export function OrderActions({ orderId, status, priority, assigneeId, workers, review, reviewSince }: Props) {
+  const t = useT();
   const router = useRouter();
   const [sheet, setSheet] = useState<Sheet>(null);
   const [reason, setReason] = useState("");

@@ -2,7 +2,7 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notifyEmployee } from "@/lib/notify";
 import { newOrderText, statusChangeText, type StatusNotifyAction } from "@/lib/notify/messages";
-import { t } from "@/lib/i18n";
+import { tRu as t } from "@/lib/i18n";
 
 // Уведомление о новом (или переназначенном) наряде.
 // Исполнителю — лично; если наряд на бригаду — всем исполнителям бригады.

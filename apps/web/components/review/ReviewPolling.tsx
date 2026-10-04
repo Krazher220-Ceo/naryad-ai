@@ -3,12 +3,13 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { InlineNotice, Skeleton } from "@/components/ui";
-import { t } from "@/lib/i18n";
+import { useT } from "@/components/LocaleProvider";
 
 // Проверка ИИ появляется через несколько секунд после «Исполнено».
 // Пока её нет, раз в 5 секунд просим страницу обновиться. Когда проверка пришла,
 // сервер перестаёт рисовать этот компонент и опрос останавливается.
 export function ReviewWaiting() {
+  const t = useT();
   const router = useRouter();
 
   useEffect(() => {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { t } from "@/lib/i18n";
+import { useT } from "@/components/LocaleProvider";
 import { Button } from "./Button";
 
 type ConfirmSheetProps = {
@@ -33,6 +33,7 @@ export function ConfirmSheet({
   loading,
   children,
 }: ConfirmSheetProps) {
+  const t = useT();
   const sheetRef = useRef<HTMLDivElement>(null);
 
   // Escape закрывает лист, фокус переносится внутрь.

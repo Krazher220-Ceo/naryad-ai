@@ -1,5 +1,5 @@
 import { ListItem, OverdueTag, PriorityBadge, StatusBadge } from "@/components/ui";
-import { t } from "@/lib/i18n";
+import { getT } from "@/lib/i18n-server";
 import type { MasterBoard } from "@/lib/orders/queries";
 import { formatTime, minutesLate } from "./format";
 import { EquipmentIcon } from "@/components/equipment/EquipmentIcon";
@@ -7,7 +7,8 @@ import { EquipmentIcon } from "@/components/equipment/EquipmentIcon";
 type BoardOrder = MasterBoard["orders"][number];
 
 // Строка наряда на панели мастера. Нажатие открывает карточку.
-export function OrderRow({ order }: { order: BoardOrder }) {
+export async function OrderRow({ order }: { order: BoardOrder }) {
+  const t = await getT();
   const place = [order.equipment?.name, order.section?.name].filter(Boolean).join(" · ");
   const assignee = order.assignee?.full_name ?? t("master.noAssignee");
 
