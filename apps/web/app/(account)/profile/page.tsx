@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { Card } from "@/components/ui";
+import Link from "next/link";
+import { Card, IconChevronRight } from "@/components/ui";
 import { LanguageSwitch } from "@/components/LanguageSwitch";
 import { getCurrentEmployee } from "@/lib/auth/session";
 import type { Role } from "@/lib/auth/roles";
@@ -14,11 +15,12 @@ import { BigTextSwitch, DeviceData, NotificationPrefsForm, TelegramSection } fro
 // Какие события вообще приходят сотруднику этой роли (lib/orders/notifications.ts, расписание сроков).
 const KINDS_BY_ROLE: Record<Role, Enums<"notification_kind">[]> = {
   worker: ["new_order", "remind", "overdue", "review_ready", "status_change"],
-  master: ["overdue", "not_accepted", "review_ready", "status_change"],
+  master: ["new_request", "overdue", "not_accepted", "review_ready", "status_change"],
   lead: ["lead_overdue", "overdue"],
+  operator: [],
 };
 
-// Профиль одинаковый для всех ролей (PLAN.md, раздел 8.4). Пароль появится в M7 вместе со входом по паролю.
+// Профиль одинаковый для всех ролей (PLAN.md, раздел 8.4).
 export default async function ProfilePage() {
   const employee = await getCurrentEmployee();
   if (!employee) redirect("/login");
@@ -49,6 +51,14 @@ export default async function ProfilePage() {
           </span>
         </div>
       </Card>
+
+      <Link
+        href="/profile/password"
+        className="flex min-h-touch items-center justify-between rounded-2xl border border-line bg-surface px-4 text-lg font-semibold text-ink hover:bg-canvas"
+      >
+        {t("password.open")}
+        <IconChevronRight className="size-5 text-ink-muted" />
+      </Link>
 
       <TelegramSection linked={Boolean(telegram?.linked)} connectUrl={connectUrl} />
 

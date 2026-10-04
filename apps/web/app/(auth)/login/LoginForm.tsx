@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { signIn, type SignInState } from "@/lib/auth/actions";
 import { useT } from "@/components/LocaleProvider";
 
@@ -9,6 +9,7 @@ const initialState: SignInState = { error: null };
 export function LoginForm({ next }: { next?: string }) {
   const t = useT();
   const [state, formAction, pending] = useActionState(signIn, initialState);
+  const [showPassword, setShowPassword] = useState(false);
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
@@ -26,19 +27,26 @@ export function LoginForm({ next }: { next?: string }) {
         />
       </label>
       <label className="flex flex-col gap-1.5 text-base font-medium text-ink-muted">
-        <span>
-          {t("auth.pin")} ({t("auth.pinHint")})
+        <span>{t("auth.password")}</span>
+        <span className="flex gap-2">
+          <input
+            name="password"
+            type={showPassword ? "text" : "password"}
+            required
+            autoComplete="current-password"
+            autoCapitalize="none"
+            autoCorrect="off"
+            className="h-14 min-h-14 w-full rounded-xl border border-line-strong bg-white px-4 text-lg text-ink shadow-sm focus:border-focus focus:outline-none focus:ring-2 focus:ring-focus/20"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((v) => !v)}
+            aria-pressed={showPassword}
+            className="min-h-14 shrink-0 rounded-xl border border-line-strong bg-white px-3 text-base font-semibold text-ink hover:bg-canvas"
+          >
+            {showPassword ? t("auth.hidePassword") : t("auth.showPassword")}
+          </button>
         </span>
-        <input
-          name="pin"
-          type="password"
-          required
-          inputMode="numeric"
-          pattern="\d{6}"
-          maxLength={6}
-          autoComplete="current-password"
-          className="h-14 min-h-14 w-full rounded-xl border border-line-strong bg-white px-4 text-lg tracking-widest text-ink shadow-sm focus:border-focus focus:outline-none focus:ring-2 focus:ring-focus/20"
-        />
       </label>
       <button
         type="submit"

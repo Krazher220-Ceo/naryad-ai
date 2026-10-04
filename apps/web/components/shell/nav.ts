@@ -23,6 +23,19 @@ export type RoleNav = {
 const PROFILE: NavItem = { href: "/profile", label: "shell.nav.profile", icon: "user" };
 
 export const NAV: Record<Role, RoleNav> = {
+  // Оператор: с общим логином участка или без входа (тогда профиль хранится на телефоне).
+  operator: {
+    phone: [
+      { href: "/operator", label: "shell.nav.requests", icon: "orders", exact: true },
+      { href: "/operator/scan", label: "shell.nav.scan", icon: "scan" },
+      { href: "/operator/profile", label: "shell.nav.profile", icon: "user" },
+    ],
+    pc: [
+      { href: "/operator", label: "shell.nav.myRequests", icon: "orders", exact: true },
+      { href: "/operator/scan", label: "shell.nav.scan", icon: "scan" },
+      { href: "/operator/profile", label: "shell.nav.profile", icon: "user" },
+    ],
+  },
   worker: {
     phone: [
       { href: "/worker", label: "shell.nav.orders", icon: "orders", exact: true },
@@ -44,6 +57,7 @@ export const NAV: Record<Role, RoleNav> = {
     pc: [
       { href: "/master", label: "shell.nav.board", icon: "orders", exact: true },
       { href: "/master/orders/new", label: "shell.nav.issueOrder", icon: "plus" },
+      { href: "/master/requests", label: "shell.nav.requestsMaster", icon: "warning" },
       { href: "/master/shift", label: "shell.nav.shiftReport", icon: "chart" },
       { href: "/master/rating", label: "shell.nav.rating", icon: "chart" },
       { href: "/master/anomalies", label: "shell.nav.anomalies", icon: "warning" },
@@ -66,6 +80,7 @@ export const NAV: Record<Role, RoleNav> = {
       { href: "/lead/downtime", label: "shell.nav.downtime", icon: "chart" },
       { href: "/lead/shift", label: "shell.nav.shiftReport", icon: "chart" },
       { href: "/lead/rating", label: "shell.nav.rating", icon: "chart" },
+      { href: "/lead/users", label: "shell.nav.users", icon: "user" },
       PROFILE,
     ],
   },
@@ -78,7 +93,7 @@ export function isActive(item: NavItem, pathname: string): boolean {
 
 // На экранах одного наряда нижнего меню нет: внизу одно главное действие на всю ширину.
 export function hidesBottomNav(pathname: string): boolean {
-  return /^\/(worker|master)\/orders\//.test(pathname);
+  return /^\/(worker|master)\/orders\//.test(pathname) || pathname.startsWith("/operator/report/");
 }
 
 // Заголовок в шапке телефона: пункт меню, на котором стоим, или название экрана наряда.
@@ -88,6 +103,9 @@ export function pageTitle(role: Role, pathname: string): MessageKey {
   if (/\/orders\/[^/]+$/.test(pathname)) return "shell.titles.order";
   if (pathname.startsWith("/notifications")) return "shell.nav.notifications";
   if (pathname.startsWith("/worker/equipment/")) return "shell.titles.equipment";
+  if (pathname.startsWith("/operator/report")) return "shell.titles.report";
+  if (pathname.startsWith("/operator/sent")) return "shell.titles.sent";
+  if (pathname.startsWith("/operator/section")) return "shell.titles.section";
   const match = NAV[role].pc.find((item) => isActive(item, pathname));
   return match?.label ?? "app.name";
 }
