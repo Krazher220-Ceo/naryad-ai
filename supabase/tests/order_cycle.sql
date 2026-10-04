@@ -86,12 +86,13 @@ select pg_temp.try('help repeat does not duplicate', format($q$select request_he
 select pg_temp.try('help events = 1', format($q$select count(*)::text from work_order_events where order_id=%L and action='help'$q$, (select val from v where k='o3')));
 select pg_temp.try('side request', format($q$insert into requests(created_by, equipment_id, parent_order_id, description) values (app.auth_employee_id(), %L, %L, 'Трещина на кожухе') returning 'ok'$q$, (select val from v where k='eq'), (select val from v where k='o3')));
 insert into v select 'r1', id::text from requests where description = 'Трещина на кожухе' order by created_at desc limit 1;
-select pg_temp.try('worker resolve request -> must fail', format($q$select resolve_request(%L,'dismissed')::text$q$, (select val from v where k='r1')));
+select pg_temp.try('worker decide request -> must fail', format($q$select decide_request(%L,'dismissed','Дубль')::text$q$, (select val from v where k='r1')));
 select pg_temp.try('repair history for worker', format($q$select count(*)::text from equipment_repair_history(%L)$q$, (select val from v where k='eq')));
 select pg_temp.as_user('worker2');
 select pg_temp.try('help on foreign order -> must fail', format($q$select request_help(%L)::text$q$, (select val from v where k='o3')));
 select pg_temp.as_user('master1');
-select pg_temp.try('master dismiss request', format($q$select resolve_request(%L,'dismissed')::text$q$, (select val from v where k='r1')));
+select pg_temp.try('master dismiss without reason -> must fail', format($q$select decide_request(%L,'dismissed')::text$q$, (select val from v where k='r1')));
+select pg_temp.try('master dismiss request', format($q$select decide_request(%L,'dismissed','Уже есть наряд')::text$q$, (select val from v where k='r1')));
 
 -- M6: центр уведомлений, настройки, сводка по машине (0012, 0013)
 select pg_temp.try('stats for master', format($q$select breakdowns_30d::text || '/' || open_orders::text from equipment_recent_stats(%L)$q$, (select val from v where k='eq')));
@@ -102,6 +103,19 @@ select pg_temp.try('half quiet hours -> must fail', $q$select save_notification_
 select pg_temp.as_user('worker2');
 select pg_temp.try('foreign prefs hidden = 0', $q$select count(*)::text from notification_prefs$q$);
 select pg_temp.try('worker stats', format($q$select breakdowns_30d::text from equipment_recent_stats(%L)$q$, (select val from v where k='eq')));
+
+-- M7: заявка оператора без входа (0015). Вызывает только сервер служебным ключом.
+select pg_temp.try('authenticated submit_operator_request -> must fail', $q$select number::text from submit_operator_request('EQ-INV-2001','Течь масла','defect','Жумабаев Арман','test-device-0001')$q$);
+reset role;
+select pg_temp.try('operator without name -> must fail', $q$select number::text from submit_operator_request('EQ-INV-2001','Течь масла','defect','Арман','test-device-0001')$q$);
+select pg_temp.try('operator fake QR -> must fail', $q$select number::text from submit_operator_request('EQ-FAKE-0','Течь масла','defect','Жумабаев Арман','test-device-0001')$q$);
+select pg_temp.try('operator request by machine QR', $q$select number::text from submit_operator_request('EQ-INV-2001','Течь масла','defect','Жумабаев Арман','test-device-0001')$q$);
+select pg_temp.try('operator request by section QR', $q$select number::text from submit_operator_request('SEC-OBG','Сильный шум в цехе','defect','Жумабаев Арман','test-device-0001')$q$);
+select pg_temp.try('requests 3', $q$select number::text from submit_operator_request('EQ-INV-2001','Вибрация','stopped','Жумабаев Арман','test-device-0001')$q$);
+select pg_temp.try('requests 4', $q$select number::text from submit_operator_request('EQ-INV-2001','Перегрев','stopped','Жумабаев Арман','test-device-0001')$q$);
+select pg_temp.try('requests 5', $q$select number::text from submit_operator_request('EQ-INV-2001','Искрит','stopped','Жумабаев Арман','test-device-0001')$q$);
+select pg_temp.try('6th request in 10 min -> must fail', $q$select number::text from submit_operator_request('EQ-INV-2001','Не запускается','stopped','Жумабаев Арман','test-device-0001')$q$);
+select pg_temp.try('my requests by device = 5', $q$select count(*)::text from operator_requests_by_device('test-device-0001')$q$);
 
 reset role;
 select step, what, result from t_log order by step;
