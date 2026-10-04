@@ -57,6 +57,7 @@ export const NAV: Record<Role, RoleNav> = {
     pc: [
       { href: "/master", label: "shell.nav.board", icon: "orders", exact: true },
       { href: "/master/orders/new", label: "shell.nav.issueOrder", icon: "plus" },
+      { href: "/master/requests", label: "shell.nav.requestsMaster", icon: "warning" },
       { href: "/master/shift", label: "shell.nav.shiftReport", icon: "chart" },
       { href: "/master/rating", label: "shell.nav.rating", icon: "chart" },
       { href: "/master/anomalies", label: "shell.nav.anomalies", icon: "warning" },

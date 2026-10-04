@@ -62,7 +62,10 @@ export async function createOrder(input: CreateOrderInput): Promise<ActionResult
     p_client_action_id: input.clientActionId,
   });
   if (error) return { ok: false, error: toErrorText(await getT(), error) };
-  if (input.requestId) await supabase.rpc("resolve_request", { p_request_id: input.requestId, p_status: "converted" });
+  // Наряд по заявке: заявка отмечается «выдан наряд» и связывается с ним (оператор увидит номер).
+  if (input.requestId) {
+    await supabase.rpc("decide_request", { p_request_id: input.requestId, p_status: "converted", p_order_id: data });
+  }
   // Сообщение исполнителю отправляем после ответа: мастер не ждёт Telegram.
   after(() => notifyNewOrder(data));
   refresh();
@@ -269,10 +272,10 @@ export async function createSideRequest(input: {
   return { ok: true, data: { sent: true } };
 }
 
-// Мастер отклоняет заявку. Превращение в наряд отмечается в createOrder.
-export async function dismissRequest(requestId: string): Promise<ActionResult<{ done: true }>> {
+// Мастер отклоняет заявку, обязательно с причиной. Превращение в наряд отмечается в createOrder.
+export async function dismissRequest(requestId: string, reason: string): Promise<ActionResult<{ done: true }>> {
   const supabase = await createClient();
-  const { error } = await supabase.rpc("resolve_request", { p_request_id: requestId, p_status: "dismissed" });
+  const { error } = await supabase.rpc("decide_request", { p_request_id: requestId, p_status: "dismissed", p_reason: reason.trim() });
   if (error) return { ok: false, error: toErrorText(await getT(), error) };
   refresh();
   return { ok: true, data: { done: true } };
