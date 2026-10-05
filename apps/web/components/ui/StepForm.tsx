@@ -20,12 +20,14 @@ type StepFormProps = {
   submitLabel: string;
   onSubmit: () => void;
   loading?: boolean;
+  // true — на широком экране (lg) шаги идут колонками на одном экране, кнопка под последней колонкой.
+  wide?: boolean;
 };
 
 // Одна форма, две раскладки.
 // Телефон (до md): по одному шагу, «Назад» и «Далее» внизу экрана.
 // Ноутбук (от md): все шаги одной страницей и одна кнопка отправки.
-export function StepForm({ steps, submitLabel, onSubmit, loading }: StepFormProps) {
+export function StepForm({ steps, submitLabel, onSubmit, loading, wide }: StepFormProps) {
   const t = useT();
   const [current, setCurrent] = useState(0);
   const isLast = current === steps.length - 1;
@@ -38,7 +40,10 @@ export function StepForm({ steps, submitLabel, onSubmit, loading }: StepFormProp
         e.preventDefault();
         if (allValid) onSubmit();
       }}
-      className="flex flex-col gap-6 pb-40 md:pb-0"
+      className={cx(
+        "flex flex-col gap-6 pb-40 md:pb-0",
+        wide && "lg:grid lg:min-h-[30rem] lg:flex-1 lg:grid-cols-[1fr_1.15fr_1fr] lg:grid-rows-[minmax(0,1fr)_auto] lg:gap-4",
+      )}
     >
       {/* Прогресс только на телефоне */}
       <div className="flex flex-col gap-2 md:hidden">
@@ -58,10 +63,11 @@ export function StepForm({ steps, submitLabel, onSubmit, loading }: StepFormProp
           aria-labelledby={`step-${s.id}`}
           className={cx(
             "flex-col gap-4 md:flex md:rounded-2xl md:border md:border-line md:bg-surface md:p-6",
+            wide && "lg:min-h-0 lg:gap-3 lg:overflow-y-auto lg:p-4 lg:[&_button]:min-h-10",
             i === current ? "flex" : "hidden",
           )}
         >
-          <h2 id={`step-${s.id}`} className="text-xl font-bold text-ink">
+          <h2 id={`step-${s.id}`} className={cx("text-xl font-bold text-ink", wide && "lg:text-lg")}>
             <span className="mr-2 hidden text-ink-muted md:inline">{i + 1}.</span>
             {s.title}
           </h2>
@@ -70,9 +76,9 @@ export function StepForm({ steps, submitLabel, onSubmit, loading }: StepFormProp
       ))}
 
       {/* Ноутбук: одна кнопка в конце */}
-      <div className="hidden flex-col items-end gap-2 md:flex">
+      <div className={cx("hidden flex-col items-end gap-2 md:flex", wide && "lg:col-start-3 lg:items-stretch lg:[&_button]:min-h-touch")}>
         {!allValid && <p className="text-base font-semibold text-danger">{t("ui.form.fixErrors")}</p>}
-        <Button type="submit" disabled={!allValid} loading={loading} className="min-w-64">
+        <Button type="submit" disabled={!allValid} loading={loading} className={wide ? "min-w-64 lg:w-full" : "min-w-64"}>
           {submitLabel}
         </Button>
       </div>

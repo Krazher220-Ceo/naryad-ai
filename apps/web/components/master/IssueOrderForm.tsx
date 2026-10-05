@@ -407,14 +407,14 @@ export function IssueOrderForm({
                 key={key}
                 type="button"
                 onClick={() => setDescription(t(key))}
-                className="min-h-touch-sm rounded-xl border-2 border-line-strong bg-surface px-4 text-base font-semibold text-ink hover:bg-canvas active:bg-line"
+                className="min-h-touch-sm rounded-xl border-2 border-line-strong bg-surface px-4 text-base font-semibold text-ink hover:bg-canvas active:bg-line lg:px-3 lg:text-sm"
               >
                 {t(key)}
               </button>
             ))}
           </div>
           <Field label={t("master.issue.description")} htmlFor="issue-description" hint={t("master.issue.descriptionHint")} required>
-            <TextArea id="issue-description" value={description} onChange={(e) => setDescription(e.target.value)} />
+            <TextArea id="issue-description" className="lg:h-24 lg:py-2" rows={4} value={description} onChange={(e) => setDescription(e.target.value)} />
             <div className="flex flex-wrap gap-2">
               <VoiceButton onText={(spoken) => setDescription((prev) => appendSpoken(prev, spoken))} />
               {/* Диктофон: Whisper на нашем Mac и разбор речи по полям. Поля человек проверяет перед выдачей. */}
@@ -429,6 +429,7 @@ export function IssueOrderForm({
           <Field label={t("master.issue.priority")}>
             <SegmentedControl
               ariaLabel={t("master.issue.priority")}
+              className="lg:grid-cols-2 2xl:grid-cols-4"
               value={priority}
               onChange={(p) => {
                 hasManuallyChangedPriority.current = true;
@@ -596,13 +597,13 @@ export function IssueOrderForm({
   ];
 
   return (
-    <div>
+    <div className="flex min-h-0 flex-1 flex-col">
       {equipment && (
-        <p className="mb-4 text-base text-ink-muted">
+        <p className="mb-4 text-base lg:mb-2 lg:text-sm text-ink-muted">
           {t("master.issue.section")}: {data.sections.find((s) => s.id === equipment.section_id)?.name}
         </p>
       )}
-      <StepForm steps={steps} submitLabel={t("master.issue.submit")} onSubmit={submit} loading={loading} />
+      <StepForm wide steps={steps} submitLabel={t("master.issue.submit")} onSubmit={submit} loading={loading} />
     </div>
   );
 }
