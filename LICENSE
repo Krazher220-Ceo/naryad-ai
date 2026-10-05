@@ -6,6 +6,10 @@ Copyright (c) 2026 команда «НарядAI»: Алихан, Бауыржа
 
 Исходный код открыт для чтения. Это не лицензия открытого программного обеспечения.
 
+Лицензия согласована с разделом 9 Положения о хакатоне: исключительные права
+на решение сохраняются за авторами (п. 9.1), а передача прав, лицензирование
+и коммерческое внедрение оформляются отдельным соглашением (п. 9.3).
+
 1. Что разрешено
 
 Без отдельного согласия авторов разрешается:
@@ -17,7 +21,10 @@ a) жюри, экспертам и организаторам хакатона, 
 b) любому человеку — читать код и запускать его у себя для личного изучения
    и обучения;
 c) ссылаться на проект и цитировать небольшие фрагменты кода в обзорах,
-   учебных и научных материалах с указанием авторов и ссылки на репозиторий.
+   учебных и научных материалах с указанием авторов и ссылки на репозиторий;
+d) организаторам и партнёрам — некоммерческое информационное освещение
+   хакатона (п. 9.2 Положения): название и состав команды, краткое описание
+   проекта, снимки экранов, фото и видео демонстрации.
 
 2. Что запрещено
 
@@ -40,8 +47,9 @@ e) удаление или изменение этой лицензии и ук�
 3. Коммерческая лицензия
 
 Использовать проект в целях пункта 2 можно только по отдельному письменному
-договору с авторами. Чтобы договориться, напишите владельцу репозитория
-на GitHub.
+договору с авторами. Индустриальный партнёр кейса имеет преимущественное право
+провести с командой переговоры о пилотировании и развитии решения (п. 9.3
+Положения). Чтобы договориться, напишите владельцу репозитория на GitHub.
 
 4. Сторонние компоненты
 
@@ -70,7 +78,8 @@ English summary (the Russian text above prevails)
 
 Source-available, not open source. Hackathon jury, organizers and the case
 partner may read, run, deploy and test the software to evaluate the solution.
-Anyone may read and run it for personal study. Any commercial use, offering it
+Anyone may read and run it for personal study. Organizers may cover the event
+non-commercially. The case partner has the first right to negotiate a pilot. Any commercial use, offering it
 as a service (SaaS, hosting, integration for third parties), selling,
 sublicensing, redistributing, or using it to build commercial products or train
 commercial AI models is prohibited without a written agreement with the authors.
