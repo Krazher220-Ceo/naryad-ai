@@ -18,6 +18,30 @@ const WATCHED: OrderStatus[] = ["issued", "accepted", "queued", "in_progress", "
 
 const minutes = (ms: number) => Math.round(ms / 60000);
 
+type SentNotification = { order_id: string | null; employee_id: string; kind: string; created_at: string };
+
+// Журнал уже отправленного читаем целиком, страницами по 1000 строк: Supabase не отдаёт больше
+// за один запрос. Раньше читалась только первая страница, и проверка не видела старые
+// уведомления и слала их заново каждую минуту.
+async function loadSentNotifications(
+  db: ReturnType<typeof createAdminClient>,
+  orderIds: string[],
+): Promise<SentNotification[]> {
+  const page = 1000;
+  const rows: SentNotification[] = [];
+  for (let from = 0; ; from += page) {
+    const { data, error } = await db
+      .from("notifications")
+      .select("order_id, employee_id, kind, created_at")
+      .in("order_id", orderIds)
+      .order("id")
+      .range(from, from + page - 1);
+    if (error) throw error;
+    rows.push(...data);
+    if (data.length < page) return rows;
+  }
+}
+
 export async function runDeadlineChecks(now: Date = new Date()) {
   const db = createAdminClient();
 
@@ -40,15 +64,14 @@ export async function runDeadlineChecks(now: Date = new Date()) {
   if (orders.length === 0) return { checked: 0, sent: 0 };
 
   const orderIds = orders.map((o) => o.id);
-  const [notifRes, eventsRes] = await Promise.all([
-    db.from("notifications").select("order_id, employee_id, kind, created_at").in("order_id", orderIds),
+  const [notifications, eventsRes] = await Promise.all([
+    loadSentNotifications(db, orderIds),
     db
       .from("work_order_events")
       .select("order_id, to_status, comment, reason, created_at")
       .in("order_id", orderIds)
       .order("created_at"),
   ]);
-  const notifications = notifRes.data ?? [];
   const events = eventsRes.data ?? [];
   const freeWorkers = (boardRes.data ?? []).filter((w) => w.board_status === "free").map((w) => w.full_name ?? "");
 
