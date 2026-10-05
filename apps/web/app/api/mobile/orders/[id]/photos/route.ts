@@ -1,26 +1,13 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { createBearerClient } from "@/lib/supabase/bearer";
 
-function getBearerClient(req: Request) {
-  const auth = req.headers.get("Authorization");
-  const token = auth?.replace(/^Bearer\s+/i, "").trim();
-  if (!token) return null;
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      global: { headers: { Authorization: `Bearer ${token}` } },
-      auth: { persistSession: false, autoRefreshToken: false },
-    }
-  );
-}
 
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id: orderId } = await params;
-  const client = getBearerClient(req);
+  const client = createBearerClient(req);
   if (!client) {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
@@ -36,6 +23,10 @@ export async function POST(
     .eq("auth_user_id", user.data.user.id)
     .maybeSingle();
 
+  if (!employee) {
+    return NextResponse.json({ ok: false, error: "Employee not found" }, { status: 403 });
+  }
+
   const body = await req.json().catch(() => ({}));
   const { kind, path } = body;
 
@@ -46,8 +37,8 @@ export async function POST(
   const { data, error } = await client.from("photos").insert({
     order_id: orderId,
     kind,
-    storage_path: path,
-    author_id: employee?.id ?? null,
+    path,
+    author_id: employee.id,
   }).select("id").single();
 
   if (error) {

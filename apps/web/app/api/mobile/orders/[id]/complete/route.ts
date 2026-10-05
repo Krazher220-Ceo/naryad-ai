@@ -1,27 +1,14 @@
-import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { after, NextResponse } from "next/server";
+import { createBearerClient } from "@/lib/supabase/bearer";
 import { reviewOrder } from "@/lib/ai/review";
 
-function getBearerClient(req: Request) {
-  const auth = req.headers.get("Authorization");
-  const token = auth?.replace(/^Bearer\s+/i, "").trim();
-  if (!token) return null;
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      global: { headers: { Authorization: `Bearer ${token}` } },
-      auth: { persistSession: false, autoRefreshToken: false },
-    }
-  );
-}
 
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id: orderId } = await params;
-  const client = getBearerClient(req);
+  const client = createBearerClient(req);
   if (!client) {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
@@ -44,9 +31,8 @@ export async function POST(
   const { data, error } = await client.rpc("complete_order", {
     p_order_id: orderId,
     p_work_done: workDone,
-    p_fault_code: faultCode || null,
+    p_fault_code: faultCode || undefined,
     p_materials: formattedMaterials,
-    p_comment: null,
     p_client_action_id: clientActionId,
   });
 
@@ -54,7 +40,8 @@ export async function POST(
     return NextResponse.json({ ok: false, error: error.message }, { status: 400 });
   }
 
-  reviewOrder(orderId).catch((e) => console.error("Mobile complete reviewOrder error", e));
+  // ИИ-проверка после ответа, как в completeOrder (lib/orders/actions.ts).
+  after(() => reviewOrder(orderId).catch((e) => console.error("reviewOrder failed", e)));
 
   return NextResponse.json({ ok: true, status: data });
 }

@@ -1,27 +1,14 @@
-import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { after, NextResponse } from "next/server";
+import { createBearerClient } from "@/lib/supabase/bearer";
 import { notifyStatusChange } from "@/lib/orders/notifications";
 
-function getBearerClient(req: Request) {
-  const auth = req.headers.get("Authorization");
-  const token = auth?.replace(/^Bearer\s+/i, "").trim();
-  if (!token) return null;
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      global: { headers: { Authorization: `Bearer ${token}` } },
-      auth: { persistSession: false, autoRefreshToken: false },
-    }
-  );
-}
 
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id: orderId } = await params;
-  const client = getBearerClient(req);
+  const client = createBearerClient(req);
   if (!client) {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
@@ -42,7 +29,7 @@ export async function POST(
     if (error) {
       return NextResponse.json({ ok: false, error: error.message }, { status: 400 });
     }
-    notifyStatusChange({ orderId, action: "help", reason }).catch(console.error);
+    after(() => notifyStatusChange({ orderId, action: "help", reason }).catch(console.error));
     return NextResponse.json({ ok: true, sent: true });
   }
 
@@ -51,7 +38,6 @@ export async function POST(
     p_action: action,
     p_reason: reason,
     p_reason_code: reasonCode,
-    p_comment: null,
     p_client_action_id: clientActionId,
   });
 
@@ -59,7 +45,8 @@ export async function POST(
     return NextResponse.json({ ok: false, error: error.message }, { status: 400 });
   }
 
-  notifyStatusChange({ orderId, action, reason, reasonCode }).catch(console.error);
+  // Уведомления после ответа, через after: иначе Vercel оборвёт их вместе с функцией.
+  after(() => notifyStatusChange({ orderId, action, reason, reasonCode }).catch(console.error));
 
   return NextResponse.json({ ok: true, status: data });
 }
