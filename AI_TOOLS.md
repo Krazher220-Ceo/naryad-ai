@@ -58,6 +58,20 @@
 | Bubblewrap (Google, Apache 2.0), Trusted Web Activity | Сборка Android-приложения (APK) поверх того же веб-приложения, `apps/android` |
 | Supabase pg_cron и pg_net | Расписание контроля сроков раз в минуту |
 
+## Android-приложение (`apps/android/native`)
+
+Все пакеты — на стороне клиента, моделей ИИ на телефоне нет.
+
+| Пакет | Лицензия | Назначение |
+|---|---|---|
+| Jetpack Compose, Material 3, Navigation, Lifecycle, Activity, Core KTX, ExifInterface (AndroidX) | Apache 2.0 | Интерфейс, навигация, чтение ориентации фото |
+| Kotlin, kotlinx.serialization, kotlinx.coroutines (JetBrains) | Apache 2.0 | Язык, JSON, фоновая работа |
+| OkHttp (Square) | Apache 2.0 | Запросы к Supabase и маршрутам `/api/mobile/...` |
+| Coil (coil-compose) | Apache 2.0 | Показ фото |
+| Шрифты Inter и Oswald (`res/font`, переменные файлы из github.com/google/fonts) | SIL OFL 1.1 | Фирменные шрифты, как на сайте |
+
+Библиотеки supabase-kt, Ktor и Room, которые были в первом наброске из Google AI Studio, не используются: вход, чтение и загрузка фото сделаны напрямую через OkHttp (меньше кода), очередь действий лежит в JSON-файле.
+
 ## Проверка лицензий зависимостей
 
 Все зависимости, включая транзитивные, разрешают коммерческое использование и закрытый код.
