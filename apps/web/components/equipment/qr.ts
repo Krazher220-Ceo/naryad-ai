@@ -2,6 +2,20 @@ import "server-only";
 import QRCode from "qrcode";
 import { equipmentIconPaths } from "./EquipmentIcon";
 
+// Модули QR для таблички: размер сетки и путь из чёрных квадратиков (единица = один модуль).
+// Белое поле вокруг кода (4 модуля) добавляет plate.ts.
+export function qrModules(url: string): { size: number; path: string } {
+  const qr = QRCode.create(url, { errorCorrectionLevel: "Q" });
+  const size = qr.modules.size;
+  let path = "";
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      if (qr.modules.get(x, y)) path += `M${x} ${y}h1v1h-1z`;
+    }
+  }
+  return { size, path };
+}
+
 // QR-код с пиктограммой по центру. Уровень H восстанавливает до 30% повреждений,
 // поэтому закрытая иконкой середина (около 5% площади) не мешает чтению.
 export async function equipmentQrSvg({ url, type, size }: { url: string; type: string; size: number }): Promise<string> {
