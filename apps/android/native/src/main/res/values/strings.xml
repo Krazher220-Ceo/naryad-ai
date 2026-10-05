@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">НарядAI</string>
+    <string name="app_description">Система нарядов на ремонт горно-обогатительной фабрики</string>
+
+    <!-- Аутентификация -->
+    <string name="auth_title">Вход в систему</string>
+    <string name="auth_login">Логин</string>
+    <string name="auth_login_hint">worker1, master1, lead1</string>
+    <string name="auth_password">Пароль</string>
+    <string name="auth_show_password">Показать пароль</string>
+    <string name="auth_hide_password">Скрыть пароль</string>
+    <string name="auth_submit">Войти</string>
+    <string name="auth_sign_out">Выйти из аккаунта</string>
+    <string name="auth_error_invalid">Неверный логин или пароль. Проверьте данные и попробуйте снова.</string>
+    <string name="auth_error_empty">Введите логин и пароль.</string>
+    <string name="auth_demo_hint">Все данные демонстрационные</string>
+
+    <!-- Роли -->
+    <string name="role_worker">Исполнитель</string>
+    <string name="role_master">Мастер</string>
+    <string name="role_lead">Руководитель</string>
+    <string name="role_operator">Оператор</string>
+
+    <!-- Навигация -->
+    <string name="nav_my_orders">Мои наряды</string>
+    <string name="nav_notifications">Уведомления</string>
+    <string name="nav_profile">Профиль</string>
+
+    <!-- Статусы наряда -->
+    <string name="status_issued">Выдан</string>
+    <string name="status_accepted">Принят</string>
+    <string name="status_queued">В очереди</string>
+    <string name="status_in_progress">В работе</string>
+    <string name="status_paused">Приостановлен</string>
+    <string name="status_done">Исполнено</string>
+    <string name="status_ai_review">Проверка ИИ</string>
+    <string name="status_rework">На доработке</string>
+    <string name="status_closed">Закрыт</string>
+    <string name="status_cancelled">Отменён</string>
+    <string name="status_rejected">Отклонён</string>
+
+    <!-- Приоритеты -->
+    <string name="priority_emergency">Аварийный</string>
+    <string name="priority_high">Высокий</string>
+    <string name="priority_normal">Обычный</string>
+    <string name="priority_planned">Плановый</string>
+
+    <!-- Статусы исполнителя -->
+    <string name="worker_free">Свободен</string>
+    <string name="worker_busy">В работе</string>
+    <string name="worker_queue">Есть очередь</string>
+    <string name="worker_off">Не на смене</string>
+
+    <!-- Действия -->
+    <string name="action_accept">Принять в работу</string>
+    <string name="action_start">Начать исполнение</string>
+    <string name="action_complete">Завершить наряд</string>
+    <string name="action_queue">В очередь</string>
+    <string name="action_pause">Пауза</string>
+    <string name="action_resume">Возобновить</string>
+    <string name="action_reject">Отклонить</string>
+    <string name="action_help">Нужна помощь</string>
+    <string name="action_back">Назад</string>
+    <string name="action_cancel">Отмена</string>
+    <string name="action_confirm">Подтвердить</string>
+    <string name="action_retry">Повторить</string>
+    <string name="action_take_photo">Сделать фото</string>
+    <string name="action_pick_photo">Выбрать фото</string>
+
+    <!-- Просрочка -->
+    <string name="overdue_badge">Просрочен</string>
+    <string name="overdue_by_min">Просрочен на %1$d мин</string>
+
+    <!-- Карточка наряда -->
+    <string name="order_number_prefix">№%1$d</string>
+    <string name="order_due_prefix">Срок: %1$s</string>
+    <string name="order_equipment_section">%1$s · %2$s</string>
+    <string name="order_assignee_prefix">Исполнитель: %1$s</string>
+    <string name="order_history_title">История наряда</string>
+    <string name="order_photos_before">Фото «до»</string>
+    <string name="order_photos_after">Фото «после»</string>
+    <string name="order_no_photos">Нет фотографий</string>
+    <string name="order_no_history">История изменений пока пуста</string>
+    <string name="order_materials_used">Использованные материалы</string>
+    <string name="order_work_done_label">Что сделано</string>
+    <string name="order_fault_code_label">Шифр неисправности</string>
+
+    <!-- Завершение наряда -->
+    <string name="complete_screen_title">Завершение наряда №%1$d</string>
+    <string name="complete_work_done_label">Что сделано (обязательно)</string>
+    <string name="complete_work_done_placeholder">Опишите выполненную работу или надиктуйте голосом…</string>
+    <string name="complete_voice_record">Голосовой ввод</string>
+    <string name="complete_voice_listening">Идёт запись… Говорите</string>
+    <string name="complete_voice_stop">Остановить</string>
+    <string name="complete_fault_code_label">Шифр неисправности</string>
+    <string name="complete_fault_code_none">Не выбрано</string>
+    <string name="complete_materials_title">Расход материалов</string>
+    <string name="complete_add_material">+ Добавить материал</string>
+    <string name="complete_material_qty">Количество (%1$s)</string>
+    <string name="complete_photo_after_title">Фото «после»</string>
+    <string name="complete_photo_unplanned_hint">Фото «после» обязательно для внеплановых работ</string>
+    <string name="complete_submit_btn">Отправить на проверку</string>
+
+    <!-- Причины отклонения / паузы -->
+    <string name="reason_sheet_title">Укажите причину</string>
+    <string name="reason_required_hint">Кнопка станет активной после выбора или ввода причины</string>
+    <string name="reason_no_materials">Нет материалов</string>
+    <string name="reason_no_permit">Нет допуска</string>
+    <string name="reason_busy_emergency">Занят аварийным</string>
+    <string name="reason_waiting_parts">Ждёт запчасть</string>
+    <string name="reason_waiting_permit">Ждёт допуск</string>
+    <string name="reason_waiting_stop">Ждёт остановки оборудования</string>
+    <string name="reason_other">Другое</string>
+    <string name="reason_other_placeholder">Напишите причину подробно…</string>
+
+    <!-- Уведомления -->
+    <string name="notifications_title">Уведомления</string>
+    <string name="notifications_empty_title">Уведомлений нет</string>
+    <string name="notifications_empty_text">Здесь появятся события по вашим нарядам</string>
+    <string name="notifications_mark_all_read">Прочитать все</string>
+    <string name="notifications_open_order">Перейти к наряду →</string>
+
+    <!-- Профиль -->
+    <string name="profile_title">Профиль</string>
+    <string name="profile_language">Язык приложения</string>
+    <string name="profile_lang_ru">Русский</string>
+    <string name="profile_lang_kk">Қазақша</string>
+    <string name="profile_offline_queue">Очередь офлайн-действий: %1$d</string>
+    <string name="profile_sync_now">Синхронизировать сейчас</string>
+
+    <!-- Офлайн и сеть -->
+    <string name="offline_banner">Нет связи · Работа в офлайн-режиме</string>
+    <string name="offline_queued_info">Действие сохранено в офлайн-очереди и будет отправлено при появлении сети</string>
+    <string name="online_restored">Связь восстановлена</string>
+
+    <!-- Состояния списков и ошибки -->
+    <string name="empty_orders_title">Нет активных нарядов</string>
+    <string name="empty_orders_desc">Новые наряды от мастера появятся здесь автоматически</string>
+    <string name="error_title">Произошла ошибка</string>
+    <string name="error_action_failed">Не удалось выполнить действие: %1$s</string>
+</resources>

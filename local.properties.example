@@ -1,0 +1,4 @@
+# Supabase and Web App configuration for NaryadAI Native
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your-anon-key-here
+WEB_APP_URL=https://naryad-ai.vercel.app
