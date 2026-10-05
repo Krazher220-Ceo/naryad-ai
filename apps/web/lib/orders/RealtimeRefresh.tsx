@@ -41,9 +41,12 @@ export function RealtimeRefresh() {
         .subscribe();
     });
 
-    // Телефон уснул и проснулся: сразу подтягиваем свежие данные.
+    // Телефон уснул и проснулся: подтягиваем свежие данные. Сначала ждём, пока клиент
+    // сам обновит токен: иначе клиент и proxy.ts обновляют его одновременно по одному
+    // refresh-токену, и вход сбрасывается.
     const onVisible = () => {
-      if (document.visibilityState === "visible") router.refresh();
+      if (document.visibilityState !== "visible") return;
+      void supabase.auth.getSession().finally(() => router.refresh());
     };
     document.addEventListener("visibilitychange", onVisible);
 

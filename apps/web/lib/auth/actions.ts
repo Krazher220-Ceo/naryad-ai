@@ -34,7 +34,7 @@ export async function signIn(
     .eq("auth_user_id", data.user.id)
     .single();
   if (!employee || !isRole(employee.role)) {
-    await supabase.auth.signOut();
+    await supabase.auth.signOut({ scope: "local" });
     return { error: t("auth.errorNoProfile") };
   }
 
@@ -44,6 +44,7 @@ export async function signIn(
 
 export async function signOut(): Promise<void> {
   const supabase = await createClient();
-  await supabase.auth.signOut();
+  // Только этот браузер: демо-логины общие, глобальный выход выкидывал бы всех.
+  await supabase.auth.signOut({ scope: "local" });
   redirect("/login");
 }
