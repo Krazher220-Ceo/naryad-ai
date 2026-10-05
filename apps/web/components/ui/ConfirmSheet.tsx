@@ -36,16 +36,23 @@ export function ConfirmSheet({
   const t = useT();
   const sheetRef = useRef<HTMLDivElement>(null);
 
-  // Escape закрывает лист, фокус переносится внутрь.
+  // onCancel приходит новой функцией при каждой отрисовке. Держим её в ref, чтобы эффект ниже
+  // срабатывал только при открытии: иначе каждая введённая буква уводила фокус из поля причины.
+  const cancelRef = useRef(onCancel);
+  useEffect(() => {
+    cancelRef.current = onCancel;
+  }, [onCancel]);
+
+  // Escape закрывает лист, фокус переносится внутрь — один раз при открытии.
   useEffect(() => {
     if (!open) return;
     sheetRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onCancel();
+      if (e.key === "Escape") cancelRef.current();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, onCancel]);
+  }, [open]);
 
   if (!open) return null;
 
