@@ -113,3 +113,76 @@ h2 {
   -webkit-mask: url("/brand/km-logo.svg") center / contain no-repeat;
   mask: url("/brand/km-logo.svg") center / contain no-repeat;
 }
+
+/* ===== Печать QR-табличек (/master/equipment/qr) ===== */
+.plates-print {
+  display: none;
+}
+
+@page plates {
+  size: A4;
+  margin: 0;
+}
+
+@media print {
+  /* Меню, шапка и нижняя навигация не печатаются */
+  .shell > aside,
+  .shell header,
+  .shell nav {
+    display: none !important;
+  }
+
+  .plates-print {
+    display: block;
+    page: plates;
+  }
+
+  .print-page {
+    width: 210mm;
+    height: 296mm;
+    break-after: page;
+    overflow: hidden;
+  }
+
+  .print-page:last-child {
+    break-after: auto;
+  }
+
+  .print-cell svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  /* Одна табличка на лист, по центру, крупно */
+  .plates-print-one .print-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .plates-print-one .print-cell {
+    width: 160mm;
+  }
+
+  /* 4 на листе: сетка 2 x 2, пунктирные линии реза */
+  .plates-print-four .print-page {
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    padding: 8mm;
+  }
+
+  .plates-print-four .print-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 0.3mm dashed #000;
+    padding: 3mm;
+  }
+
+  .plates-print-four .print-cell svg {
+    width: 88mm;
+  }
+}
