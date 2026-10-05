@@ -17,6 +17,7 @@ import {
 import { SignOutButton } from "@/components/shell/SignOutButton";
 import type { Role } from "@/lib/auth/roles";
 import { ConnectionPill } from "./ConnectionPill";
+import { LinkIcon } from "./LinkIcon";
 import { NotificationBell } from "./NotificationBell";
 import { NAV, hidesBottomNav, isActive, pageTitle, type NavIcon } from "./nav";
 
@@ -88,7 +89,7 @@ export function ShellFrame({ role, employeeId, fullName, roleLabel, unread, chil
                   active ? "bg-brand-hover font-bold text-white" : "font-semibold text-white/80 hover:bg-white/10 hover:text-white",
                 )}
               >
-                <Icon className="size-5 shrink-0" />
+                <LinkIcon icon={Icon} className="size-5 shrink-0" />
                 <span className="flex-1">{t(item.label)}</span>
               </Link>
             );
@@ -152,7 +153,7 @@ export function ShellFrame({ role, employeeId, fullName, roleLabel, unread, chil
                   aria-label={t("shell.profile")}
                   className="flex size-11 items-center justify-center rounded-xl border border-line text-ink hover:bg-canvas"
                 >
-                  <IconUser className="size-5" />
+                  <LinkIcon icon={IconUser} className="size-5" />
                 </Link>
               )}
             </div>
@@ -180,7 +181,7 @@ export function ShellFrame({ role, employeeId, fullName, roleLabel, unread, chil
                     className="flex flex-col items-center gap-1 text-[13px] font-bold text-ink"
                   >
                     <span className="-mt-7 flex size-16 items-center justify-center rounded-[20px] border-4 border-canvas bg-brand text-white shadow-lg shadow-brand/35">
-                      <Icon className="size-7" />
+                      <LinkIcon icon={Icon} className="size-7" />
                     </span>
                     {t(item.label)}
                   </Link>
@@ -196,7 +197,7 @@ export function ShellFrame({ role, employeeId, fullName, roleLabel, unread, chil
                     active ? "font-bold text-brand" : "font-semibold text-ink-muted",
                   )}
                 >
-                  <Icon className="size-[26px]" />
+                  <LinkIcon icon={Icon} className="size-[26px]" />
                   {t(item.label)}
                 </Link>
               );

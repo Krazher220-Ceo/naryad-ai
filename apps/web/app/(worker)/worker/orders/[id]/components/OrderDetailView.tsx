@@ -2,7 +2,6 @@
 
 import { useState, useRef } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { tRu, type MessageKey } from "@/lib/i18n";
 import { useT } from "@/components/LocaleProvider";
 import { RealtimeRefresh } from "@/lib/orders/RealtimeRefresh";
@@ -50,7 +49,6 @@ type OrderDetailViewProps = {
 
 export function OrderDetailView({ order, events, photos, materials, review, toBring, repairHistory }: OrderDetailViewProps) {
   const t = useT();
-  const router = useRouter();
 
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
   const toast = useToast();
@@ -110,7 +108,6 @@ export function OrderDetailView({ order, events, photos, materials, review, toBr
           toast.show("offline");
         } else {
           toast.show("saved");
-          router.refresh();
         }
       } else {
         toast.show("error", { detail: res.error });
@@ -146,7 +143,6 @@ export function OrderDetailView({ order, events, photos, materials, review, toBr
           toast.show("offline");
         } else {
           toast.show("saved");
-          router.refresh();
         }
       } else {
         toast.show("error", { detail: res.error });
@@ -182,7 +178,6 @@ export function OrderDetailView({ order, events, photos, materials, review, toBr
           toast.show("offline");
         } else {
           toast.show("saved");
-          router.refresh();
         }
       } else {
         toast.show("error", { detail: res.error });

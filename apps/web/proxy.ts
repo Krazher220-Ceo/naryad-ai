@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { isRole, ROLE_HOME, ROLES, type Role } from "@/lib/auth/roles";
+import { isRole, ROLE_HOME } from "@/lib/auth/roles";
 
 // Страницы без входа. /api проверяет доступ сам.
 // /operator и /q — оператор без входа: сообщить о поломке по QR (PLAN.md, раздел 4).
@@ -10,11 +10,6 @@ const PUBLIC_FILES = ["/manifest.webmanifest", "/sw.js"];
 function isPublic(path: string): boolean {
   if (PUBLIC_FILES.includes(path)) return true;
   return PUBLIC_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`));
-}
-
-// Роль, чей раздел открыт по этому пути (/master, /master/...), иначе null.
-function roleOfPath(path: string): Role | null {
-  return ROLES.find((r) => path === `/${r}` || path.startsWith(`/${r}/`)) ?? null;
 }
 
 export async function proxy(request: NextRequest) {
@@ -39,7 +34,10 @@ export async function proxy(request: NextRequest) {
     },
   );
 
-  const { data: userData } = await supabase.auth.getUser();
+  // getClaims проверяет подпись токена на месте и при необходимости обновляет сессию.
+  // getUser ходил бы в Supabase Auth на каждый переход и добавлял задержку.
+  const { data: claimsData } = await supabase.auth.getClaims();
+  const userId = claimsData?.claims.sub;
   const path = request.nextUrl.pathname;
 
   // Редирект с теми же обновлёнными cookie сессии.
@@ -49,31 +47,25 @@ export async function proxy(request: NextRequest) {
     return redirectResponse;
   }
 
-  if (!userData.user) {
+  if (!userId) {
     // Корень без входа — стартовая страница для жюри с логинами и сценарием.
     if (path === "/") return redirectTo("/demo");
     // После входа вернём туда, куда шли (например, на QR-код оборудования).
     return isPublic(path) ? response : redirectTo(`/login?next=${encodeURIComponent(path + request.nextUrl.search)}`);
   }
 
-  const pathRole = roleOfPath(path);
-  if (path !== "/login" && path !== "/" && pathRole === null) return response;
+  // Разделы ролей проверяет layout роли (requireRole), второй запрос здесь не нужен.
+  // Роль ищем только для / и /login, чтобы отправить сотрудника на его экран.
+  if (path !== "/login" && path !== "/") return response;
 
-  // Роль нужна только для /, /login и разделов ролей.
   const { data: employee } = await supabase
     .from("employees")
     .select("role")
-    .eq("auth_user_id", userData.user.id)
+    .eq("auth_user_id", userId)
     .single();
   // Нет записи сотрудника: не редиректим, иначе будет петля.
-  if (!employee || !isRole(employee.role)) {
-    return pathRole === null ? response : redirectTo("/login");
-  }
-
-  if (pathRole === null || pathRole !== employee.role) {
-    return redirectTo(ROLE_HOME[employee.role]);
-  }
-  return response;
+  if (!employee || !isRole(employee.role)) return response;
+  return redirectTo(ROLE_HOME[employee.role]);
 }
 
 export const config = {

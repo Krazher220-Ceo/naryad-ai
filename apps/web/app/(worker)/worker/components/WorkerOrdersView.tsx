@@ -2,7 +2,6 @@
 
 import { useState, useRef } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useT } from "@/components/LocaleProvider";
 import { RealtimeRefresh } from "@/lib/orders/RealtimeRefresh";
 import { sendTransition } from "@/lib/offline/queue";
@@ -38,7 +37,6 @@ type OrderItem = WorkerOrders["open"][number];
 
 export function WorkerOrdersView({ fullName, open, recent }: WorkerOrdersViewProps) {
   const t = useT();
-  const router = useRouter();
 
   // Состояния действий
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
@@ -113,7 +111,6 @@ export function WorkerOrdersView({ fullName, open, recent }: WorkerOrdersViewPro
           toast.show("offline");
         } else {
           toast.show("saved");
-          router.refresh();
         }
       } else {
         toast.show("error", { detail: res.error });
@@ -149,7 +146,6 @@ export function WorkerOrdersView({ fullName, open, recent }: WorkerOrdersViewPro
           toast.show("offline");
         } else {
           toast.show("saved");
-          router.refresh();
         }
       } else {
         toast.show("error", { detail: res.error });
@@ -185,7 +181,6 @@ export function WorkerOrdersView({ fullName, open, recent }: WorkerOrdersViewPro
           toast.show("offline");
         } else {
           toast.show("saved");
-          router.refresh();
         }
       } else {
         toast.show("error", { detail: res.error });
