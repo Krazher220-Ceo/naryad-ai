@@ -1,70 +1,71 @@
-# НарядAI — Нативный Android-клиент (Kotlin + Jetpack Compose)
+# НарядAI: нативное Android-приложение исполнителя
 
-Нативный тонкий клиент системы нарядов на ремонт «НарядAI» для АО «Костанайские минералы».
-Разработан в соответствии с разделом «Android-приложение» в `AGENTS.md`.
+Тонкий клиент веб-приложения «НарядAI» (Kotlin, Jetpack Compose). Правила — в разделе «Android-приложение» файла `AGENTS.md`.
 
-## Архитектура и принципы
+Логики статусов, прав и подсчётов в приложении нет:
 
-- **Тонкий клиент**: никакой бизнес-логики в приложении. Переходы статусов, валидация прав, начисление рейтинга и аналитика выполняются сервером и базой Supabase.
-- **Действия**: отправляются исключительно через HTTP-маршруты `/api/mobile/orders/{id}/...` с Bearer-токеном сессии. Приложение генерирует постоянный `clientActionId` (UUID) для идемпотентности.
-- **Офлайн-режим**: локальная база данных Room кэширует наряды, события и фото. При отсутствии сети действия сохраняются в очередь `offline_actions` и отправляются при восстановлении подключения.
-- **Интерфейс для работы в перчатках**:
-  - Высота интерактивных кнопок не менее 56 dp.
-  - Главное действие размещено внизу экрана.
-  - Фирменные цвета км.кз: тёмно-синий `#0B2A5B`, акцентный жёлтый `#F5C400`, аварийный красный.
-  - Полная поддержка двух языков: Русский (`ru`) и Қазақша (`kk`).
+- **Чтение** идёт напрямую в Supabase (PostgREST) с токеном пользователя. Видимость строк решают правила доступа базы.
+- **Действия** идут только через маршруты веб-приложения `/api/mobile/orders/{id}/transition|complete|photos` с заголовком `Authorization: Bearer <токен>`. Текст ошибки сервера показывается как есть.
+- **Без сети** действия складываются в очередь на телефоне (`queue.json`, фото в `pending/`) и уходят сами, когда появится связь. У каждого нажатия свой `clientActionId` (UUID), при повторе он тот же, поэтому сервер не задублирует действие.
+- Кэш последних нарядов и уведомлений лежит в настройках приложения: без сети показываем его и плашку «Нет связи».
 
-## Структура проекта
+## Экраны
+
+Вход, Мои наряды, Наряд (история, фото, кнопки по статусу, пауза и отказ с причиной, проверка безопасности, «Нужна помощь»), Закрытие наряда (4 шага: что сделано, шифр, материалы, фото «после»), Уведомления, Профиль (язык Рус/Қаз, очередь отправки, выход). Все надписи — в `app/src/main/res/values/strings.xml` и `values-kk/strings.xml`.
+
+Приложение только для роли «исполнитель». Если войдёт мастер или руководитель, вход покажет, что нужна веб-версия.
+
+## Сборка одной командой
+
+Нужны JDK 21 и Android SDK (платформа 35).
+
+```bash
+cd apps/android/native
+cp local.properties.example local.properties   # один раз, затем заполнить (ниже)
+./gradlew assembleDebug
+```
+
+APK: `apps/android/native/app/build/outputs/apk/debug/app-debug.apk`.
+
+`local.properties` не попадает в репозиторий. В нём:
+
+```properties
+sdk.dir=/Users/<вы>/Library/Android/sdk
+SUPABASE_URL=https://<проект>.supabase.co
+SUPABASE_ANON_KEY=<публичный anon-ключ>
+WEB_APP_URL=https://naryad-ai.vercel.app
+```
+
+Ключ `service_role` сюда не кладут никогда: приложению нужен только публичный anon-ключ.
+
+## Установка на телефон
+
+1. На телефоне включить «Для разработчиков», затем «Отладка по USB».
+2. Подключить кабелем и выполнить:
+   ```bash
+   adb install -r app/build/outputs/apk/debug/app-debug.apk
+   ```
+   Или скопировать `app-debug.apk` на телефон и открыть его (разрешить установку из этого источника).
+3. Для эмулятора: `adb install -r ...` на запущенный эмулятор, дальше так же.
+
+Демо-вход исполнителя: логин `worker1` (пароль в `supabase/seed.sql`). Приложение превращает логин в `worker1@naryad.local`.
+
+## Структура
 
 ```
 apps/android/native/
-├── build.gradle.kts           # Конфигурация модуля Android, зависимости, BuildConfig
-├── local.properties.example   # Шаблон настроек подключения к Supabase и веб-серверу
-├── README.md                  # Данная инструкция
-└── src/main/
-    ├── AndroidManifest.xml    # Разрешения сети, камеры, микрофона, активности
+├── settings.gradle.kts, build.gradle.kts, gradle.properties, gradle/libs.versions.toml, gradlew
+└── app/src/main/
     ├── java/kz/naryadai/app/
-    │   ├── MainActivity.kt
-    │   ├── NaryadApplication.kt
-    │   ├── data/
-    │   │   ├── local/         # Room Database, DAOs, SessionManager
-    │   │   ├── model/         # Модели данных (WorkOrder, Event, Photo, OfflineAction)
-    │   │   ├── remote/        # SupabaseManager, MobileApiClient (Ktor)
-    │   │   └── repository/    # OrderRepository (синхронизация, офлайн-очередь)
-    │   ├── ui/
-    │   │   ├── components/    # Бейджи статусов и приоритетов, баннер офлайна, ReasonBottomSheet
-    │   │   ├── navigation/    # NavGraph, Bottom Navigation
-    │   │   ├── screens/       # Login, Orders, OrderDetail, CompleteOrder, Notifications, Profile
-    │   │   └── theme/         # Цветовая палитра km.kz, Material 3 Theme
-    │   └── util/              # ImageUtils (сжатие 1600px, JPEG 80, EXIF strip), NetworkUtils
-    └── res/
-        ├── values/strings.xml      # Русская локализация
-        ├── values-kk/strings.xml   # Казахская локализация
-        ├── drawable/               # Векторные ресурсы и иконки
-        └── mipmap-*/               # Адаптивные и растровые иконки приложения
+    │   ├── MainActivity.kt, NaryadApp.kt   запуск, язык, общие объекты (Graph)
+    │   ├── data/   Models (строки базы), Session (токены, кэш), Api (HTTP), Repository (данные и очередь)
+    │   ├── util/   ImageUtils (1600 px, JPEG 80, без EXIF), Format (время)
+    │   └── ui/     AppRoot (навигация и нижнее меню), screens/, components/, theme/
+    └── res/        strings (ru, kk), шрифты Inter и Oswald, значки
 ```
 
-## Настройка окружения
+## Что не сделано
 
-1. Скопируйте `local.properties.example` в `local.properties`:
-   ```bash
-   cp local.properties.example local.properties
-   ```
-2. Укажите ваши ключи Supabase:
-   ```properties
-   SUPABASE_URL=https://your-project.supabase.co
-   SUPABASE_ANON_KEY=your-anon-key-here
-   WEB_APP_URL=https://naryad-ai.vercel.app
-   ```
-
-## Сборка APK
-
-Для сборки требуются JDK 21 и Android SDK (API 35/36):
-
-```bash
-# Сборка отладочного APK
-gradle :app:assembleDebug
-
-# Готовый файл будет находиться по пути:
-# apps/android/native/build/outputs/apk/debug/app-debug.apk
-```
+- Реальное время по websocket: вместо него обновление каждые 20 с на экране и по возвращению в приложение.
+- Диктовка «что сделано»: маршрут `/api/voice` пока принимает только вход по cookie сайта, для токена приложения он не готов.
+- Подпись релизного APK: ключ подписи не хранится в репозитории (`*.keystore` в `.gitignore`).

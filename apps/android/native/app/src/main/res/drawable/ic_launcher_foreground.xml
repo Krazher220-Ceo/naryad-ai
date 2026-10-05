@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Буква «Н» (наряд) и жёлтая полоса км.кз -->
+    <path android:fillColor="#FFFFFF" android:pathData="M34,32h10v16h20V32h10v44H64V57H44v19H34z" />
+    <path android:fillColor="#FFC107" android:pathData="M34,80h40v6H34z" />
+</vector>

@@ -2,11 +2,11 @@
 *.keystore
 *.jks
 keystore.properties
-app/
+/app/
 build/
-gradle/
-gradlew
-gradlew.bat
+/gradle/
+/gradlew
+/gradlew.bat
 *.apk
 *.aab
 .gradle/

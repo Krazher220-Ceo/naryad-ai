@@ -1,6 +1,0 @@
-{
-  "name": "НарядAI",
-  "description": "Система нарядов на ремонт для горно-обогатительной фабрики АО «Костанайские минералы»",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}

@@ -1,5 +1,5 @@
-# Supabase and Web App configuration for NaryadAI Native
-# Copy this file to local.properties and fill in your Supabase project credentials:
+# Скопируйте в local.properties (файл не коммитится) и заполните.
+sdk.dir=/Users/<вы>/Library/Android/sdk
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_ANON_KEY=your-anon-key-here
 WEB_APP_URL=https://naryad-ai.vercel.app
