@@ -31,7 +31,7 @@ export async function AnomaliesScreen({
           </div>
         }
       >
-        <AnomalyList days={days} />
+        <AnomalyList days={days} showUpdated />
       </Suspense>
     </ReportPage>
   );

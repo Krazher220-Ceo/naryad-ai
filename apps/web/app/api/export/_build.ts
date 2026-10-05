@@ -1,8 +1,8 @@
 import { factLabel, factValue, categoryLabel } from "@/components/reports/format";
-import { findAnomalies } from "@/lib/analytics/anomalies";
-import { getDowntimeReport, getMaterialsReport, periodFromDays, type MaterialRow } from "@/lib/analytics/reports";
-import { getRating } from "@/lib/analytics/rating";
-import { getShiftReport, type Shift } from "@/lib/analytics/shift";
+// Выгрузка берёт те же снимки, что и страницы: файл совпадает с тем, что на экране.
+import { cachedAnomalies, cachedDowntime, cachedMaterials, cachedRating, cachedShift } from "@/lib/analytics/cached";
+import { periodFromDays, type MaterialRow } from "@/lib/analytics/reports";
+import type { Shift } from "@/lib/analytics/shift";
 import { tRu as t, type MessageKey } from "@/lib/i18n";
 
 // Любой отчёт — это заголовок и несколько таблиц. Из них собираются и Excel, и PDF.
@@ -33,7 +33,7 @@ const materialTable = (name: string, rows: MaterialRow[]): Table => ({
 });
 
 async function materials(p: ReportParams): Promise<ReportDoc> {
-  const r = await getMaterialsReport(p.days);
+  const { data: r } = await cachedMaterials(p.days);
   return {
     title: t("materialsReport.title"),
     period: periodText(p.days),
@@ -48,7 +48,7 @@ async function materials(p: ReportParams): Promise<ReportDoc> {
 }
 
 async function downtime(p: ReportParams): Promise<ReportDoc> {
-  const r = await getDowntimeReport(p.days);
+  const { data: r } = await cachedDowntime(p.days);
   return {
     title: t("downtimeReport.title"),
     period: periodText(p.days),
@@ -85,8 +85,7 @@ async function downtime(p: ReportParams): Promise<ReportDoc> {
 }
 
 async function rating(p: ReportParams): Promise<ReportDoc> {
-  const { from, to } = periodFromDays(p.days);
-  const rows = await getRating(from, to);
+  const { data: rows } = await cachedRating(p.days);
   return {
     title: t("rating.title"),
     period: periodText(p.days),
@@ -124,7 +123,7 @@ async function rating(p: ReportParams): Promise<ReportDoc> {
 }
 
 async function shift(p: ReportParams): Promise<ReportDoc> {
-  const r = await getShiftReport(p.date, p.shift);
+  const { data: r } = await cachedShift(p.date, p.shift);
   const shiftName = t("shiftReport.shiftName").replace("{shift}", p.shift).replace("{date}", p.date.split("-").reverse().join("."));
   return {
     title: t("shiftReport.title"),
@@ -163,7 +162,8 @@ async function shift(p: ReportParams): Promise<ReportDoc> {
 }
 
 async function anomalies(p: ReportParams): Promise<ReportDoc> {
-  const { anomalies: list } = await findAnomalies(p.days);
+  const { data } = await cachedAnomalies(p.days);
+  const list = data.anomalies;
   return {
     title: t("anomalies.title"),
     period: periodText(p.days),
