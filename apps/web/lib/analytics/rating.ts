@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import type { Db } from "./db";
 
 // Рейтинг исполнителей (п. 6.6 кейса). Считает код, модель только поясняет.
 // Пять составляющих из кейса, каждая приводится к шкале 0–100:
@@ -44,8 +45,8 @@ type Order = {
   fault: { norm_hours: number } | null;
 };
 
-export async function getRating(from: Date, to: Date): Promise<RatingRow[]> {
-  const supabase = await createClient();
+export async function getRating(from: Date, to: Date, db?: Db): Promise<RatingRow[]> {
+  const supabase = db ?? (await createClient());
   const fromIso = from.toISOString();
   const toIso = to.toISOString();
 

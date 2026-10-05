@@ -1,4 +1,5 @@
 import "server-only";
+import type { Db } from "./db";
 import { getRating } from "./rating";
 import { downtimeMinutes, loadHistory, type History } from "./history";
 
@@ -43,9 +44,9 @@ function materialRows(h: History, keyOf: (orderId: string, materialName: string)
     .sort((a, b) => b.deviationPct - a.deviationPct);
 }
 
-export async function getMaterialsReport(days: number) {
+export async function getMaterialsReport(days: number, db?: Db) {
   const { from, to } = periodFromDays(days);
-  const h = await loadHistory(from, to);
+  const h = await loadHistory(from, to, db);
   const order = new Map(h.orders.map((o) => [o.id, o]));
   const unitOf = new Map(h.usages.filter((u) => u.material).map((u) => [u.material!.name, u.material!.unit]));
 
@@ -71,9 +72,9 @@ export type MaterialsReport = Awaited<ReturnType<typeof getMaterialsReport>>;
 // ---------- Простои ----------
 // Простой = время внеплановых нарядов от выдачи до исполнения.
 
-export async function getDowntimeReport(days: number) {
+export async function getDowntimeReport(days: number, db?: Db) {
   const { from, to } = periodFromDays(days);
-  const h = await loadHistory(from, to);
+  const h = await loadHistory(from, to, db);
   const done = h.orders.filter((o) => o.status !== "cancelled");
 
   const byEquipment = new Map<string, { name: string; section: string; hours: number; unplanned: number; planned: number; categories: Record<string, number> }>();
@@ -123,9 +124,9 @@ export type DowntimeReport = Awaited<ReturnType<typeof getDowntimeReport>>;
 const minutesBetween = (a: string, b: string) => (new Date(b).getTime() - new Date(a).getTime()) / 60000;
 const avg = (xs: number[]) => (xs.length ? xs.reduce((s, x) => s + x, 0) / xs.length : null);
 
-export async function getDashboard(days: number) {
+export async function getDashboard(days: number, db?: Db) {
   const { from, to } = periodFromDays(days);
-  const [h, rating, downtime] = await Promise.all([loadHistory(from, to), getRating(from, to), getDowntimeReport(days)]);
+  const [h, rating, downtime] = await Promise.all([loadHistory(from, to, db), getRating(from, to, db), getDowntimeReport(days, db)]);
   const now = new Date().toISOString();
   const open = h.orders.filter((o) => !["closed", "cancelled", "done", "ai_review"].includes(o.status));
 

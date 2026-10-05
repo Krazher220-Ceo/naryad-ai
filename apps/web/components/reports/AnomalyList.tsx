@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { Card, cx } from "@/components/ui";
-import { findAnomalies, type Anomaly } from "@/lib/analytics/anomalies";
+import { type Anomaly } from "@/lib/analytics/anomalies";
+import { cachedAnomalies } from "@/lib/analytics/cached";
 import { type MessageKey } from "@/lib/i18n";
 import { getT } from "@/lib/i18n-server";
 import { factLabel, factValue } from "./format";
+import { SnapshotBar } from "./SnapshotBar";
 
 export async function AnomalyCard({ anomaly }: { anomaly: Anomaly }) {
   const t = await getT();
@@ -44,10 +46,22 @@ export async function AnomalyCard({ anomaly }: { anomaly: Anomaly }) {
   );
 }
 
-// Список карточек. Вызывает модель (до 15 секунд), поэтому страница оборачивает его в <Suspense>.
-export async function AnomalyList({ days, limit, allHref }: { days: number; limit?: number; allHref?: string }) {
+// Список карточек. Берёт готовый снимок; если его ещё нет, вызывает модель (до 30 секунд), поэтому страница оборачивает его в <Suspense>.
+// showUpdated — строка «Обновлено» с кнопкой (на странице аномалий; в превью на дашборде не нужна).
+export async function AnomalyList({
+  days,
+  limit,
+  allHref,
+  showUpdated,
+}: {
+  days: number;
+  limit?: number;
+  allHref?: string;
+  showUpdated?: boolean;
+}) {
   const t = await getT();
-  const { anomalies } = await findAnomalies(days);
+  const { data, computedAt } = await cachedAnomalies(days);
+  const anomalies = data.anomalies;
   const shown = limit ? anomalies.slice(0, limit) : anomalies;
 
   if (shown.length === 0) {
@@ -55,6 +69,7 @@ export async function AnomalyList({ days, limit, allHref }: { days: number; limi
   }
   return (
     <div className="flex flex-col gap-3">
+      {showUpdated && <SnapshotBar kind="anomalies" scope={String(days)} computedAt={computedAt} />}
       <ul className="flex flex-col gap-3 lg:grid lg:grid-cols-2 lg:items-start">
         {shown.map((a) => (
           <li key={a.id}>

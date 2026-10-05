@@ -2,7 +2,9 @@ import Link from "next/link";
 import { ExportButtons } from "@/components/reports/ExportButtons";
 import { ShiftReportView } from "@/components/reports/ShiftReportView";
 import { cx } from "@/components/ui";
-import { currentShift, getShiftReport, type Shift } from "@/lib/analytics/shift";
+import { SnapshotBar } from "@/components/reports/SnapshotBar";
+import { cachedShift } from "@/lib/analytics/cached";
+import { currentShift, type Shift } from "@/lib/analytics/shift";
 import { getT } from "@/lib/i18n-server";
 
 // Разбор ?date=...&shift=...: неверные значения заменяются текущей сменой.
@@ -45,7 +47,7 @@ export async function ShiftScreen({
   const next = neighbour(date, shift, 1);
   const href = (x: { date: string; shift: Shift }) => `${basePath}/shift?date=${x.date}&shift=${x.shift}`;
 
-  const report = await getShiftReport(date, shift);
+  const { data: report, computedAt } = await cachedShift(date, shift);
 
   return (
     <div className="flex flex-1 flex-col bg-canvas">
@@ -79,6 +81,7 @@ export async function ShiftScreen({
           )}
         </nav>
 
+        <SnapshotBar kind="shift" scope={`${date}:${shift}`} computedAt={computedAt} />
         <ExportButtons report="shift" params={{ date, shift }} />
         <ShiftReportView report={report} />
       </main>

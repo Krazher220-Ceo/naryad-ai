@@ -2,6 +2,7 @@
 
 import { refresh } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { clearSnapshots } from "@/lib/analytics/snapshots";
 import { getT } from "@/lib/i18n-server";
 
 // «Сбросить демо» (страница для жюри /demo). Возвращает наряды к снимку демо-данных
@@ -24,6 +25,8 @@ export async function resetDemo(): Promise<{ ok: true } | { ok: false; error: st
     console.error("restore_demo failed", error);
     return { ok: false, error: t("demo.resetFailed") };
   }
+  // Цифры отчётов изменились: кэшированные снимки пересчитаются при следующем открытии.
+  await clearSnapshots();
   refresh();
   return { ok: true };
 }

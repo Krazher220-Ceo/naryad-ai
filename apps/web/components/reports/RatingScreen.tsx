@@ -2,7 +2,8 @@ import Link from "next/link";
 import { ExportButtons } from "@/components/reports/ExportButtons";
 import { RatingFormula, RatingTable } from "@/components/reports/RatingTable";
 import { EmptyState, cx } from "@/components/ui";
-import { getRating } from "@/lib/analytics/rating";
+import { SnapshotBar } from "@/components/reports/SnapshotBar";
+import { cachedRating } from "@/lib/analytics/cached";
 import { getT } from "@/lib/i18n-server";
 
 const PERIODS = [7, 30, 90] as const;
@@ -22,9 +23,7 @@ export async function RatingScreen({
   days: Days;
 }) {
   const t = await getT();
-  const to = new Date();
-  const from = new Date(to.getTime() - days * 24 * 3600_000);
-  const rows = await getRating(from, to);
+  const { data: rows, computedAt } = await cachedRating(days);
 
   return (
     <div className="flex flex-1 flex-col bg-canvas">
@@ -50,6 +49,7 @@ export async function RatingScreen({
           ))}
         </nav>
 
+        <SnapshotBar kind="rating" scope={String(days)} computedAt={computedAt} />
         <ExportButtons report="rating" params={{ days }} />
         <RatingFormula />
         {rows.length === 0 ? (

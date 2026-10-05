@@ -2,7 +2,8 @@ import { DowntimeView } from "@/components/reports/DowntimeView";
 import { ExportButtons } from "@/components/reports/ExportButtons";
 import { PERIODS, parseDaysIn } from "@/components/reports/format";
 import { PeriodSwitch, ReportPage } from "@/components/reports/ReportPage";
-import { getDowntimeReport } from "@/lib/analytics/reports";
+import { SnapshotBar } from "@/components/reports/SnapshotBar";
+import { cachedDowntime } from "@/lib/analytics/cached";
 import { requireRole } from "@/lib/auth/session";
 import { getT } from "@/lib/i18n-server";
 
@@ -11,7 +12,7 @@ export default async function LeadDowntimePage({ searchParams }: PageProps<"/lea
   await requireRole("lead");
   const { days: daysParam } = await searchParams;
   const days = parseDaysIn(daysParam, PERIODS, 30);
-  const report = await getDowntimeReport(days);
+  const { data: report, computedAt } = await cachedDowntime(days);
 
   return (
     <ReportPage
@@ -20,6 +21,7 @@ export default async function LeadDowntimePage({ searchParams }: PageProps<"/lea
       title={t("downtimeReport.title")}
     >
       <PeriodSwitch basePath="/lead/downtime" days={days} options={PERIODS} />
+      <SnapshotBar kind="downtime" scope={String(days)} computedAt={computedAt} />
       <ExportButtons report="downtime" params={{ days }} />
       <p className="text-base text-ink-muted">{t("downtimeReport.note")}</p>
       <DowntimeView report={report} />

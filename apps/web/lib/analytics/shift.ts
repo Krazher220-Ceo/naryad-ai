@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import type { Db } from "./db";
 import { summarizeShift } from "@/lib/ai/summaries";
 
 // Отчёт за смену (раздел 7 кейса): выдано / выполнено / просрочено / отклонено,
@@ -34,8 +35,8 @@ export function currentShift(now: Date = new Date()): { date: string; shift: Shi
 const overlapMinutes = (aStart: number, aEnd: number, bStart: number, bEnd: number) =>
   Math.max(0, (Math.min(aEnd, bEnd) - Math.max(aStart, bStart)) / 60000);
 
-export async function getShiftReport(date: string, shift: Shift) {
-  const supabase = await createClient();
+export async function getShiftReport(date: string, shift: Shift, db?: Db) {
+  const supabase = db ?? (await createClient());
   const { start, end } = shiftWindow(date, shift);
   const s = start.toISOString();
   const e = end.toISOString();

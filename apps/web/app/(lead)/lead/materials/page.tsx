@@ -4,7 +4,8 @@ import { MaterialsView } from "@/components/reports/MaterialsView";
 import { PERIODS, parseDaysIn } from "@/components/reports/format";
 import { PeriodSwitch, ReportPage } from "@/components/reports/ReportPage";
 import { cx } from "@/components/ui";
-import { getMaterialsReport } from "@/lib/analytics/reports";
+import { SnapshotBar } from "@/components/reports/SnapshotBar";
+import { cachedMaterials } from "@/lib/analytics/cached";
 import { requireRole } from "@/lib/auth/session";
 import { getT } from "@/lib/i18n-server";
 
@@ -25,7 +26,7 @@ export default async function LeadMaterialsPage({ searchParams }: PageProps<"/le
   const tabParam = Array.isArray(query.tab) ? query.tab[0] : query.tab;
   const tab = TABS.find((x) => x === tabParam) ?? "material";
 
-  const report = await getMaterialsReport(days);
+  const { data: report, computedAt } = await cachedMaterials(days);
 
   return (
     <ReportPage
@@ -49,6 +50,7 @@ export default async function LeadMaterialsPage({ searchParams }: PageProps<"/le
           </Link>
         ))}
       </nav>
+      <SnapshotBar kind="materials" scope={String(days)} computedAt={computedAt} />
       <ExportButtons report="materials" params={{ days }} />
       <p className="text-base text-ink-muted">{t("materialsReport.note")}</p>
       <MaterialsView rows={report[ROWS_OF[tab]]} />

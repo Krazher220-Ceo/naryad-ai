@@ -4,7 +4,8 @@ import { AnomalyList } from "@/components/reports/AnomalyList";
 import { PERIODS, fill, parseDaysIn } from "@/components/reports/format";
 import { PeriodSwitch } from "@/components/reports/ReportPage";
 import { Card, EmptyState, Skeleton, cx, formatMinutes } from "@/components/ui";
-import { getDashboard } from "@/lib/analytics/reports";
+import { SnapshotBar } from "@/components/reports/SnapshotBar";
+import { cachedDashboard } from "@/lib/analytics/cached";
 import { getLeadSummary } from "@/lib/orders/queries";
 import { requireRole } from "@/lib/auth/session";
 import { getT } from "@/lib/i18n-server";
@@ -31,7 +32,9 @@ export default async function LeadPage({ searchParams }: PageProps<"/lead">) {
   await requireRole("lead");
   const { days: daysParam } = await searchParams;
   const days = parseDaysIn(daysParam, PERIODS, 30);
-  const [d, now] = await Promise.all([getDashboard(days), getLeadSummary()]);
+  const [{ data: cached, computedAt }, now] = await Promise.all([cachedDashboard(days), getLeadSummary()]);
+  // Текущие счётчики всегда живые; из снимка берётся только тяжёлая аналитика.
+  const d = { ...cached, inWork: now.inWork, waiting: now.waiting, overdue: now.overdue };
 
   const minutes = (value: number | null) => (value === null ? t("dashboard.noValue") : formatMinutes(t, value));
   const maxHours = Math.max(0.1, ...d.topEquipment.map((e) => e.hours));
@@ -86,6 +89,7 @@ export default async function LeadPage({ searchParams }: PageProps<"/lead">) {
         </nav>
 
         <PeriodSwitch basePath="/lead" days={days} options={PERIODS} />
+        <SnapshotBar kind="dashboard" scope={String(days)} computedAt={computedAt} />
 
         <section aria-label={t("dashboard.kpiTitle")} className="flex flex-col gap-2">
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-6">
