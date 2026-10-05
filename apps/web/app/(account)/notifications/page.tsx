@@ -5,6 +5,7 @@ import { getLocale, getT } from "@/lib/i18n-server";
 import type { MessageKey } from "@/lib/i18n";
 import { markAllRead, openNotification } from "@/lib/notify/actions";
 import { createClient } from "@/lib/supabase/server";
+import { PendingButton } from "./PendingButton";
 
 // Центр уведомлений: те же события, что уходят в Telegram (PLAN.md, раздел 8.1).
 export default async function NotificationsPage() {
@@ -50,12 +51,9 @@ export default async function NotificationsPage() {
         </div>
         {unread > 0 && (
           <form action={markAllRead}>
-            <button
-              type="submit"
-              className="min-h-touch-sm rounded-xl border-2 border-ink bg-surface px-4 text-base font-semibold text-ink hover:bg-canvas"
-            >
+            <PendingButton className="min-h-touch-sm rounded-xl border-2 border-ink bg-surface px-4 text-base font-semibold text-ink hover:bg-canvas">
               {t("inbox.readAll")}
-            </button>
+            </PendingButton>
           </form>
         )}
       </div>
@@ -70,8 +68,7 @@ export default async function NotificationsPage() {
             return (
               <li key={n.id}>
                 <form action={openNotification.bind(null, n.id, href)}>
-                  <button
-                    type="submit"
+                  <PendingButton
                     className={cx(
                       "flex w-full flex-col gap-1.5 rounded-2xl border bg-surface p-4 text-left hover:bg-canvas",
                       isNew ? "border-2 border-brand" : "border-line",
@@ -87,7 +84,7 @@ export default async function NotificationsPage() {
                     </span>
                     <span className="whitespace-pre-line text-base text-ink">{n.text}</span>
                     {href && <span className="text-base font-semibold text-brand underline-offset-4">{t("inbox.openOrder")} →</span>}
-                  </button>
+                  </PendingButton>
                 </form>
               </li>
             );

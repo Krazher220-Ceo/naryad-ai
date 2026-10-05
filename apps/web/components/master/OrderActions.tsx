@@ -136,8 +136,8 @@ export function OrderActions({ orderId, status, priority, assigneeId, workers, r
     }
     actionId.current = null;
     if (sheet === "score") setNotice({ tone: "success", text: t("review.action.scoreSaved") });
+    // Экран обновляет само серверное действие (refresh в lib/orders/actions.ts).
     setSheet(null);
-    router.refresh();
   }
 
   async function rerun() {

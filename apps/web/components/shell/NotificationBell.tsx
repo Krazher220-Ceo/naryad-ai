@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useT } from "@/components/LocaleProvider";
 import { IconBell, cx } from "@/components/ui";
 import { createClient } from "@/lib/supabase/client";
+import { LinkIcon } from "./LinkIcon";
 
 // Колокольчик со счётчиком непрочитанных. Счётчик обновляется через Realtime:
 // новое уведомление (INSERT) или «прочитано» (UPDATE) — и число пересчитывается.
@@ -73,7 +74,7 @@ export function NotificationBell({
         dark ? "border-white/30 text-white hover:bg-white/10" : "border-line bg-surface text-ink hover:bg-canvas",
       )}
     >
-      <IconBell className="size-5" />
+      <LinkIcon icon={IconBell} className="size-5" />
       {unread > 0 && (
         <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1.5 text-xs font-extrabold text-ink">
           {unread > 99 ? "99+" : unread}

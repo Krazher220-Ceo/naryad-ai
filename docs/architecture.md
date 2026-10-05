@@ -9,7 +9,7 @@
         │                                  │
         └──────────────┬───────────────────┘
                        ▼
-        apps/web — Next.js 16 на Vercel
+        apps/web — Next.js 16 на Vercel (регион fra1, рядом с базой Supabase eu-central-1, см. apps/web/vercel.json)
         ├─ экраны мастера, исполнителя, руководителя, /demo для жюри
         ├─ серверные действия (lib/orders/actions.ts)
         ├─ lib/ai — единственная точка вызова моделей
