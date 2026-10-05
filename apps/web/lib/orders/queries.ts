@@ -250,6 +250,7 @@ export async function getLeadSummary() {
     overdue: overdue.length,
     emergency: open.filter((o) => o.priority === "emergency").length,
     inWork: open.filter((o) => ["in_progress", "paused", "accepted"].includes(o.status)).length,
+    waiting: open.filter((o) => ["issued", "queued"].includes(o.status)).length,
     // Эскалации: просроченные наряды, самые давние первыми.
     escalations: [...overdue]
       .sort((a, b) => a.due_at.localeCompare(b.due_at))

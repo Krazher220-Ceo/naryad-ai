@@ -32,7 +32,9 @@ export default async function LeadPage({ searchParams }: PageProps<"/lead">) {
   await requireRole("lead");
   const { days: daysParam } = await searchParams;
   const days = parseDaysIn(daysParam, PERIODS, 30);
-  const [{ data: d, computedAt }, now] = await Promise.all([cachedDashboard(days), getLeadSummary()]);
+  const [{ data: cached, computedAt }, now] = await Promise.all([cachedDashboard(days), getLeadSummary()]);
+  // Текущие счётчики всегда живые; из снимка берётся только тяжёлая аналитика.
+  const d = { ...cached, inWork: now.inWork, waiting: now.waiting, overdue: now.overdue };
 
   const minutes = (value: number | null) => (value === null ? t("dashboard.noValue") : formatMinutes(t, value));
   const maxHours = Math.max(0.1, ...d.topEquipment.map((e) => e.hours));
