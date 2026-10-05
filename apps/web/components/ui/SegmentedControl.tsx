@@ -15,10 +15,11 @@ type SegmentedControlProps<T extends string> = {
   value: T | null;
   onChange: (value: T) => void;
   ariaLabel?: string;
+  className?: string;
 };
 
 // Выбор одним нажатием вместо выпадающего списка. До 3 вариантов в ряд, 4 — сеткой 2×2 на телефоне.
-export function SegmentedControl<T extends string>({ options, value, onChange, ariaLabel }: SegmentedControlProps<T>) {
+export function SegmentedControl<T extends string>({ options, value, onChange, ariaLabel, className }: SegmentedControlProps<T>) {
   return (
     <div
       role="radiogroup"
@@ -28,6 +29,7 @@ export function SegmentedControl<T extends string>({ options, value, onChange, a
         options.length === 2 && "grid-cols-2",
         options.length === 3 && "grid-cols-3",
         options.length >= 4 && "grid-cols-2 sm:grid-cols-4",
+        className,
       )}
     >
       {options.map((o) => {
