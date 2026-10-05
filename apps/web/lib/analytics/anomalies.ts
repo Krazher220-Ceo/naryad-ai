@@ -1,5 +1,6 @@
 import "server-only";
 import { describeAnomalies } from "@/lib/ai/summaries";
+import type { Db } from "./db";
 import { downtimeMinutes, isNight, loadHistory, type History, type HistoryOrder } from "./history";
 
 // Поиск аномалий и зависимостей (п. 6.5 кейса). Цифры и пороги — код.
@@ -220,10 +221,10 @@ function failureTrend(h: History, to: Date): Draft[] {
   return drafts;
 }
 
-export async function findAnomalies(days = 90, useModel = true): Promise<{ anomalies: Anomaly[]; period: { from: string; to: string } }> {
+export async function findAnomalies(days = 90, useModel = true, db?: Db): Promise<{ anomalies: Anomaly[]; period: { from: string; to: string } }> {
   const to = new Date();
   const from = new Date(to.getTime() - days * DAY);
-  const history = await loadHistory(from, to);
+  const history = await loadHistory(from, to, db);
 
   const drafts: Draft[] = [
     ...problemEquipment(history),

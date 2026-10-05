@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import type { Db } from "./db";
 
 // Загрузка истории для аналитики за период. Одна функция на все отчёты, чтобы цифры
 // в аномалиях, отчётах и дашборде считались из одних и тех же данных.
@@ -35,8 +36,9 @@ export type HistoryOrder = {
   assignee: { id: string; full_name: string } | null;
 };
 
-export async function loadHistory(from: Date, to: Date) {
-  const supabase = await createClient();
+// db — необязательный клиент базы: расчёт для кэша идёт служебным клиентом (без входа пользователя).
+export async function loadHistory(from: Date, to: Date, db?: Db) {
+  const supabase = db ?? (await createClient());
   const f = from.toISOString();
   const t = to.toISOString();
 

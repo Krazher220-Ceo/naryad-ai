@@ -394,6 +394,36 @@ export type Database = {
           },
         ]
       }
+      report_snapshots: {
+        Row: {
+          ai_source: string | null
+          ai_text: Json | null
+          computed_at: string
+          id: string
+          kind: string
+          payload: Json
+          scope: string
+        }
+        Insert: {
+          ai_source?: string | null
+          ai_text?: Json | null
+          computed_at?: string
+          id?: string
+          kind: string
+          payload: Json
+          scope?: string
+        }
+        Update: {
+          ai_source?: string | null
+          ai_text?: Json | null
+          computed_at?: string
+          id?: string
+          kind?: string
+          payload?: Json
+          scope?: string
+        }
+        Relationships: []
+      }
       requests: {
         Row: {
           created_at: string
