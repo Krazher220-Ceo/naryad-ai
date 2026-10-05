@@ -14,6 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "naryad-ai"
+rootProject.name = "naryad-ai-android"
 include(":app")
-project(":app").projectDir = file("apps/android/native")
