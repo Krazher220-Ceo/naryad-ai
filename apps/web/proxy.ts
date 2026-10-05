@@ -23,12 +23,14 @@ export async function proxy(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet, headers) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
           response = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options),
           );
+          // Ответ с новыми cookie нельзя кэшировать (CDN отдал бы чужую или старую сессию).
+          Object.entries(headers ?? {}).forEach(([k, v]) => response.headers.set(k, v));
         },
       },
     },
@@ -44,6 +46,8 @@ export async function proxy(request: NextRequest) {
   function redirectTo(target: string) {
     const redirectResponse = NextResponse.redirect(new URL(target, request.url));
     response.cookies.getAll().forEach((c) => redirectResponse.cookies.set(c));
+    const cc = response.headers.get("cache-control");
+    if (cc) redirectResponse.headers.set("cache-control", cc);
     return redirectResponse;
   }
 
