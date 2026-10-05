@@ -51,6 +51,7 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return; // Supabase и прочие сервисы
   if (url.pathname.startsWith("/api/")) return;
+  if (url.pathname.startsWith("/downloads/")) return; // APK не кладём в кэш
 
   if (isStatic(url)) {
     event.respondWith(
