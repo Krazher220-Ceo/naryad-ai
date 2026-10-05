@@ -44,12 +44,14 @@ export async function chatJson<T>(params: {
   withImages?: boolean;
   timeoutMs?: number;
   maxTokens?: number;
+  // Своя модель для задачи, например Qwen3-4B для разбора речи (OLLAMA_VOICE_MODEL).
+  model?: string;
 }): Promise<ChatJsonResult<T>> {
   const config = PROVIDERS[params.provider]();
   if (params.provider === "cloud" && !config.apiKey) return { ok: false, error: "DEEPSEEK_API_KEY не задан" };
 
   const body = {
-    model: params.withImages ? config.visionModel : config.textModel,
+    model: params.model ?? (params.withImages ? config.visionModel : config.textModel),
     messages: [
       { role: "system", content: params.system },
       { role: "user", content: params.user },

@@ -15,3 +15,19 @@ FAST_AI_SECRET=секрет .venv/bin/uvicorn server:app --port 8787   # сер�
 Если `finetune/laya-naryad/` нет, берётся базовая `laya-multilingual`. В приложении сервис включается переменными
 `LAYA_ENABLED=1`, `FAST_AI_URL`, `FAST_AI_SECRET`.
 Веса и данные не коммитятся (см. `.gitignore`).
+
+## Голос: Whisper и Qwen3 на Mac
+
+Речь в текст — `POST /transcribe` (поле `audio` — файл записи, поле `lang` — `ru` или `kk`), тот же заголовок
+`Authorization`. Модель Whisper large-v3-turbo (MIT) через mlx-whisper (MIT), только Mac с чипом M.
+
+```
+brew install ffmpeg
+.venv/bin/pip install -r requirements-voice.txt
+ollama pull qwen3:4b-instruct-2507-q4_K_M        # разбор речи по полям наряда (Apache 2.0)
+FAST_AI_SECRET=секрет .venv/bin/uvicorn server:app --port 8787
+```
+
+Разбор текста по полям делает приложение (`apps/web/lib/ai/voice.ts`) через Ollama: переменные `OLLAMA_URL`
+и `OLLAMA_VOICE_MODEL` (по умолчанию `qwen3:4b-instruct-2507-q4_K_M`). Mac выключен — облако с обезличиванием,
+облако недоступно — текст вставляется без разбора. В браузере без сети работает распознавание телефона.

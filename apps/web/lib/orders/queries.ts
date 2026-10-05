@@ -228,3 +228,32 @@ export async function getRequest(requestId: string) {
     .maybeSingle();
   return data;
 }
+
+// Сводка руководителя «на сейчас» (PLAN.md, раздел 8.6): открытые наряды, просрочка, аварийные.
+// Просрочка считается кодом (isOverdue), а не хранится статусом.
+export async function getLeadSummary() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("work_orders")
+    .select(
+      `id, number, description, priority, status, due_at,
+       equipment:equipment_id ( name ),
+       master:employees!work_orders_master_id_fkey ( full_name ),
+       assignee:employees!work_orders_assignee_id_fkey ( full_name )`,
+    )
+    .not("status", "in", "(closed,cancelled)");
+  if (error) throw error;
+  const orders = sortOrders(data).map((o) => ({ ...o, overdue: isOverdue(o) }));
+  const open = orders.filter((o) => !["done", "ai_review"].includes(o.status));
+  const overdue = open.filter((o) => o.overdue);
+  return {
+    overdue: overdue.length,
+    emergency: open.filter((o) => o.priority === "emergency").length,
+    inWork: open.filter((o) => ["in_progress", "paused", "accepted"].includes(o.status)).length,
+    // Эскалации: просроченные наряды, самые давние первыми.
+    escalations: [...overdue]
+      .sort((a, b) => a.due_at.localeCompare(b.due_at))
+      .slice(0, 3)
+      .map((o) => ({ ...o, lateMin: Math.max(1, Math.round((Date.now() - new Date(o.due_at).getTime()) / 60000)) })),
+  };
+}

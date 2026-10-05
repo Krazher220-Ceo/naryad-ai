@@ -5,7 +5,7 @@ import { Card, IconChevronRight } from "@/components/ui";
 import { LanguageSwitch } from "@/components/LanguageSwitch";
 import { getCurrentEmployee } from "@/lib/auth/session";
 import type { Role } from "@/lib/auth/roles";
-import { signOut } from "@/lib/auth/actions";
+import { SignOutButton } from "@/components/shell/SignOutButton";
 import { BIG_TEXT_COOKIE } from "@/lib/display";
 import { getT } from "@/lib/i18n-server";
 import type { Enums } from "@/lib/supabase/database.types";
@@ -80,14 +80,9 @@ export default async function ProfilePage() {
 
       <DeviceData />
 
-      <form action={signOut}>
-        <button
-          type="submit"
-          className="min-h-touch w-full rounded-xl border-2 border-danger bg-surface px-5 text-lg font-semibold text-danger hover:bg-danger-soft"
-        >
-          {t("profile.signOut")}
-        </button>
-      </form>
+      <SignOutButton className="min-h-touch w-full rounded-xl border-2 border-danger bg-surface px-5 text-lg font-semibold text-danger hover:bg-danger-soft">
+        {t("profile.signOut")}
+      </SignOutButton>
     </main>
   );
 }

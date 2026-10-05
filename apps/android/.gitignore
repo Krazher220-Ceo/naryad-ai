@@ -1,0 +1,13 @@
+# Ключ подписи и пароли к нему не коммитятся (AGENTS.md). Сборка Bubblewrap тоже.
+*.keystore
+*.jks
+keystore.properties
+app/
+build/
+gradle/
+gradlew
+gradlew.bat
+*.apk
+*.aab
+.gradle/
+local.properties
