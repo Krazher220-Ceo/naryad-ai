@@ -182,7 +182,9 @@ private fun BottomNav(nav: NavHostController, route: String?) {
                 }
                 Text(
                     stringResource(R.string.nav_notifications),
-                    modifier = Modifier.offset(y = (-18).dp),
+                    modifier = Modifier.offset(y = (-14).dp),
+                    maxLines = 1,
+                    softWrap = false,
                     style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp),
                     color = if (route == NOTIFICATIONS) Brand else Ink,
                 )

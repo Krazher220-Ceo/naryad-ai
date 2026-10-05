@@ -34,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -190,9 +191,9 @@ private fun GroupTitle(text: String) {
 @Composable
 private fun Counter(count: Int, label: String, modifier: Modifier = Modifier) {
     Column(
-        modifier.background(Surface, RoundedCornerShape(16.dp)).border(1.dp, Line, RoundedCornerShape(16.dp)).padding(horizontal = 12.dp, vertical = 10.dp),
+        modifier.background(Surface, RoundedCornerShape(16.dp)).border(1.dp, Line, RoundedCornerShape(16.dp)).padding(horizontal = 10.dp, vertical = 10.dp),
     ) {
         Text(count.toString(), style = MaterialTheme.typography.headlineMedium.copy(fontFamily = Oswald), color = Ink)
-        Text(label, style = MaterialTheme.typography.bodySmall, color = InkMuted, maxLines = 1)
+        Text(label, style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp), color = InkMuted, maxLines = 1, softWrap = false)
     }
 }
