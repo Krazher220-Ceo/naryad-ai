@@ -14,7 +14,7 @@ import {
   IconWarning,
   cx,
 } from "@/components/ui";
-import { signOut } from "@/lib/auth/actions";
+import { SignOutButton } from "@/components/shell/SignOutButton";
 import type { Role } from "@/lib/auth/roles";
 import { ConnectionPill } from "./ConnectionPill";
 import { NotificationBell } from "./NotificationBell";
@@ -120,14 +120,9 @@ export function ShellFrame({ role, employeeId, fullName, roleLabel, unread, chil
             <LanguageSwitch full dark />
           </div>
           {employeeId ? (
-            <form action={signOut}>
-              <button
-                type="submit"
-                className="min-h-11 w-full rounded-xl border border-white/35 text-[15px] font-bold hover:bg-white/10"
-              >
-                {t("shell.signOut")}
-              </button>
-            </form>
+            <SignOutButton className="min-h-11 w-full rounded-xl border border-white/35 text-[15px] font-bold hover:bg-white/10">
+              {t("shell.signOut")}
+            </SignOutButton>
           ) : (
             <Link
               href="/login"

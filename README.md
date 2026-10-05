@@ -315,7 +315,8 @@ apps/web/                 Next.js 16 (App Router), PWA — один код дл�
   lib/analytics           рейтинг, отчёт за смену, аномалии, отчёты
   lib/offline             офлайн-очередь действий
   messages/ru.json, kk.json   все надписи интерфейса на двух языках
-services/fast-ai          Laya (FastAPI), дообучение на Mac
+services/fast-ai          Laya, Whisper (FastAPI) на Mac, дообучение
+apps/android              Android-приложение: оболочка TWA, сборка Bubblewrap
 supabase/migrations       схема базы, функции переходов, правила доступа
 supabase/tests            тест цикла наряда и прав
 scripts/seed              генератор демо-истории

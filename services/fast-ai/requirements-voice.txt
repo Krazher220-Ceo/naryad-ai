@@ -1,0 +1,5 @@
+# Голос на Mac с чипом M: Whisper large-v3-turbo через mlx-whisper (MIT).
+# Нужен ffmpeg: brew install ffmpeg
+-r requirements.txt
+mlx-whisper>=0.4,<0.5
+python-multipart==0.0.20

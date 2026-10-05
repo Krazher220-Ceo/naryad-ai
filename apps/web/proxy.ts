@@ -4,7 +4,7 @@ import { isRole, ROLE_HOME, ROLES, type Role } from "@/lib/auth/roles";
 
 // Страницы без входа. /api проверяет доступ сам.
 // /operator и /q — оператор без входа: сообщить о поломке по QR (PLAN.md, раздел 4).
-const PUBLIC_PREFIXES = ["/login", "/offline", "/demo", "/icons", "/api", "/operator", "/q"];
+const PUBLIC_PREFIXES = ["/login", "/offline", "/demo", "/icons", "/api", "/operator", "/q", "/.well-known"];
 const PUBLIC_FILES = ["/manifest.webmanifest", "/sw.js"];
 
 function isPublic(path: string): boolean {

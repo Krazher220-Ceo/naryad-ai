@@ -17,6 +17,8 @@ import {
   TextArea,
   TextInput,
   VoiceButton,
+  Dictaphone,
+  type DictatedFields,
   WORK_TYPES,
   appendSpoken,
   WorkerChip,
@@ -284,6 +286,35 @@ export function IssueOrderForm({
     }
   }
 
+  // Поля из речи заполняют форму, но не перебивают то, что мастер уже выбрал руками.
+  function applyDictated(f: DictatedFields) {
+    if (f.equipmentId && data.equipment.some((e) => e.id === f.equipmentId)) setEquipmentId(f.equipmentId);
+    if (f.priority) {
+      hasManuallyChangedPriority.current = true;
+      setPriority(f.priority);
+    }
+    if (f.faultCode) {
+      hasManuallyChangedFaultCode.current = true;
+      setFaultCode(f.faultCode);
+    }
+    if (f.assigneeId && data.workers.some((w) => w.id === f.assigneeId)) {
+      hasManuallyChangedAssignee.current = true;
+      setAssigneeId(f.assigneeId);
+    }
+  }
+
+  function describeDictated(f: DictatedFields) {
+    const rows: { label: string; value: string }[] = [];
+    const eq = data.equipment.find((e) => e.id === f.equipmentId);
+    if (eq) rows.push({ label: t("voice.field.equipment"), value: eq.name });
+    if (f.problem) rows.push({ label: t("voice.field.problem"), value: f.problem });
+    if (f.priority) rows.push({ label: t("voice.field.priority"), value: t(`orders.priority.${f.priority}`) });
+    if (f.faultCode) rows.push({ label: t("voice.field.faultCode"), value: f.faultCode });
+    const w = data.workers.find((x) => x.id === f.assigneeId);
+    if (w?.full_name) rows.push({ label: t("voice.field.assignee"), value: w.full_name });
+    return rows;
+  }
+
   const steps = [
     {
       id: "equipment",
@@ -384,7 +415,16 @@ export function IssueOrderForm({
           </div>
           <Field label={t("master.issue.description")} htmlFor="issue-description" hint={t("master.issue.descriptionHint")} required>
             <TextArea id="issue-description" value={description} onChange={(e) => setDescription(e.target.value)} />
-            <VoiceButton onText={(spoken) => setDescription((prev) => appendSpoken(prev, spoken))} />
+            <div className="flex flex-wrap gap-2">
+              <VoiceButton onText={(spoken) => setDescription((prev) => appendSpoken(prev, spoken))} />
+              {/* Диктофон: Whisper на нашем Mac и разбор речи по полям. Поля человек проверяет перед выдачей. */}
+              <Dictaphone
+                mode="order"
+                onText={(spoken) => setDescription((prev) => (prev.trim() ? appendSpoken(prev, spoken) : spoken))}
+                onFields={applyDictated}
+                describe={describeDictated}
+              />
+            </div>
           </Field>
           <Field label={t("master.issue.priority")}>
             <SegmentedControl

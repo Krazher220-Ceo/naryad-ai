@@ -1,0 +1,44 @@
+{
+  "packageId": "kz.naryadai.app",
+  "host": "naryad-ai.vercel.app",
+  "name": "НарядAI",
+  "launcherName": "НарядAI",
+  "display": "standalone",
+  "orientation": "portrait",
+  "themeColor": "#07316e",
+  "themeColorDark": "#001636",
+  "navigationColor": "#ffffff",
+  "navigationColorDark": "#001636",
+  "navigationDividerColor": "#cbd5e1",
+  "navigationDividerColorDark": "#001636",
+  "backgroundColor": "#f3f6fb",
+  "enableNotifications": true,
+  "startUrl": "/",
+  "iconUrl": "https://naryad-ai.vercel.app/icons/icon-512.png",
+  "maskableIconUrl": "https://naryad-ai.vercel.app/icons/maskable-512.png",
+  "webManifestUrl": "https://naryad-ai.vercel.app/manifest.webmanifest",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./naryad-release.keystore",
+    "alias": "naryad"
+  },
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "shortcuts": [
+    {
+      "name": "Сообщить о поломке",
+      "shortName": "Поломка",
+      "url": "/operator/scan",
+      "chosenIconUrl": "https://naryad-ai.vercel.app/icons/icon-192.png"
+    }
+  ],
+  "generatorApp": "bubblewrap-cli",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": { "enabled": false },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "minSdkVersion": 23,
+  "fingerprints": []
+}

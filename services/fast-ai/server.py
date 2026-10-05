@@ -1,4 +1,6 @@
-# HTTP-сервер быстрого слоя: POST /classify {"description": "..."} -> категория, приоритет, специальность.
+# HTTP-сервер быстрого слоя на нашем Mac:
+#   POST /classify {"description": "..."} -> категория, приоритет, специальность (Laya);
+#   POST /transcribe (файл audio, поле lang) -> текст речи (Whisper large-v3-turbo через mlx-whisper).
 # Формат ответа ждёт apps/web/lib/ai/classify.ts. Доступ по заголовку Authorization: Bearer <FAST_AI_SECRET>.
 # Запуск: FAST_AI_SECRET=... .venv/bin/uvicorn server:app --port 8787
 import hmac
@@ -7,7 +9,9 @@ import threading
 import time
 from pathlib import Path
 
-from fastapi import Depends, FastAPI, Header, HTTPException
+import tempfile
+
+from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, UploadFile
 from laya import Router
 from pydantic import BaseModel
 
@@ -67,3 +71,35 @@ def classify(item: Item):
     out = {k: {"choice": answers[k]["choice"], "probabilities": answers[k]["probabilities"]} for k in KEYS}
     out["ms"] = round((time.perf_counter() - t0) * 1000)
     return out
+
+
+# ---------- Голос: Whisper large-v3-turbo (MIT) на Apple Silicon ----------
+# mlx-whisper ставится отдельно (requirements-voice.txt): он работает только на Mac с чипом M.
+# Модель скачивается при первом запросе (~1,6 ГБ) и дальше лежит в кэше Hugging Face.
+WHISPER_MODEL = os.environ.get("WHISPER_MODEL", "mlx-community/whisper-large-v3-turbo")
+MAX_AUDIO_BYTES = 10 * 1024 * 1024  # примерно 5 минут речи в webm/opus
+whisper_lock = threading.Lock()
+
+
+@app.post("/transcribe", dependencies=[Depends(check_auth)])
+async def transcribe(audio: UploadFile = File(...), lang: str = Form("ru")):
+    try:
+        import mlx_whisper  # импорт здесь: без него /classify тоже работает
+    except ImportError:
+        raise HTTPException(status_code=503, detail="mlx-whisper не установлен")
+
+    data = await audio.read()
+    if not data:
+        raise HTTPException(status_code=422, detail="audio is empty")
+    if len(data) > MAX_AUDIO_BYTES:
+        raise HTTPException(status_code=413, detail="audio is too long")
+
+    language = "kk" if lang.startswith("kk") else "ru"
+    t0 = time.perf_counter()
+    # Whisper читает файл через ffmpeg, поэтому сохраняем во временный файл.
+    with tempfile.NamedTemporaryFile(suffix=Path(audio.filename or "a.webm").suffix or ".webm") as tmp:
+        tmp.write(data)
+        tmp.flush()
+        with whisper_lock:
+            result = mlx_whisper.transcribe(tmp.name, path_or_hf_repo=WHISPER_MODEL, language=language)
+    return {"text": str(result.get("text", "")).strip(), "lang": language, "ms": round((time.perf_counter() - t0) * 1000)}
