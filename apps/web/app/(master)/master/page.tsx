@@ -80,7 +80,7 @@ export default async function MasterPage() {
         <SideRequests requests={requests} limit={4} />
 
         <div className="flex flex-col gap-6 lg:min-h-0 lg:flex-1 lg:flex-row lg:gap-4">
-          <section className="flex min-w-0 flex-col gap-3 lg:min-h-0 lg:w-64 lg:shrink-0 lg:gap-2">
+          <section className="flex min-w-0 flex-col gap-3 lg:min-h-0 lg:w-56 lg:shrink-0 lg:gap-2">
             <h2 className="text-xl font-bold text-ink lg:text-base">{t("master.workersTitle")}</h2>
             {sortedWorkers.length === 0 ? (
               <EmptyState title={t("ui.empty.workersTitle")} text={t("ui.empty.workersText")} />
@@ -88,7 +88,7 @@ export default async function MasterPage() {
               // На телефоне ряд прокручивается внутри себя, на ноутбуке это колонка
               <ul className="flex gap-2 overflow-x-auto pb-1 lg:min-h-0 lg:flex-1 lg:flex-col lg:gap-1.5 lg:overflow-y-auto lg:overflow-x-hidden lg:pb-0">
                 {sortedWorkers.map((w) => (
-                  <li key={w.id} className="w-60 shrink-0 lg:w-auto lg:[&>div]:min-h-0 lg:[&>div]:py-1.5">
+                  <li key={w.id} className="w-60 shrink-0 lg:w-auto lg:[&>div]:min-h-0 lg:[&>div]:py-1 lg:[&_span]:text-sm">
                     <WorkerChip
                       name={w.full_name ?? ""}
                       state={w.board_status}
