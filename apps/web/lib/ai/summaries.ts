@@ -34,6 +34,7 @@ export async function summarizeShift(facts: {
 }): Promise<SummaryText> {
   const anon = createAnonymizer(facts.load.map((l) => l.name));
   const res = await chatJson({
+    cloudFallback: true, // данные уже обезличены
     provider: await provider(),
     system: SHIFT_SYSTEM,
     user: anon.hide(JSON.stringify(facts)),
@@ -100,6 +101,7 @@ export async function describeAnomalies(drafts: AnomalyDraft[], useModel = true)
   // Имена исполнителей в карточках обезличиваем.
   const anon = createAnonymizer(drafts.filter((d) => d.kind === "worker_returns").map((d) => d.subject));
   const res = await chatJson({
+    cloudFallback: true, // данные уже обезличены
     provider: await provider(),
     system: ANOMALY_SYSTEM,
     user: anon.hide(JSON.stringify(drafts.map((d) => ({ id: d.id, kind: d.kind, subject: d.subject, facts: d.facts })))),

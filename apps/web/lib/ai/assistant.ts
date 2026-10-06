@@ -96,6 +96,7 @@ export async function answerQuestion(question: string, history: AssistantTurn[],
   const payload = JSON.stringify({ facts: forModel, dialog, question: q });
 
   const res = await chatJson({
+    cloudFallback: true, // данные уже обезличены
     provider: await provider(),
     system: `${SYSTEM}\n${locale === "kk" ? "Отвечай на казахском языке." : "Отвечай на русском языке."}`,
     user: anon.hide(payload),

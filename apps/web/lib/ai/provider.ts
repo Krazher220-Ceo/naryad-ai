@@ -10,7 +10,9 @@ import "server-only";
 // Правила:
 // - ответ всегда строгий JSON, который проверяется функцией validate;
 // - при ошибке разбора или проверки — ещё одна попытка, затем ошибка (вызывающий ставит needs_master);
-// - у каждого вызова есть таймаут: недоступная модель не останавливает цикл наряда.
+// - у каждого вызова есть таймаут: недоступная модель не останавливает цикл наряда;
+// - cloudFallback: если Mac (local) не ответил, тот же запрос уходит в облако.
+//   Включать только там, где данные уже обезличены (имена заменены метками).
 
 export type AiProvider = "cloud" | "local";
 
@@ -33,10 +35,10 @@ const PROVIDERS: Record<AiProvider, () => ProviderConfig> = {
 // Часть сообщения: текст или картинка в виде data:image/jpeg;base64,...
 export type ContentPart = { type: "text"; text: string } | { type: "image_url"; image_url: { url: string } };
 
-export type ChatJsonResult<T> = { ok: true; data: T } | { ok: false; error: string };
+export type ChatJsonResult<T> = { ok: true; data: T; provider: AiProvider } | { ok: false; error: string };
 
 // validate возвращает готовое значение нужного типа или null, если ответ не по схеме.
-export async function chatJson<T>(params: {
+type ChatParams<T> = {
   provider: AiProvider;
   system: string;
   user: string | ContentPart[];
@@ -46,9 +48,20 @@ export async function chatJson<T>(params: {
   maxTokens?: number;
   // Своя модель для задачи, например Qwen3-4B для разбора речи (OLLAMA_VOICE_MODEL).
   model?: string;
-}): Promise<ChatJsonResult<T>> {
-  const config = PROVIDERS[params.provider]();
-  if (params.provider === "cloud" && !config.apiKey) return { ok: false, error: "DEEPSEEK_API_KEY не задан" };
+  cloudFallback?: boolean;
+};
+
+export async function chatJson<T>(params: ChatParams<T>): Promise<ChatJsonResult<T>> {
+  const first = await callProvider(params.provider, params);
+  if (first.ok || params.provider !== "local" || !params.cloudFallback) return first;
+  // Порядок по AGENTS.md: Mac → облако → правила. Своя модель Mac облаку не подходит.
+  const cloud = await callProvider("cloud", { ...params, model: undefined });
+  return cloud.ok ? cloud : { ok: false, error: `Mac: ${first.error}; облако: ${cloud.error}` };
+}
+
+async function callProvider<T>(provider: AiProvider, params: ChatParams<T>): Promise<ChatJsonResult<T>> {
+  const config = PROVIDERS[provider]();
+  if (provider === "cloud" && !config.apiKey) return { ok: false, error: "DEEPSEEK_API_KEY не задан" };
 
   const body = {
     model: params.model ?? (params.withImages ? config.visionModel : config.textModel),
@@ -76,15 +89,19 @@ export async function chatJson<T>(params: {
       });
       if (!res.ok) {
         lastError = `HTTP ${res.status}`;
+        // Mac недоступен — второй раз ждать не стоит, сразу к облаку.
+        if (provider === "local") break;
         continue;
       }
       const json = (await res.json()) as { choices?: { message?: { content?: string } }[] };
       const text = json.choices?.[0]?.message?.content ?? "";
       const parsed = params.validate(JSON.parse(text));
-      if (parsed) return { ok: true, data: parsed };
+      if (parsed) return { ok: true, data: parsed, provider };
       lastError = "ответ не по схеме";
     } catch (e) {
       lastError = e instanceof Error ? e.message : "ошибка запроса";
+      // Таймаут или обрыв связи с Mac: повтор только удвоит ожидание.
+      if (provider === "local" && !(e instanceof SyntaxError)) break;
     }
   }
   return { ok: false, error: lastError };
