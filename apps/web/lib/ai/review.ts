@@ -99,6 +99,7 @@ export async function reviewOrder(orderId: string): Promise<{ verdict: Verdict }
   let workMatch: WorkMatch | null = null;
   if (order.work_done) {
     const res = await chatJson({
+      cloudFallback: true, // данные уже обезличены
       provider,
       system: WORK_MATCH_SYSTEM,
       user: anon.hide(
@@ -131,6 +132,7 @@ export async function reviewOrder(orderId: string): Promise<{ verdict: Verdict }
       ...images.map((url): ContentPart => ({ type: "image_url", image_url: { url } })),
     ];
     const res = await chatJson({
+      cloudFallback: true, // данные уже обезличены
       provider,
       system: PHOTO_CHECK_SYSTEM,
       user: content,
@@ -160,6 +162,7 @@ export async function reviewOrder(orderId: string): Promise<{ verdict: Verdict }
     },
   };
   const textRes = await chatJson({
+    cloudFallback: true, // данные уже обезличены
     provider,
     system: REVIEW_TEXT_SYSTEM,
     user: anon.hide(JSON.stringify(facts)),
@@ -178,7 +181,9 @@ export async function reviewOrder(orderId: string): Promise<{ verdict: Verdict }
   }
 
   // ---------- 6. Сохранить, записать в журнал, уведомить ----------
-  const reviewChecks: ReviewChecks = { rules, work_match: workMatch, photo: photoCheck, text, provider, errors };
+  // Кто на самом деле ответил: при недоступном Mac текст мог прийти из облака.
+  const usedProvider = textRes.ok ? textRes.provider : provider;
+  const reviewChecks: ReviewChecks = { rules, work_match: workMatch, photo: photoCheck, text, provider: usedProvider, errors };
   const checks = reviewChecks as unknown as Json;
   await db.from("ai_reviews").insert({
     order_id: orderId,
