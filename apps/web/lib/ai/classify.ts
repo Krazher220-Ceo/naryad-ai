@@ -7,10 +7,13 @@ import { chatJson, type AiProvider } from "./provider";
 
 // Подсказка по описанию проблемы: шифр неисправности, приоритет, специальность (п. 5.1.4 кейса).
 //
-// Путь 1 — Laya (services/fast-ai): ~0,1 с, но без дообучения на русском точность низкая
-//   (docs/laya-eval.md), поэтому включается только переменной LAYA_ENABLED=1.
-// Путь 2 — языковая модель через lib/ai (~2 с), выбирает точный шифр из справочника.
-// Если оба недоступны — подсказки нет, мастер выбирает сам. Выдачу наряда это не останавливает.
+// Путь 1 — Laya (services/fast-ai): ~0,1 с, включается переменной LAYA_ENABLED=1. Берём у неё только
+//   категорию шифра и специальность. Приоритет Laya не отдаёт: на расширенном тесте он угадывается плохо
+//   и завышается до emergency (docs/laya-eval.md), а ошибка приоритета хуже, чем его отсутствие.
+// Путь 2 — языковая модель через lib/ai (~2 с): точный шифр из справочника и приоритет.
+// Если доступна только Laya — приоритета нет (null), мастер выбирает его сам.
+// Если недоступны оба — подсказки нет вообще. Выдачу наряда это не останавливает.
+// Сервис может ответить 503 {"busy": true} (очередь полна) — это такая же недоступность, идём дальше.
 
 export type Specialty = "слесарь" | "электрик" | "сварщик";
 export type Classification = {
@@ -38,14 +41,14 @@ async function viaLaya(description: string): Promise<Classification | null> {
     });
     if (!res.ok) return null;
     type Answer = { choice: string; probabilities: Record<string, number> };
-    const data = (await res.json()) as { category: Answer; priority: Answer; specialty: Answer };
+    const data = (await res.json()) as { category: Answer; specialty: Answer };
     const p = (a: Answer) => a.probabilities[a.choice] ?? 0;
     return {
       faultCode: null,
       category: data.category.choice,
-      priority: (PRIORITIES as readonly string[]).includes(data.priority.choice) ? (data.priority.choice as Classification["priority"]) : null,
+      priority: null, // приоритет Laya намеренно не используем (см. комментарий выше)
       specialty: SPECIALTIES.includes(data.specialty.choice as Specialty) ? (data.specialty.choice as Specialty) : null,
-      confidence: Math.min(p(data.category), p(data.priority), p(data.specialty)),
+      confidence: Math.min(p(data.category), p(data.specialty)),
       source: "laya",
     };
   } catch {
@@ -93,12 +96,12 @@ async function viaLlm(description: string): Promise<Classification | null> {
   };
 }
 
-// Laya после дообучения (docs/laya-eval.md): специальность 100%, категория 85%, приоритет 45%.
-// Поэтому от Laya берём специальность и категорию, а точный шифр и приоритет — у языковой модели.
+// Точность Laya по полям — в docs/laya-eval.md. Специальность и категорию берём у Laya,
+// точный шифр и приоритет — у языковой модели.
 export async function classifyProblem(description: string): Promise<Classification | null> {
   if (description.trim().length < 5) return null;
   const [laya, llm] = await Promise.all([viaLaya(description), viaLlm(description)]);
   if (laya && llm) return { ...llm, category: laya.category ?? llm.category, specialty: laya.specialty ?? llm.specialty, source: "laya" };
-  if (laya) return { ...laya, priority: null }; // приоритету Laya пока не доверяем
+  if (laya) return laya; // приоритета нет — его выберет мастер
   return llm;
 }
