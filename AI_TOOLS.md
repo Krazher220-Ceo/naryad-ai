@@ -41,6 +41,7 @@
 | server-only | Защита: серверный код с секретами не попадёт в браузер |
 | write-excel-file (MIT) | Выгрузка отчётов в Excel (.xlsx) |
 | @react-pdf/renderer (MIT) | Выгрузка отчётов в PDF |
+| web-push (MIT), @types/web-push (MIT) | Системные push-уведомления браузера (Web Push, VAPID): отправка с сервера, `lib/notify/push.ts` |
 | qrcode, @types/qrcode | QR-коды оборудования для быстрого выбора при выдаче наряда (уровень коррекции H, со значком в центре) |
 
 ## Зависимости `services/fast-ai`
