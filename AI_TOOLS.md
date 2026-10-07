@@ -22,11 +22,12 @@
 | DeepSeek `deepseek-flash` (API) | облако, режим `AI_PROVIDER=cloud` | Соответствие работ проблеме, сравнение фото «до/после», пояснение вердикта, подсказка шифра и приоритета, ответы чат-помощника мастера по готовым фактам смены |
 | Ollama + мультимодальная модель (план) | свой компьютер, режим `local` | Тот же набор задач без отправки данных наружу |
 | Распознавание речи браузера (Web Speech API) | в браузере телефона; Chrome отправляет звук на серверы Google | Голосовой ввод описания наряда, полей закрытия и вопроса помощнику (русский и казахский). Новых зависимостей нет |
-| Laya `laya-multilingual` (Convai Innovations, Apache 2.0), пакет `laya` (PyPI) | `services/fast-ai`, свой сервер | Быстрая классификация описания: категория шифра, приоритет, специальность с вероятностями. Пока без дообучения точность низкая, см. `docs/laya-eval.md` |
+| Laya `laya-multilingual` (Convai Innovations, Apache 2.0), пакет `laya` (PyPI) | `services/fast-ai`, свой сервер | Быстрая классификация описания: категория шифра, приоритет, специальность с вероятностями. Дообучена на наших описаниях (`finetune/laya-naryad`, не в git), сравнение — `docs/laya-eval.md` |
 | Whisper large-v3-turbo (OpenAI, MIT), модель `mlx-community/whisper-large-v3-turbo` | `services/fast-ai` на нашем Mac, `POST /transcribe` | Речь в текст для диктофона (русский и казахский). Без Mac — распознавание браузера |
 | mlx-whisper (Apple ml-explore, MIT), ffmpeg (LGPL, отдельная программа на Mac) | `services/fast-ai`, `requirements-voice.txt` | Запуск Whisper на чипе Apple M, чтение аудио |
 | python-multipart (Apache 2.0) | `services/fast-ai` | Приём файла записи в FastAPI |
-| Qwen3-4B-Instruct-2507 (Alibaba, Apache 2.0) через Ollama (MIT) | наш Mac, `OLLAMA_URL`, `OLLAMA_VOICE_MODEL` | Разбор надиктованного текста по полям наряда в строгий JSON. Без Mac — DeepSeek с обезличиванием, без него — текст без разбора |
+| Qwen3-4B-Instruct-2507 (Alibaba, Apache 2.0) через Ollama (MIT) | Mac 1, `OLLAMA_URL`, `OLLAMA_TEXT_MODEL`, `OLLAMA_VOICE_MODEL` | Разбор надиктованного текста по полям наряда, сверка работ с проблемой, текст вердикта, сводки, помощник мастера. Mac не ответил — DeepSeek с обезличиванием, затем правила |
+| Qwen3-VL-4B (Alibaba, Apache 2.0) через Ollama | Mac 1, `OLLAMA_VISION_MODEL` | Сравнение фото «до/после» при проверке наряда: что видно, что проверить нельзя. Mac не ответил — DeepSeek, затем правила |
 
 ## Зависимости приложения (`apps/web`)
 

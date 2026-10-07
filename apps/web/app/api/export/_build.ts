@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: LicenseRef-NaryadAI-NonCommercial
+// © 2026 команда «НарядAI»: Алихан, Бауыржан, Али, Тамерлан. Только для проверки и обучения,
+// без коммерческого использования. Полные условия — файл LICENSE в корне репозитория.
 import { factLabel, factValue, categoryLabel } from "@/components/reports/format";
 // Выгрузка берёт те же снимки, что и страницы: файл совпадает с тем, что на экране.
 import { cachedAnomalies, cachedDowntime, cachedMaterials, cachedRating, cachedShift } from "@/lib/analytics/cached";

@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: LicenseRef-NaryadAI-NonCommercial
+// © 2026 команда «НарядAI»: Алихан, Бауыржан, Али, Тамерлан. Только для проверки и обучения,
+// без коммерческого использования. Полные условия — файл LICENSE в корне репозитория.
 import { tRu as t, type MessageKey } from "@/lib/i18n";
 import type { OrderPriority, OrderStatus } from "@/lib/orders/types";
 

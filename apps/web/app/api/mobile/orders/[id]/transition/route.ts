@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: LicenseRef-NaryadAI-NonCommercial
+// © 2026 команда «НарядAI»: Алихан, Бауыржан, Али, Тамерлан. Только для проверки и обучения,
+// без коммерческого использования. Полные условия — файл LICENSE в корне репозитория.
 import { after, NextResponse } from "next/server";
 import { createBearerClient } from "@/lib/supabase/bearer";
 import { notifyStatusChange } from "@/lib/orders/notifications";

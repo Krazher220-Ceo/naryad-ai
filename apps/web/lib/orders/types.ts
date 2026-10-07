@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: LicenseRef-NaryadAI-NonCommercial
+// © 2026 команда «НарядAI»: Алихан, Бауыржан, Али, Тамерлан. Только для проверки и обучения,
+// без коммерческого использования. Полные условия — файл LICENSE в корне репозитория.
 import type { Enums, Tables } from "@/lib/supabase/database.types";
 
 // Типы наряда. Значения совпадают с перечислениями в базе (supabase/migrations/0001_init.sql).

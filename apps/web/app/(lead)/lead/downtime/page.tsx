@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: LicenseRef-NaryadAI-NonCommercial
+// © 2026 команда «НарядAI»: Алихан, Бауыржан, Али, Тамерлан. Только для проверки и обучения,
+// без коммерческого использования. Полные условия — файл LICENSE в корне репозитория.
 import { DowntimeView } from "@/components/reports/DowntimeView";
 import { ExportButtons } from "@/components/reports/ExportButtons";
 import { PERIODS, parseDaysIn } from "@/components/reports/format";

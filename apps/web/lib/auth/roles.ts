@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: LicenseRef-NaryadAI-NonCommercial
+// © 2026 команда «НарядAI»: Алихан, Бауыржан, Али, Тамерлан. Только для проверки и обучения,
+// без коммерческого использования. Полные условия — файл LICENSE в корне репозитория.
 // Роли совпадают с типом employee_role в базе (supabase/migrations/0001_init.sql).
 export const ROLES = ["master", "worker", "lead", "operator"] as const;
 export type Role = (typeof ROLES)[number];

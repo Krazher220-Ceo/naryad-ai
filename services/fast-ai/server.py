@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: LicenseRef-NaryadAI-NonCommercial
+# © 2026 команда «НарядAI»: Алихан, Бауыржан, Али, Тамерлан. Только для проверки и обучения,
+# без коммерческого использования. Полные условия — файл LICENSE в корне репозитория.
 # HTTP-сервер быстрого слоя на нашем Mac:
 #   POST /classify {"description": "..."} -> категория, приоритет, специальность (Laya);
 #   POST /transcribe (файл audio, поле lang) -> текст речи (Whisper large-v3-turbo через mlx-whisper).
