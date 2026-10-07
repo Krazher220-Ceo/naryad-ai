@@ -457,7 +457,7 @@ docs/                     architecture.md, demo-data.md, laya-eval.md, ui/, bran
 | Али | Справочники, закономерности, формула рейтинга, правила проверки, тексты ИИ, перевод на казахский |
 | Тамерлан | Чек-лист по кейсу, тестирование на телефонах, презентация, видео, питч |
 
-Код пишут люди и ИИ-агенты (Claude Code, Antigravity) по общим правилам из [`AGENTS.md`](AGENTS.md).
+Проект создан командой совместно с ИИ-агентами **Claude** (Anthropic, Claude Code) и **Antigravity** (Google) по общим правилам из [`AGENTS.md`](AGENTS.md).
 Агенты работают в своих ветках и сливают только через запрос на слияние. Любой фрагмент кода команда может объяснить.
 
 ## Лицензия
@@ -472,4 +472,4 @@ docs/                     architecture.md, demo-data.md, laya-eval.md, ui/, bran
 
 ---
 
-<p align="center"><sub>План — <a href="PLAN.md">PLAN.md</a> · Архитектура — <a href="docs/architecture.md">docs/architecture.md</a> · Правила — <a href="AGENTS.md">AGENTS.md</a> · ИИ-инструменты — <a href="AI_TOOLS.md">AI_TOOLS.md</a></sub></p>
+<p align="center"><sub>Версия 1.0.0 — <a href="CHANGELOG.md">CHANGELOG.md</a> · План — <a href="PLAN.md">PLAN.md</a> · Архитектура — <a href="docs/architecture.md">docs/architecture.md</a> · Правила — <a href="AGENTS.md">AGENTS.md</a> · ИИ-инструменты — <a href="AI_TOOLS.md">AI_TOOLS.md</a></sub></p>
