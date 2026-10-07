@@ -85,3 +85,11 @@ sublicensing, redistributing, or using it to build commercial products or train
 commercial AI models is prohibited without a written agreement with the authors.
 Third-party components keep their own licenses (see AI_TOOLS.md).
 Provided "as is", without warranty.
+
+5. Пометка в файлах
+
+Файлы кода команды начинаются с пометки
+«SPDX-License-Identifier: LicenseRef-NaryadAI-NonCommercial». Она означает,
+что на файл распространяется эта лицензия. Отсутствие пометки в отдельном
+файле (например, в уже применённой миграции базы) не снимает действие лицензии:
+она распространяется на весь код и материалы команды в этом репозитории.

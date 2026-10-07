@@ -15,7 +15,7 @@
   <img alt="React 19" src="https://img.shields.io/badge/React-19-07316e?style=flat-square&logo=react&logoColor=white">
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-strict-1753a9?style=flat-square&logo=typescript&logoColor=white">
   <img alt="Supabase" src="https://img.shields.io/badge/Supabase-Postgres%20%2B%20RLS-15803d?style=flat-square&logo=supabase&logoColor=white">
-  <img alt="PWA и Android" src="https://img.shields.io/badge/PWA-%2B%20Android%20TWA-ffc107?style=flat-square&logoColor=001636">
+  <img alt="PWA и Android APK" src="https://img.shields.io/badge/PWA-%2B%20Android%20APK-ffc107?style=flat-square&logoColor=001636">
   <img alt="Русский и казахский" src="https://img.shields.io/badge/язык-рус%20%7C%20қаз-475569?style=flat-square">
 </p>
 
@@ -28,6 +28,35 @@
 
 > [!NOTE]
 > Все справочники, сотрудники и история нарядов демонстрационные, сгенерированные. Это не реальные данные завода.
+
+## О проекте
+
+**Проблема.** На фабрике наряды на ремонт выдают на бумаге и по рации. Мастер не видит, кто свободен и что просрочено.
+Исполнитель узнаёт о работе с опозданием. Качество ремонта проверяют на глаз, а историю отказов никто не анализирует.
+
+**Решение.** Одно приложение для всех ролей. Оно работает на телефоне в перчатках и на ПК в диспетчерской:
+
+| Роль | Что делает в НарядAI |
+|---|---|
+| Оператор | Сканирует QR на машине и сообщает о поломке без входа (ФИО обязательно) |
+| Мастер | Видит смену на одном экране, выдаёт наряд за ≤ 6 нажатий или голосом, закрывает после проверки ИИ |
+| Исполнитель | Принимает наряд, проходит проверку безопасности, работает, закрывает по шагам с фото «после» |
+| Руководитель | Дашборд за 3 месяца, рейтинг, аномалии, простои, материалы, выгрузка в Excel и PDF |
+
+**ИИ-модули.**
+- **Контроль сроков** — код раз в минуту: напоминание, просрочка с повтором, эскалация руководителю.
+- **Подсказка при выдаче** — Laya и языковая модель предлагают шифр неисправности, приоритет, специальность и исполнителя.
+- **Проверка выполнения** — правила кода, сверка текста работ с проблемой, сравнение фото «до/после» мультимодальной моделью.
+  Итог — оценка 1–5 с объяснением, что видно, что сошлось и что проверить нельзя. При низкой уверенности — «решает мастер».
+- **Аналитика** — рейтинг, отчёт за смену и аномалии считает код, модель формулирует выводы и рекомендации.
+- **Голос** — Whisper превращает речь в текст, Qwen3 раскладывает его по полям наряда, человек проверяет поля.
+- **Помощник мастера** — отвечает на вопросы о смене по готовым цифрам.
+
+**Применимость на предприятии.**
+- Права проверяет база (правила доступа PostgreSQL).
+- Персональные данные не уходят наружу: модели работают на своих Mac, в облако идут только обезличенные данные.
+- Всё работает без интернета у ИИ: Mac → облако → правила.
+- Офлайн-режим на телефоне, интерфейс на русском и казахском.
 
 ## Попробовать за минуту
 
@@ -45,7 +74,7 @@
 **[Скачать APK](https://naryad-ai.vercel.app/downloads/naryad-worker.apk)** (18 МБ, Android 8.0 и новее).
 
 > [!IMPORTANT]
-> Сейчас в приложении только роль **исполнителя**. Войдите как `worker1` / `worker2026`. Мастер, руководитель и оператор работают в веб-версии по той же ссылке: на телефоне она открывается как приложение (PWA).
+> Сейчас в нативном приложении только роль **исполнителя**. Войдите как `worker1` / `worker2026`. Мастер, руководитель и оператор работают в веб-версии по той же ссылке: на телефоне она открывается как приложение (PWA).
 
 Что умеет: мои наряды (аварийные наверху), принять, начать, пауза и отклонение с причиной, «Нужна помощь», закрытие по шагам с шифром, материалами и фото «после», уведомления, русский и казахский, работа без сети с очередью действий. Логики статусов и прав в приложении нет: всё проверяет сервер, как и для сайта.
 
@@ -184,7 +213,7 @@ flowchart LR
 </details>
 
 <details>
-<summary><b>Уровень 5 — интерфейс v2, роли и клиенты</b> · в работе (M6–M8)</summary>
+<summary><b>Уровень 5 — интерфейс v2, роли и клиенты</b> · готово</summary>
 
 По наброскам на [холсте](https://claude.ai/artifact/9TGeJToj32uzK9RudHwqVy), подробно — `PLAN.md`, раздел 8.
 
@@ -194,7 +223,8 @@ flowchart LR
 - QR цехов и выбор «цех → группа → машина»
 - Вход по логину и паролю, профиль: пароль, Telegram, уведомления, язык
 - Голос как диктофон: Whisper large-v3-turbo и Qwen3-4B на нашем Mac
-- Офлайн-кэш нарядов, справочников и фото; Android-приложение (APK)
+- Офлайн-кэш нарядов, справочников и фото; нативное Android-приложение исполнителя (APK)
+- Кэш отчётов: тяжёлая аналитика считается раз в сутки, страницы открываются сразу
 
 </details>
 
@@ -218,12 +248,13 @@ flowchart LR
 Голос устроен в два шага: **речь → Whisper → текст → Qwen3-4B → поля наряда в JSON → человек проверяет**.
 Без сети работает распознавание браузера, текст вставляется без разбора.
 
-| Модель | Назначение | Лицензия |
-|---|---|---|
-| Laya `laya-multilingual` | шифр, приоритет, специальность | Apache 2.0 |
-| Whisper large-v3-turbo через mlx-whisper | речь в текст | MIT |
-| Qwen3-4B-Instruct-2507 через Ollama | разбор речи по полям | Apache 2.0 |
-| DeepSeek (API) | запасной путь, проверка и объяснения | облачный сервис |
+| Модель | Где работает | Назначение | Лицензия |
+|---|---|---|---|
+| Laya `laya-naryad` (дообученная `laya-multilingual`) | Mac 2 (Air), `services/fast-ai` | шифр, приоритет, специальность | Apache 2.0 |
+| Whisper large-v3-turbo через mlx-whisper | Mac 2 (Air), `services/fast-ai` | речь в текст | MIT |
+| Qwen3-4B-Instruct-2507 через Ollama | Mac 1 | разбор речи, проверка текста работ, сводки, помощник | Apache 2.0 |
+| Qwen3-VL-4B через Ollama | Mac 1 | сравнение фото «до/после» | Apache 2.0 |
+| DeepSeek (API) | облако | запасной путь, только обезличенные данные | облачный сервис |
 
 Полный список ИИ-инструментов и зависимостей — [`AI_TOOLS.md`](AI_TOOLS.md).
 
@@ -233,17 +264,17 @@ flowchart LR
 flowchart TB
     subgraph CL["Клиенты"]
         PWA["Веб-приложение PWA<br/>ПК и телефон"]
-        APK["Android APK<br/>оболочка TWA"]
+        APK["Android APK<br/>Kotlin, тонкий клиент"]
         TG["Telegram-бот"]
     end
     subgraph SV["Next.js 16 на Vercel"]
-        ACT["Серверные действия и /api"]
+        ACT["Серверные действия, /api, /api/mobile"]
         ORD["lib/orders<br/>переходы статусов"]
         LAI["lib/ai<br/>модели и обезличивание"]
     end
     subgraph DT["Данные"]
         SB[("Supabase<br/>Postgres · RLS · Realtime · pg_cron")]
-        MAC["services/fast-ai на Mac"]
+        MAC["Mac 1: Ollama, Qwen3<br/>Mac 2: Laya, Whisper"]
         DS["DeepSeek"]
     end
     PWA & APK --> ACT
@@ -254,38 +285,97 @@ flowchart TB
     ACT --> TG
 ```
 
-- **Один код для всех клиентов.** Android-приложение — оболочка над тем же адресом, своей логики у него нет.
-- **Права проверяет база** (правила доступа PostgreSQL и функции), а не скрытые кнопки. Тест `supabase/tests/order_cycle.sql` — 33 шага, все запрещённые действия отклоняются.
+- **Одна логика для всех клиентов.** Android-приложение — тонкий клиент: читает данные через Supabase с правами пользователя,
+  а действия отправляет в те же серверные маршруты (`/api/mobile`), что и сайт. Своих правил статусов и прав в нём нет.
+- **Права проверяет база** (правила доступа PostgreSQL и функции), а не скрытые кнопки. Тест `supabase/tests/order_cycle.sql` — 55 шагов, все запрещённые действия отклоняются.
 - **Персональные данные дома.** Перед отправкой во внешний ИИ ФИО заменяются номерами, с фото удаляются метаданные.
+- **Кэш отчётов.** Аналитика и тексты ИИ считаются раз в сутки (Vercel Cron) и хранятся в `report_snapshots`.
 
 ## Запуск
 
-Нужны Node.js 20+ и проект Supabase.
+Готовая версия уже работает: **https://naryad-ai.vercel.app/demo**. Ниже — как развернуть свою копию с нуля.
+
+**Нужно:** Node.js 20+, бесплатный проект [Supabase](https://supabase.com), для своего сайта — аккаунт [Vercel](https://vercel.com).
+Локальные модели — по желанию, без них ИИ работает через облако или правила.
+
+### 1. Код и зависимости
 
 ```bash
-cd apps/web && npm install && cp ../../.env.example .env.local && npm run dev
+git clone https://github.com/Krazher220-Ceo/naryad-ai.git && cd naryad-ai/apps/web && npm install && cp ../../.env.example .env.local
 ```
 
-В `.env.local` заполните ключи; описание каждой переменной — в `.env.example`. Без `DEEPSEEK_API_KEY`
-приложение работает, а ИИ-проверка выносит вердикт по правилам кода.
+### 2. База данных Supabase — один раз на новый проект
+
+1. Выполнить по порядку файлы `supabase/migrations/0001…0016` в SQL Editor (или `npx supabase db push`).
+2. Выполнить `supabase/seed.sql`: справочники и демо-логины из таблицы выше.
+3. Демо-история за 3 месяца (≈600 нарядов): `node scripts/seed/generate.mjs` из корня репозитория,
+   затем в SQL Editor `select snapshot_demo();` — снимок для кнопки «Сбросить демо». Описание данных — `docs/demo-data.md`.
+4. Контроль сроков раз в минуту (pg_cron): в Supabase → Vault создать секреты `app_url` (адрес приложения)
+   и `cron_secret` (то же значение, что `CRON_SECRET`).
+
+### 3. Переменные окружения
+
+Заполнить `apps/web/.env.local` (для Vercel — Settings → Environment Variables). Пояснения — в `.env.example`.
+
+| Переменная | Обязательно | Что это |
+|---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | да | адрес и публичный ключ Supabase |
+| `SUPABASE_SERVICE_ROLE_KEY` | да | служебный ключ: сброс демо, кэш отчётов, уведомления |
+| `CRON_SECRET` | да | секрет для `/api/cron/*` (сроки и ночной пересчёт отчётов) |
+| `AI_PROVIDER` | нет | `local` — сначала свои модели, `cloud` — сразу облако. Переключается и в настройках мастера |
+| `DEEPSEEK_API_KEY` | нет | облачная модель. Без ключа и без Mac ИИ выносит вердикт по правилам |
+| `OLLAMA_URL`, `OLLAMA_TEXT_MODEL`, `OLLAMA_VISION_MODEL`, `OLLAMA_VOICE_MODEL` | нет | свои модели на Mac через Ollama |
+| `LAYA_ENABLED`, `FAST_AI_URL`, `FAST_AI_SECRET` | нет | Laya и Whisper (`services/fast-ai`) |
+| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET`, `NEXT_PUBLIC_TELEGRAM_BOT_USERNAME` | нет | уведомления в Telegram |
+
+### 4. Запуск
+
+```bash
+cd apps/web && npm run dev
+```
+
+Откройте http://localhost:3000/demo. Для своего сайта импортируйте репозиторий в Vercel с корнем `apps/web` и теми же переменными.
+Ночной пересчёт отчётов Vercel запускает сам по `apps/web/vercel.json`. Telegram: `node scripts/telegram/set-webhook.mjs https://<адрес-приложения>`.
 
 <details>
-<summary><b>База данных</b> — один раз на новый проект Supabase</summary>
+<summary><b>5. Свои модели на Mac</b> — необязательно</summary>
 
-1. Выполнить по порядку файлы `supabase/migrations/0001…0013` в SQL Editor (или `npx supabase db push`).
-2. Выполнить `supabase/seed.sql` — справочники и демо-логины.
-3. Демо-история за 3 месяца: `node scripts/seed/generate.mjs`, затем в SQL Editor `select snapshot_demo();`
-   (снимок для кнопки «Сбросить демо»).
-4. Расписание контроля сроков: в Supabase Vault создать секреты `app_url` (адрес приложения) и `cron_secret`
-   (то же значение, что `CRON_SECRET`).
-5. Telegram: `node scripts/telegram/set-webhook.mjs https://<адрес-приложения>`.
+Мы разносим модели на два Mac с чипом M, чтобы обе помещались в память.
+Модели наружу открываются через Cloudflare Tunnel на свои адреса, например `ollama.<домен>` и `voice.<домен>`.
+
+**Mac 1 — Ollama (16 ГБ памяти):**
+
+```bash
+brew install ollama cloudflared && brew services start ollama
+ollama pull qwen3:4b-instruct-2507-q4_K_M && ollama pull qwen3-vl:4b
+launchctl setenv OLLAMA_KEEP_ALIVE 24h && launchctl setenv OLLAMA_MAX_LOADED_MODELS 2 && brew services restart ollama
+cloudflared tunnel run <имя-туннеля>      # ingress на http://localhost:11434, httpHostHeader: localhost:11434
+```
+
+**Mac 2 — Laya и Whisper (хватает 8 ГБ):**
+
+```bash
+cd services/fast-ai && python3.11 -m venv .venv && .venv/bin/pip install -r requirements-voice.txt
+FAST_AI_SECRET=<секрет> .venv/bin/uvicorn server:app --host 127.0.0.1 --port 8787
+cloudflared tunnel run <имя-туннеля>      # ingress на http://localhost:8787
+```
+
+Подробно, с дообучением Laya, — `services/fast-ai/README.md`. В Vercel: `OLLAMA_URL=https://ollama.<домен>`,
+`FAST_AI_URL=https://voice.<домен>`, `LAYA_ENABLED=1`, `AI_PROVIDER=local`. Mac выключен — приложение само переходит на облако, затем на правила.
 
 </details>
 
 <details>
-<summary><b>Быстрый слой ИИ</b> — необязательно</summary>
+<summary><b>6. Android-приложение</b> — необязательно, готовый APK есть выше</summary>
 
-Инструкция — `services/fast-ai/README.md`: Laya на своём сервере, включается `LAYA_ENABLED=1`.
+Нужны JDK 21 и Android SDK. В `apps/android/native/local.properties` указать `SUPABASE_URL`, `SUPABASE_ANON_KEY`,
+`WEB_APP_URL` (образец — `local.properties.example`).
+
+```bash
+cd apps/android/native && ./gradlew assembleDebug    # -> app/build/outputs/apk/debug/app-debug.apk
+```
+
+Подробно — `apps/android/native/README.md`.
 
 </details>
 
@@ -296,7 +386,7 @@ cd apps/web && npm install && cp ../../.env.example .env.local && npm run dev
 node scripts/qr/make-test-qr.mjs https://naryad-ai.vercel.app
 ```
 
-Скрипт кладёт SVG с логотипом в `docs/qr/`.
+Скрипт кладёт SVG с логотипом в `docs/qr/`. Таблички для печати по 4 на листе — у мастера в разделе «QR-коды».
 
 </details>
 
@@ -309,7 +399,8 @@ npm run lint
 npm run build
 ```
 
-Тест цикла наряда на настоящей базе: `supabase/tests/order_cycle.sql`. Он выполняется в транзакции и откатывается.
+Тест цикла наряда на настоящей базе: `supabase/tests/order_cycle.sql` (55 шагов: переходы, причины, фото «после»,
+чужие наряды, заявки оператора, лимит частоты). Он выполняется в транзакции и откатывается.
 
 ## Структура
 
@@ -320,14 +411,15 @@ apps/web/                 Next.js 16 (App Router), PWA — один код дл�
   app/(worker)            мои наряды, карточка, закрытие по шагам
   app/(lead)              дашборд, рейтинг, смена, аномалии, материалы, простои
   app/demo                стартовая страница для жюри
-  app/api                 расписание сроков, вебхук Telegram, выгрузка отчётов
+  app/api                 расписание сроков и отчётов, вебхук Telegram, выгрузка, голос, /api/mobile для Android
   lib/orders              действия с нарядом, переходы, сроки, подбор исполнителя
   lib/ai                  единственная точка вызова моделей, обезличивание, проверка наряда
   lib/analytics           рейтинг, отчёт за смену, аномалии, отчёты
   lib/offline             офлайн-очередь действий
   messages/ru.json, kk.json   все надписи интерфейса на двух языках
 services/fast-ai          Laya, Whisper (FastAPI) на Mac, дообучение
-apps/android              Android-приложение: оболочка TWA, сборка Bubblewrap
+apps/android/native       Android-приложение исполнителя: Kotlin, Jetpack Compose, тонкий клиент
+apps/web/public/downloads готовый APK для скачивания
 supabase/migrations       схема базы, функции переходов, правила доступа
 supabase/tests            тест цикла наряда и прав
 scripts/seed              генератор демо-истории
@@ -340,10 +432,21 @@ docs/                     architecture.md, demo-data.md, laya-eval.md, ui/, bran
 | Дата | Веха | Статус |
 |---|---|---|
 | 3–4 октября | M0–M5: цикл наряда, сроки, Telegram, ИИ, аналитика, офлайн, голос, казахский, уровень 4 | готово |
-| 5 октября | M6: каркас v2, плашка связи, уведомления, экраны исполнителя | план |
-| 6 октября | M7: оператор, QR цехов, мастер v2, вход по паролю | план |
-| 7 октября | M8: руководитель v2, Whisper, офлайн-кэш, Android APK, видео | план |
+| 5 октября | M6: каркас v2, плашка связи, уведомления, экраны исполнителя | готово |
+| 6 октября | M7: оператор, QR цехов, мастер v2, вход по паролю | готово |
+| 7 октября | M8: руководитель v2, Whisper, офлайн-кэш, Android APK, кэш отчётов | готово |
 | 8 октября | M9: стабилизация, заморозка кода в 14:00, сдача до 18:00 | план |
+
+## Состав сдачи по кейсу
+
+| Что требует кейс (раздел 12) | Где |
+|---|---|
+| Репозиторий с кодом и инструкцией запуска | этот README, раздел «Запуск» |
+| APK или ссылка на PWA | [APK исполнителя](https://naryad-ai.vercel.app/downloads/naryad-worker.apk), PWA — https://naryad-ai.vercel.app |
+| Веб-панель и тестовые учётные записи | https://naryad-ai.vercel.app/demo, логины — раздел «Попробовать за минуту» |
+| Тестовый набор данных | `supabase/seed.sql`, `scripts/seed/generate.mjs`, описание — `docs/demo-data.md` |
+| ИИ-инструменты и внешние компоненты | [`AI_TOOLS.md`](AI_TOOLS.md) |
+| Презентация и видео демо | ссылки в письме организаторам (`docs/submission.md`) |
 
 ## Команда
 
@@ -363,6 +466,8 @@ docs/                     architecture.md, demo-data.md, laya-eval.md, ui/, bran
 
 - **Можно.** Жюри, организаторам хакатона и АО «Костанайские минералы» — запускать, разворачивать и проверять решение. Любому — изучать код для себя.
 - **Нельзя без письменного договора с авторами.** Коммерческое использование, предоставление как услуги (SaaS, внедрение, хостинг для других), продажа, распространение и разработка своих продуктов на основе проекта.
+- Каждый файл кода команды начинается с пометки `SPDX-License-Identifier: LicenseRef-NaryadAI-NonCommercial` — она указывает на эту лицензию.
+  Применённые миграции базы не меняются, на них лицензия распространяется так же.
 - Сторонние библиотеки, модели и шрифты — по своим лицензиям, список в [`AI_TOOLS.md`](AI_TOOLS.md).
 
 ---
