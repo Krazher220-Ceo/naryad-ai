@@ -1,0 +1,6 @@
+# Голос на Linux (в том числе с NVIDIA): Whisper large-v3-turbo через faster-whisper (MIT, CTranslate2, MIT).
+# ffmpeg не нужен: faster-whisper читает аудио через PyAV (ставится вместе с ним).
+# На NVIDIA нужны драйвер, CUDA 12 и cuDNN 9; без видеокарты работает на процессоре (int8).
+-r requirements.txt
+faster-whisper>=1.1,<2
+python-multipart==0.0.20
