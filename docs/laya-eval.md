@@ -63,7 +63,7 @@ Laya уверенно отличает плановые работы (45 из 45
 Данные: 920 синтетических описаний (`finetune/make_data.py`, 48 запросов к `deepseek-flash`, метка — запрошенная комбинация).
 Обучение: `finetune/train_mps.py`, fp32, батч 8 × накопление 4, 4 эпохи, AdamW, потеря RLCD + мягкая кросс-энтропия; 10% описаний отложено для калибровки температуры (1,075);
 20 минут на MacBook Air M2 16 ГБ. Веса (`finetune/laya-naryad/`, 640 МБ) в репозиторий не входят; на других машинах их можно получить
-из Hugging Face (`LAYA_MODEL=Krazher/laya-naryad`, пример id) или обучить заново (~25 минут).
+из Hugging Face ([`Krazher/laya-naryad`](https://huggingface.co/Krazher/laya-naryad), `LAYA_MODEL=Krazher/laya-naryad`) или обучить заново (~25 минут).
 
 **Как запустить** (из `services/fast-ai`):
 - данные: `.venv/bin/python finetune/make_data.py`

@@ -250,7 +250,7 @@ flowchart LR
 
 | Модель | Где работает | Назначение | Лицензия |
 |---|---|---|---|
-| Laya `laya-naryad` (дообученная `laya-multilingual`) | Mac 2 (Air), `services/fast-ai` | шифр, приоритет, специальность | Apache 2.0 |
+| Laya [`laya-naryad`](https://huggingface.co/Krazher/laya-naryad) (дообученная `laya-multilingual`) | Mac 2 (Air), `services/fast-ai` | шифр, приоритет, специальность | Apache 2.0 |
 | Whisper large-v3-turbo через mlx-whisper | Mac 2 (Air), `services/fast-ai` | речь в текст | MIT |
 | Qwen3-4B-Instruct-2507 через Ollama | Mac 1 | разбор речи, проверка текста работ, сводки, помощник | Apache 2.0 |
 | Qwen3-VL-4B через Ollama | Mac 1 | сравнение фото «до/после» | Apache 2.0 |

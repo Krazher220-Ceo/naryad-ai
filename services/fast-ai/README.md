@@ -43,7 +43,7 @@ python3.11 -m venv .venv && .venv/bin/pip install -r requirements-voice-linux.tx
 LAYA_MODEL=Krazher/laya-naryad FAST_AI_SECRET=секрет .venv/bin/uvicorn server:app --host 0.0.0.0 --port 8787
 ```
 
-`Krazher/laya-naryad` — пример id репозитория на Hugging Face с весами дообученной Laya (см. `LAYA_MODEL`).
+Веса дообученной Laya лежат публично на Hugging Face: [Krazher/laya-naryad](https://huggingface.co/Krazher/laya-naryad). Сервер скачает их сам по `LAYA_MODEL` или `LAYA_HF_REPO`.
 Устройство для Whisper выбирается само: `cuda` с float16, если CTranslate2 видит видеокарту, иначе `cpu` с int8.
 `GET /health` показывает выбранный движок и устройство (`whisper.backend`, `whisper.device`; до первого запроса устройство `auto`).
 
