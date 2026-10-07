@@ -18,7 +18,8 @@ object ImageUtils {
 
     // Читает фото, поворачивает по EXIF, уменьшает до 1600 px и сохраняет как JPEG 80.
     // Сохранение заново — это и есть удаление EXIF (геометки, модель телефона и т.д.).
-    fun compressToFile(context: Context, source: Uri, target: File) {
+    // Возвращает dHash итогового изображения (для поиска повторных фото на сервере).
+    fun compressToFile(context: Context, source: Uri, target: File): String? {
         val bytes = context.contentResolver.openInputStream(source)?.use { it.readBytes() }
             ?: error("Cannot open $source")
 
@@ -52,5 +53,13 @@ object ImageUtils {
 
         target.parentFile?.mkdirs()
         target.outputStream().use { result.compress(Bitmap.CompressFormat.JPEG, QUALITY, it) }
+        return runCatching { dHash(result) }.getOrNull()
+    }
+
+    private fun dHash(bitmap: Bitmap): String {
+        val small = Bitmap.createScaledBitmap(bitmap, PerceptualHash.WIDTH, PerceptualHash.HEIGHT, true)
+        val pixels = IntArray(PerceptualHash.WIDTH * PerceptualHash.HEIGHT)
+        small.getPixels(pixels, 0, PerceptualHash.WIDTH, 0, 0, PerceptualHash.WIDTH, PerceptualHash.HEIGHT)
+        return PerceptualHash.fromPixels(pixels)
     }
 }

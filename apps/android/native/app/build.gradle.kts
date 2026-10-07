@@ -24,8 +24,8 @@ android {
         applicationId = "kz.naryadai.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 2
-        versionName = "1.1.0"
+        versionCode = 3
+        versionName = "1.2.0"
 
         buildConfigField("String", "SUPABASE_URL", "\"${prop("SUPABASE_URL", "https://example.supabase.co")}\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${prop("SUPABASE_ANON_KEY", "")}\"")

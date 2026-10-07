@@ -455,6 +455,8 @@
       "noFaultCode": "Не указан шифр неисправности.",
       "noAfterPhoto": "Нет фото «после».",
       "duplicatePhoto": "Фото «после» уже встречалось в другом наряде.",
+      "similarPhoto": "Фото «после» похоже на фото из наряда №{number}.",
+      "sameAsBefore": "Фото «после» почти совпадает с фото «до» — работа на фото не видна.",
       "materialOver": "{name}: списано {qty} {unit} при обычном расходе {typical} — в {ratio} раза больше.",
       "materialHigh": "{name}: списано {qty} {unit} при обычном расходе {typical}.",
       "materialUnrelated": "{name} обычно не списывается при шифре {code}.",

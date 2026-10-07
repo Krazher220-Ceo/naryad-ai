@@ -2,6 +2,7 @@
 // © 2026 команда «НарядAI»: Алихан, Бауыржан, Али, Тамерлан. Только для проверки и обучения,
 // без коммерческого использования. Полные условия — файл LICENSE в корне репозитория.
 import { createClient } from "@/lib/supabase/client";
+import { dHashFromRgba, PHASH_HEIGHT, PHASH_WIDTH } from "@/lib/ai/phash";
 import type { PhotoKind } from "./types";
 
 // Загрузка фото наряда из браузера.
@@ -15,7 +16,8 @@ const MAX_SIDE = 1600;
 const JPEG_QUALITY = 0.8;
 export const MAX_PHOTOS_PER_KIND = 5;
 
-export async function compress(file: File): Promise<Blob> {
+// Сжатый JPEG и перцептивный хеш (dHash) с того же canvas.
+async function compressWithHash(file: File): Promise<{ blob: Blob; phash: string | null }> {
   const bitmap = await createImageBitmap(file);
   const scale = Math.min(1, MAX_SIDE / Math.max(bitmap.width, bitmap.height));
   const canvas = document.createElement("canvas");
@@ -24,9 +26,28 @@ export async function compress(file: File): Promise<Blob> {
   canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
   bitmap.close();
 
-  return new Promise((resolve, reject) =>
-    canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("compress failed"))), "image/jpeg", JPEG_QUALITY),
+  // Хеш считаем по уменьшенной копии 9x8. Не вышло — фото всё равно загрузится, но без хеша.
+  let phash: string | null = null;
+  try {
+    const small = document.createElement("canvas");
+    small.width = PHASH_WIDTH;
+    small.height = PHASH_HEIGHT;
+    const ctx = small.getContext("2d")!;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(canvas, 0, 0, PHASH_WIDTH, PHASH_HEIGHT);
+    phash = dHashFromRgba(ctx.getImageData(0, 0, PHASH_WIDTH, PHASH_HEIGHT).data);
+  } catch {
+    phash = null;
+  }
+
+  const blob = await new Promise<Blob>((resolve, reject) =>
+    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("compress failed"))), "image/jpeg", JPEG_QUALITY),
   );
+  return { blob, phash };
+}
+
+export async function compress(file: File): Promise<Blob> {
+  return (await compressWithHash(file)).blob;
 }
 
 // Отпечаток файла: по нему в M3 ищется повторно загруженное старое фото.
@@ -42,7 +63,7 @@ export async function uploadOrderPhoto(params: {
   authorId: string; // id сотрудника из employees
 }): Promise<{ path: string }> {
   const supabase = createClient();
-  const blob = await compress(params.file);
+  const { blob, phash } = await compressWithHash(params.file);
   const path = `${params.orderId}/${params.kind}-${crypto.randomUUID()}.jpg`;
 
   const upload = await supabase.storage.from("photos").upload(path, blob, { contentType: "image/jpeg" });
@@ -54,6 +75,7 @@ export async function uploadOrderPhoto(params: {
     path,
     author_id: params.authorId,
     sha256: await sha256(blob),
+    phash,
     taken_at: new Date(params.file.lastModified).toISOString(),
   });
   if (insert.error) throw insert.error;

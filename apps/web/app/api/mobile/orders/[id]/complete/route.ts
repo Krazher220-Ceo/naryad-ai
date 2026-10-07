@@ -5,6 +5,8 @@ import { after, NextResponse } from "next/server";
 import { createBearerClient } from "@/lib/supabase/bearer";
 import { reviewOrder } from "@/lib/ai/review";
 
+// Проверка ИИ идёт в after() и ограничена этим временем (бюджет в reviewOrder — 90 с).
+export const maxDuration = 120;
 
 export async function POST(
   req: Request,
