@@ -25,6 +25,8 @@
 | Laya `laya-multilingual` (Convai Innovations, Apache 2.0), пакет `laya` (PyPI) | `services/fast-ai`, свой сервер | Быстрая классификация описания: категория шифра, приоритет, специальность с вероятностями. Дообучена на наших описаниях (`finetune/laya-naryad`, не в git), сравнение — `docs/laya-eval.md` |
 | Whisper large-v3-turbo (OpenAI, MIT), модель `mlx-community/whisper-large-v3-turbo` | `services/fast-ai` на нашем Mac, `POST /transcribe` | Речь в текст для диктофона (русский и казахский). Без Mac — распознавание браузера |
 | mlx-whisper (Apple ml-explore, MIT), ffmpeg (LGPL, отдельная программа на Mac) | `services/fast-ai`, `requirements-voice.txt` | Запуск Whisper на чипе Apple M, чтение аудио |
+| faster-whisper (SYSTRAN, MIT), CTranslate2 (OpenNMT, MIT), PyAV (BSD) | `services/fast-ai`, `requirements-voice-linux.txt` | Запуск Whisper large-v3-turbo на Linux (NVIDIA cuda float16 или процессор int8), если нет Mac с чипом M; выбирается `WHISPER_BACKEND`. ffmpeg не нужен |
+| huggingface_hub (Apache 2.0) | `services/fast-ai` (уже входит в зависимости Laya) | Скачивание весов дообученной Laya по `LAYA_MODEL` |
 | python-multipart (Apache 2.0) | `services/fast-ai` | Приём файла записи в FastAPI |
 | Qwen3-4B-Instruct-2507 (Alibaba, Apache 2.0) через Ollama (MIT) | Mac 1, `OLLAMA_URL`, `OLLAMA_TEXT_MODEL`, `OLLAMA_VOICE_MODEL` | Разбор надиктованного текста по полям наряда, сверка работ с проблемой, текст вердикта, сводки, помощник мастера. Mac не ответил — DeepSeek с обезличиванием, затем правила |
 | Qwen3-VL-4B (Alibaba, Apache 2.0) через Ollama | Mac 1, `OLLAMA_VISION_MODEL` | Сравнение фото «до/после» при проверке наряда: что видно, что проверить нельзя. Mac не ответил — DeepSeek, затем правила |
