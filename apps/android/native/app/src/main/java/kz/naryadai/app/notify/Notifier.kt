@@ -92,7 +92,8 @@ object Notifier {
             // Android 16: просим показать как живое уведомление (чип в строке состояния)
             .setRequestPromotedOngoing(true)
             .setShortCriticalText(ctx.getString(R.string.live_chip, order.number.toString()))
-        if (due != null && !paused) {
+        // Когда срок прошёл, обратный отсчёт не нужен: вместо него «Просрочен на N мин»
+        if (due != null && !paused && !overdue) {
             b.setShowWhen(true).setWhen(due).setUsesChronometer(true).setChronometerCountDown(true)
         } else {
             b.setShowWhen(false)

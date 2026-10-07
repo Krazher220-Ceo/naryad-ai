@@ -56,7 +56,8 @@ class WorkerService : Service() {
         if (loop == null) {
             loop = scope.launch {
                 while (isActive) {
-                    if (!Graph.session.isLoggedIn) {
+                    // Вышли из аккаунта или отключили уведомления: службе делать нечего, батарею не тратим
+                    if (!Graph.session.isLoggedIn || !Notifier.canPost(this@WorkerService)) {
                         stopSelf()
                         break
                     }

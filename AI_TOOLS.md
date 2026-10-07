@@ -65,7 +65,7 @@
 
 | Пакет | Лицензия | Назначение |
 |---|---|---|
-| Jetpack Compose, Material 3, Navigation, Lifecycle, Activity, Core KTX, ExifInterface (AndroidX) | Apache 2.0 | Интерфейс, навигация, чтение ориентации фото |
+| Jetpack Compose, Material 3, Navigation, Lifecycle, Activity, Core KTX 1.17.0 (нужен для живого уведомления Android 16), ExifInterface (AndroidX) | Apache 2.0 | Интерфейс, навигация, чтение ориентации фото |
 | Kotlin, kotlinx.serialization, kotlinx.coroutines (JetBrains) | Apache 2.0 | Язык, JSON, фоновая работа |
 | OkHttp (Square) | Apache 2.0 | Запросы к Supabase и маршрутам `/api/mobile/...` |
 | Coil (coil-compose) | Apache 2.0 | Показ фото |

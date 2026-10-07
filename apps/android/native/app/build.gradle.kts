@@ -43,6 +43,15 @@ android {
         targetCompatibility = JavaVersion.VERSION_21
     }
 
+    // Отладочные приёмники для проверки уведомлений через adb. В сданный APK не попадают:
+    // подключаются только флагом  ./gradlew assembleDebug -PdebugTools
+    if (project.hasProperty("debugTools")) {
+        sourceSets.getByName("debug") {
+            manifest.srcFile("src/debugTools/AndroidManifest.xml")
+        }
+        sourceSets.getByName("debug").kotlin.directories.add("src/debugTools/kotlin")
+    }
+
     buildFeatures {
         compose = true
         buildConfig = true
