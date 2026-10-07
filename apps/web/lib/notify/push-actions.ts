@@ -7,6 +7,7 @@ import { getCurrentEmployee } from "@/lib/auth/session";
 import { getT } from "@/lib/i18n-server";
 import { tRu } from "@/lib/i18n";
 import type { ActionResult } from "@/lib/orders/types";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { sendPush } from "./push";
 
@@ -18,17 +19,19 @@ export async function savePushSubscription(input: { endpoint: string; p256dh: st
   if (!employee) return { ok: false, error: t("orders.errors.unknown") };
   if (!input.endpoint.startsWith("https://") || !input.p256dh || !input.auth) return { ok: false, error: t("profile.push.failed") };
 
+  // Устройство принадлежит тому, кто вошёл сейчас: старую запись этого же адреса
+  // (другой сотрудник на том же телефоне или обновлённые ключи) убираем служебным ключом.
+  // Адрес подписки знает только сам браузер, поэтому чужую подписку так удалить нельзя.
+  await createAdminClient().from("push_subscriptions").delete().eq("endpoint", input.endpoint);
+
   const supabase = await createClient();
-  const { error } = await supabase.from("push_subscriptions").upsert(
-    {
-      employee_id: employee.id,
-      endpoint: input.endpoint,
-      p256dh: input.p256dh,
-      auth: input.auth,
-      user_agent: input.userAgent?.slice(0, 300) ?? null,
-    },
-    { onConflict: "endpoint" },
-  );
+  const { error } = await supabase.from("push_subscriptions").insert({
+    employee_id: employee.id,
+    endpoint: input.endpoint,
+    p256dh: input.p256dh,
+    auth: input.auth,
+    user_agent: input.userAgent?.slice(0, 300) ?? null,
+  });
   if (error) return { ok: false, error: t("profile.push.failed") };
   return { ok: true, data: null };
 }
