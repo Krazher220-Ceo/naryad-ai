@@ -3,6 +3,8 @@
 // без коммерческого использования. Полные условия — файл LICENSE в корне репозитория.
 package kz.naryadai.app.ui.screens
 
+import android.content.Intent
+import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,7 +31,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import kz.naryadai.app.BuildConfig
@@ -42,6 +46,7 @@ import kz.naryadai.app.ui.components.LanguageToggle
 import kz.naryadai.app.ui.components.PrimaryButton
 import kz.naryadai.app.ui.components.SecondaryButton
 import kz.naryadai.app.ui.components.SectionTitle
+import kz.naryadai.app.notify.Notifier
 import kz.naryadai.app.ui.theme.Brand
 import kz.naryadai.app.ui.theme.Canvas
 import kz.naryadai.app.ui.theme.Danger
@@ -59,6 +64,13 @@ fun ProfileScreen() {
     val flushing by repo.flushing.collectAsState()
     val scope = rememberCoroutineScope()
     var confirmLogout by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    // Включены ли уведомления; перечитываем при возврате из системных настроек
+    var notifOn by remember { mutableStateOf(Notifier.canPost(context)) }
+    LifecycleResumeEffect(Unit) {
+        notifOn = Notifier.canPost(context)
+        onPauseOrDispose { }
+    }
     val name = employee?.fullName.orEmpty()
     val roleRes = when (employee?.role) {
         "master" -> R.string.role_master
@@ -88,6 +100,26 @@ fun ProfileScreen() {
             InfoCard {
                 SectionTitle(stringResource(R.string.language))
                 LanguageToggle(minItemWidth = 96.dp)
+            }
+
+            InfoCard {
+                SectionTitle(stringResource(R.string.profile_notifications))
+                Text(
+                    stringResource(if (notifOn) R.string.profile_notifications_on else R.string.profile_notifications_off),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Ink,
+                )
+                SecondaryButton(
+                    stringResource(if (notifOn) R.string.profile_notifications_settings else R.string.profile_notifications_enable),
+                    {
+                        context.startActivity(
+                            Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                                .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                        )
+                    },
+                    Modifier.fillMaxWidth(),
+                )
             }
 
             InfoCard {

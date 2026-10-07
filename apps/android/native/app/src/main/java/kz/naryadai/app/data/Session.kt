@@ -41,6 +41,16 @@ class Session(context: Context) {
 
     val isLoggedIn: Boolean get() = _employee.value != null && refreshToken != null
 
+    // Время последнего уведомления, по которому уже показали системное (0 — ещё не было)
+    var notifSeenMs: Long
+        get() = prefs.getLong("notif_seen_ms", 0L)
+        set(v) = prefs.edit().putLong("notif_seen_ms", v).apply()
+
+    // Объясняли ли уже, зачем нужны уведомления (системный запрос показываем один раз)
+    var notifAsked: Boolean
+        get() = prefs.getBoolean("notif_asked", false)
+        set(v) = prefs.edit().putBoolean("notif_asked", v).apply()
+
     fun saveTokens(access: String, refresh: String, expiresInSec: Long) {
         accessToken = access
         refreshToken = refresh
@@ -54,7 +64,7 @@ class Session(context: Context) {
 
     // Выход только из этого устройства. Кэш и очередь действий не трогаем.
     fun clear() {
-        val editor = prefs.edit().remove("access").remove("refresh").remove("expires").remove("employee")
+        val editor = prefs.edit().remove("access").remove("refresh").remove("expires").remove("employee").remove("notif_seen_ms")
         prefs.all.keys.filter { it.startsWith("cache_") }.forEach { editor.remove(it) }
         editor.apply()
         _employee.value = null
