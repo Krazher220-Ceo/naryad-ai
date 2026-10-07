@@ -28,6 +28,9 @@ export function categoryLabel(t: Translate, letter: string | null): string {
   return t(`faultCategory.${key}`);
 }
 
+// p-значение: «0,012» или «<0,001».
+export const formatP = (p: number) => (p < 0.001 ? "<0,001" : p.toFixed(3).replace(".", ","));
+
 // Подписи цифр аномалий. Ключи фактов задаёт lib/analytics/anomalies.
 const isFactKey = (key: string): key is keyof typeof ru.anomalies.fact => key in ru.anomalies.fact;
 
@@ -36,6 +39,7 @@ export function factLabel(t: Translate, key: string): string {
 }
 
 export function factValue(t: Translate, key: string, value: number | string): string {
+  if (typeof value === "number" && (key === "pValue" || key === "qValue")) return formatP(value);
   if (typeof value === "number") return oneDecimal(value);
   if (key === "shift" && (value === "night" || value === "day")) return t(`anomaly.shiftName.${value}`);
   if (value === "*") return t("anomaly.allEquipment");

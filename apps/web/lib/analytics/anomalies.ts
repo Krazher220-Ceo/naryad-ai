@@ -4,9 +4,13 @@
 import "server-only";
 import { describeAnomalies } from "@/lib/ai/summaries";
 import type { Db } from "./db";
+import { trendTests } from "./forecast";
 import { downtimeMinutes, isNight, loadHistory, type History, type HistoryOrder } from "./history";
+import { FDR_Q, OUTLIER_Z, benjaminiHochberg, modifiedZ, poissonTail } from "./stats";
 
-// Поиск аномалий и зависимостей (п. 6.5 кейса). Цифры и пороги — код.
+// Поиск аномалий и зависимостей (п. 6.5 кейса). Цифры и статистика — код (lib/analytics/stats.ts, forecast.ts).
+// Где можно, вместо фиксированных порогов проверяется статистика: критерий Пуассона (p-value) и
+// модифицированный z-показатель по медиане и MAD (устойчив к выбросам). Описание — docs/analytics-methods.md.
 // Модель получает готовые факты карточек и пишет вывод с рекомендацией простым языком.
 // Каждый детектор — отдельная маленькая функция: её легко объяснить и проверить.
 
@@ -34,6 +38,8 @@ type Draft = Omit<Anomaly, "text" | "recommendation" | "source">;
 
 const DAY = 24 * 60 * 60 * 1000;
 const round1 = (x: number) => Math.round(x * 10) / 10;
+// Меньше 0,0001 показываем как 0,0001, чтобы модель не писала «p=0».
+const roundP = (p: number) => Math.max(0.0001, Math.round(p * 10000) / 10000);
 const share = (part: number, all: number) => (all > 0 ? Math.round((part / all) * 100) : 0);
 
 function countBy<T>(items: T[], key: (item: T) => string | null): Map<string, T[]> {
@@ -48,28 +54,34 @@ function countBy<T>(items: T[], key: (item: T) => string | null): Map<string, T[
 
 const unplannedOf = (orders: HistoryOrder[]) => orders.filter((o) => o.type === "unplanned" && o.status !== "cancelled");
 
-// 1. Оборудование с внеплановыми нарядами минимум вдвое чаще, чем в среднем у однотипного.
+// 1. Оборудование с внеплановыми нарядами минимум вдвое чаще, чем в среднем у однотипного,
+// и так много, что случайностью это не объяснить: P(X >= k) при среднем у однотипного (Пуассон),
+// после поправки Бенджамини–Хохберга на все проверяемые машины q < 0,1.
 function problemEquipment(h: History): Draft[] {
   const unplanned = unplannedOf(h.orders);
   const byEquipment = countBy(unplanned, (o) => o.equipment?.id ?? null);
-  const drafts: Draft[] = [];
-  for (const [, orders] of byEquipment) {
+  const candidates = [...byEquipment.values()].map((orders) => {
     const eq = orders[0].equipment!;
     const sameType = [...byEquipment.values()].filter((list) => list[0].equipment!.type === eq.type && list[0].equipment!.id !== eq.id);
     const peers = sameType.length > 0 ? sameType : [...byEquipment.values()].filter((list) => list[0].equipment!.id !== eq.id);
     const peerMean = peers.reduce((s, list) => s + list.length, 0) / Math.max(1, peers.length);
     const ratio = peerMean > 0 ? orders.length / peerMean : 0;
-    if (orders.length >= 5 && ratio >= 2) {
-      const downtime = Math.round(orders.reduce((s, o) => s + downtimeMinutes(o), 0) / 60);
+    return { orders, eq, peerMean, ratio, hasSameType: sameType.length > 0, pValue: poissonTail(orders.length, peerMean) };
+  });
+  const qs = benjaminiHochberg(candidates.map((c) => c.pValue));
+  const drafts: Draft[] = [];
+  candidates.forEach((c, i) => {
+    if (c.orders.length >= 3 && c.ratio >= 2 && qs[i] < FDR_Q) {
+      const downtime = Math.round(c.orders.reduce((s, o) => s + downtimeMinutes(o), 0) / 60);
       drafts.push({
-        id: `problem_equipment:${eq.id}`,
+        id: `problem_equipment:${c.eq.id}`,
         kind: "problem_equipment",
-        severity: ratio >= 3 ? "high" : "medium",
-        subject: eq.name,
-        facts: { unplanned: orders.length, peerMean: round1(peerMean), ratio: round1(ratio), downtimeHours: downtime, peers: sameType.length > 0 ? eq.type : "*" },
+        severity: c.ratio >= 3 ? "high" : "medium",
+        subject: c.eq.name,
+        facts: { unplanned: c.orders.length, peerMean: round1(c.peerMean), ratio: round1(c.ratio), qValue: roundP(qs[i]), downtimeHours: downtime, peers: c.hasSameType ? c.eq.type : "*" },
       });
     }
-  }
+  });
   return drafts;
 }
 
@@ -151,76 +163,90 @@ function shiftDependency(h: History): Draft[] {
   return drafts;
 }
 
-// 5. Исполнитель, у которого возвратов на доработку втрое больше, чем у остальных.
+// 5. Исполнитель, у которого доля возвратов на доработку — статистический выброс среди исполнителей:
+// модифицированный z по медиане и MAD долей возвратов выше 3,5.
 function workerReturns(h: History): Draft[] {
   const closed = h.orders.filter((o) => o.assignee && o.done_at);
+  const workers = [...countBy(closed, (o) => o.assignee?.id ?? null)].filter(([, list]) => list.length >= 10);
+  const rates = workers.map(([, list]) => list.filter((o) => h.reworkedOrderIds.has(o.id)).length / list.length);
+  const zs = modifiedZ(rates);
   const drafts: Draft[] = [];
-  for (const [id, list] of countBy(closed, (o) => o.assignee?.id ?? null)) {
+  workers.forEach(([id, list], i) => {
     const returns = list.filter((o) => h.reworkedOrderIds.has(o.id)).length;
     const others = closed.filter((o) => o.assignee?.id !== id);
     const othersRate = others.filter((o) => h.reworkedOrderIds.has(o.id)).length / Math.max(1, others.length);
-    const rate = returns / list.length;
-    if (list.length >= 10 && returns >= 3 && rate >= Math.max(0.15, othersRate * 3)) {
+    if (returns >= 3 && zs[i] > OUTLIER_Z) {
       drafts.push({
         id: `worker_returns:${id}`,
         kind: "worker_returns",
         severity: "high",
         subject: list[0].assignee!.full_name,
-        facts: { orders: list.length, returns, ratePct: share(returns, list.length), othersRatePct: Math.round(othersRate * 100) },
+        facts: { orders: list.length, returns, ratePct: share(returns, list.length), othersRatePct: Math.round(othersRate * 100), z: round1(zs[i]) },
       });
     }
-  }
+  });
   return drafts;
 }
 
-// 6. Перерасход: списано больше двух обычных норм. Ищем, где такие случаи сосредоточены.
+// 6. Перерасход: списание — выброс среди списаний того же материала (отношение к норме, модифицированный z > 3,5)
+// и при этом не меньше 1,5 нормы (чтобы не ловить пустяки). Ищем, где такие случаи сосредоточены.
 function materialOveruse(h: History): Draft[] {
   const orderById = new Map(h.orders.map((o) => [o.id, o]));
-  const over = h.usages.filter((u) => u.material && u.qty > u.material.typical_qty * 2 && orderById.has(u.order_id));
+  const usages = h.usages.filter((u) => u.material && u.material.typical_qty > 0 && orderById.has(u.order_id));
+  const over: { usage: (typeof usages)[number]; z: number }[] = [];
+  for (const [, list] of countBy(usages, (u) => u.material!.id)) {
+    const ratios = list.map((u) => u.qty / u.material!.typical_qty);
+    const zs = modifiedZ(ratios);
+    list.forEach((usage, i) => {
+      if (zs[i] > OUTLIER_Z && ratios[i] >= 1.5) over.push({ usage, z: zs[i] });
+    });
+  }
   if (over.length < 5) return [];
-  const groups = countBy(over, (u) => {
-    const o = orderById.get(u.order_id)!;
-    return `${o.section?.name ?? "—"}|${isNight(o.created_at) ? "night" : "day"}|${u.material!.name}`;
+  const groups = countBy(over, ({ usage }) => {
+    const o = orderById.get(usage.order_id)!;
+    return `${o.section?.name ?? "—"}|${isNight(o.created_at) ? "night" : "day"}|${usage.material!.name}`;
   });
   const drafts: Draft[] = [];
   for (const [key, list] of groups) {
     if (list.length >= 5 && list.length / over.length >= 0.4) {
       const [section, shift, material] = key.split("|");
-      const avgRatio = list.reduce((s, u) => s + u.qty / u.material!.typical_qty, 0) / list.length;
+      const avgRatio = list.reduce((s, { usage: u }) => s + u.qty / u.material!.typical_qty, 0) / list.length;
+      const avgZ = list.reduce((s, x) => s + x.z, 0) / list.length;
       drafts.push({
         id: `material_overuse:${key}`,
         kind: "material_overuse",
         severity: "medium",
         subject: material,
-        facts: { section, shift, cases: list.length, ofAllOveruse: over.length, avgTimesNorm: round1(avgRatio) },
+        facts: { section, shift, cases: list.length, ofAllOveruse: over.length, avgTimesNorm: round1(avgRatio), z: round1(avgZ) },
       });
     }
   }
   return drafts;
 }
 
-// 7. Прогноз отказа: внеплановых нарядов за последние 14 дней вдвое больше, чем за предыдущие 14.
-function failureTrend(h: History, to: Date): Draft[] {
-  const unplanned = unplannedOf(h.orders);
+// 7. Рост отказов: за последние 30 дней отказов не меньше 2 и их число значимо выше ожидаемого
+// по предыдущим 60 дням (критерий Пуассона, поправка Бенджамини–Хохберга по всем машинам, q < 0,1).
+// Тот же тест использует прогноз в forecast.ts.
+function failureTrend(h: History, from: Date, to: Date): Draft[] {
   const end = to.getTime();
+  const windowDays = Math.max(1, (end - from.getTime()) / DAY);
+  // Для сравнения «последние 30 дней против предыдущих» нужно окно не короче 60 дней.
+  if (windowDays < 60) return [];
+  const machines = [...countBy(unplannedOf(h.orders), (o) => o.equipment?.id ?? null).values()];
+  const tests = trendTests(machines.map((list) => list.map((o) => new Date(o.created_at).getTime())), end, windowDays);
   const drafts: Draft[] = [];
-  for (const [, list] of countBy(unplanned, (o) => o.equipment?.id ?? null)) {
-    const recent = list.filter((o) => end - new Date(o.created_at).getTime() <= 14 * DAY).length;
-    const before = list.filter((o) => {
-      const age = end - new Date(o.created_at).getTime();
-      return age > 14 * DAY && age <= 28 * DAY;
-    }).length;
-    // Не меньше 4 случаев: на 2–3 нарядах «рост» — это шум.
-    if (recent >= 4 && recent >= before * 2) {
+  machines.forEach((list, i) => {
+    const test = tests[i];
+    if (test.significant) {
       drafts.push({
         id: `failure_trend:${list[0].equipment!.id}`,
         kind: "failure_trend",
-        severity: recent >= 8 && recent >= before * 3 ? "high" : "medium",
+        severity: test.qValue < 0.03 ? "high" : "medium",
         subject: list[0].equipment!.name,
-        facts: { last14: recent, previous14: before },
+        facts: { last30: test.failures30, expected30: round1(test.expected30), qValue: roundP(test.qValue) },
       });
     }
-  }
+  });
   return drafts;
 }
 
@@ -236,7 +262,7 @@ export async function findAnomalies(days = 90, useModel = true, db?: Db): Promis
     ...shiftDependency(history),
     ...workerReturns(history),
     ...materialOveruse(history),
-    ...failureTrend(history, to),
+    ...failureTrend(history, from, to),
   ];
 
   // Порядок карточек: сначала по одной самой сильной карточке каждого вида, потом остальные.

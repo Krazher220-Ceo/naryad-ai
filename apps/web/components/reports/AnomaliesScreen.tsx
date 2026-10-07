@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { Skeleton } from "@/components/ui";
 import { getT } from "@/lib/i18n-server";
 import { AnomalyList } from "./AnomalyList";
+import { ForecastBlock } from "./ForecastBlock";
 import { ExportButtons } from "./ExportButtons";
 import { PeriodSwitch, ReportPage } from "./ReportPage";
 
@@ -24,6 +25,9 @@ export async function AnomaliesScreen({
       <p className="text-base text-ink-muted">{t("anomalies.intro")}</p>
       <PeriodSwitch basePath={`${basePath}/anomalies`} days={days} options={ANOMALY_PERIODS} />
       <ExportButtons report="anomalies" params={{ days }} />
+      <Suspense fallback={<Skeleton className="h-32" />}>
+        <ForecastBlock />
+      </Suspense>
       <Suspense
         key={days}
         fallback={

@@ -5,6 +5,7 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Db } from "./db";
 import { findAnomalies } from "./anomalies";
+import { getForecast } from "./forecast";
 import { getRating } from "./rating";
 import { getDashboard, getDowntimeReport, getMaterialsReport, periodFromDays } from "./reports";
 import { currentShift, getShiftReport, shiftWindow, type Shift } from "./shift";
@@ -15,12 +16,13 @@ import { getSnapshot, storeSnapshot, type AiPart, type Snapshot } from "./snapsh
 //   scope периодных отчётов — число дней: «7», «30», «90»
 //   scope смены — «2026-10-03:A»
 
-export const REPORT_KINDS = ["shift", "rating", "anomalies", "dashboard", "materials", "downtime"] as const;
+export const REPORT_KINDS = ["shift", "rating", "anomalies", "dashboard", "materials", "downtime", "forecast"] as const;
 export type ReportKind = (typeof REPORT_KINDS)[number];
 export const isReportKind = (x: string): x is ReportKind => (REPORT_KINDS as readonly string[]).includes(x);
 
 const DAY_SCOPES = ["7", "30", "90"];
 const ANOMALY_SCOPES = ["30", "90"];
+const FORECAST_SCOPES = ["90"]; // прогноз всегда по 90 дням истории
 const SHIFT_HISTORY_DAYS = 60;
 
 function parseShiftScope(scope: string): { date: string; shift: Shift } | null {
@@ -63,6 +65,7 @@ const JOBS: Record<ReportKind, Job> = {
       source: r.anomalies.some((a) => a.source === "llm") ? "llm" : "rules",
     }),
   },
+  forecast: { valid: (s) => FORECAST_SCOPES.includes(s), run: (s, db) => getForecast(Number(s), db) },
   dashboard: { valid: (s) => DAY_SCOPES.includes(s), run: (s, db) => getDashboard(Number(s), db) },
   materials: { valid: (s) => DAY_SCOPES.includes(s), run: (s, db) => getMaterialsReport(Number(s), db) },
   downtime: { valid: (s) => DAY_SCOPES.includes(s), run: (s, db) => getDowntimeReport(Number(s), db) },
@@ -96,6 +99,7 @@ export function cachedRating(days: number) {
 }
 
 export const cachedAnomalies = (days: number) => read("anomalies", String(days), () => findAnomalies(days));
+export const cachedForecast = () => read("forecast", "90", () => getForecast(90));
 export const cachedDashboard = (days: number) => read("dashboard", String(days), () => getDashboard(days));
 export const cachedMaterials = (days: number) => read("materials", String(days), () => getMaterialsReport(days));
 export const cachedDowntime = (days: number) => read("downtime", String(days), () => getDowntimeReport(days));
@@ -112,6 +116,7 @@ export function allSnapshotKeys(): { kind: ReportKind; scope: string }[] {
     { kind: "shift", scope: `${prevShift.date}:${prevShift.shift}` },
     ...DAY_SCOPES.flatMap((scope) => (["rating", "dashboard", "materials", "downtime"] as const).map((kind) => ({ kind, scope }))),
     ...ANOMALY_SCOPES.map((scope) => ({ kind: "anomalies" as const, scope })),
+    ...FORECAST_SCOPES.map((scope) => ({ kind: "forecast" as const, scope })),
   ];
 }
 
