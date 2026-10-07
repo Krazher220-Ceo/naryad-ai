@@ -4,6 +4,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { AnomalyList } from "@/components/reports/AnomalyList";
+import { ForecastBlock } from "@/components/reports/ForecastBlock";
 import { PERIODS, fill, parseDaysIn } from "@/components/reports/format";
 import { PeriodSwitch } from "@/components/reports/ReportPage";
 import { Card, EmptyState, Skeleton, cx, formatMinutes } from "@/components/ui";
@@ -147,6 +148,17 @@ export default async function LeadPage({ searchParams }: PageProps<"/lead">) {
             )}
           </section>
         </div>
+
+        <Suspense
+          fallback={
+            <div role="status" className="flex flex-col gap-3">
+              <p className="text-base font-semibold text-ink">{t("forecast.loading")}</p>
+              <Skeleton className="h-32" />
+            </div>
+          }
+        >
+          <ForecastBlock />
+        </Suspense>
 
         <section className="flex flex-col gap-3">
           <div>
