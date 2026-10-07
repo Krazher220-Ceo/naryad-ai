@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Card, IconChevronRight } from "@/components/ui";
+import { PushSection } from "@/components/PushControl";
 import { LanguageSwitch } from "@/components/LanguageSwitch";
 import { getCurrentEmployee } from "@/lib/auth/session";
 import type { Role } from "@/lib/auth/roles";
@@ -64,6 +65,8 @@ export default async function ProfilePage() {
       </Link>
 
       <TelegramSection linked={Boolean(telegram?.linked)} connectUrl={connectUrl} />
+
+      <PushSection />
 
       <NotificationPrefsForm
         kinds={KINDS_BY_ROLE[employee.role]}

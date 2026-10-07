@@ -4,6 +4,8 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Enums } from "@/lib/supabase/database.types";
+import { tRu, type MessageKey } from "@/lib/i18n";
+import { sendPush } from "./push";
 import { sendTelegramMessage } from "./telegram";
 
 export type NotificationKind = Enums<"notification_kind">;
@@ -22,7 +24,7 @@ export async function notifyEmployee(params: {
 
   const { data: employee } = await supabase
     .from("employees")
-    .select("telegram_chat_id")
+    .select("telegram_chat_id, role")
     .eq("id", params.employeeId)
     .maybeSingle();
   const { data: prefs } = await supabase
@@ -38,12 +40,22 @@ export async function notifyEmployee(params: {
   const muted = prefs ? prefs.telegram_off_kinds.includes(params.kind) || isQuietNow(prefs.quiet_from, prefs.quiet_to) : false;
   if (muted) {
     error = "muted_by_prefs";
-  } else if (employee?.telegram_chat_id) {
-    const res = await sendTelegramMessage(employee.telegram_chat_id, params.text);
-    delivered = res.ok;
-    if (!res.ok) error = res.error;
   } else {
-    error = "telegram_not_linked";
+    // Системное уведомление браузера: те же правила, что у Telegram. Ошибки внутри sendPush гасятся.
+    await sendPush(params.employeeId, {
+      title: tRu(`push.title.${params.kind}` as MessageKey),
+      body: params.text.length > 180 ? `${params.text.slice(0, 177)}…` : params.text,
+      url: pushUrl(employee?.role, params.orderId),
+      tag: params.orderId ?? params.kind,
+      urgent: URGENT_KINDS.includes(params.kind),
+    });
+    if (employee?.telegram_chat_id) {
+      const res = await sendTelegramMessage(employee.telegram_chat_id, params.text);
+      delivered = res.ok;
+      if (!res.ok) error = res.error;
+    } else {
+      error = "telegram_not_linked";
+    }
   }
 
   await supabase.from("notifications").insert({
@@ -56,6 +68,16 @@ export async function notifyEmployee(params: {
   });
 
   return { delivered };
+}
+
+// Срочные события: уведомление остаётся на экране, пока его не закроют.
+const URGENT_KINDS: NotificationKind[] = ["overdue", "lead_overdue", "not_accepted"];
+
+// Куда ведёт нажатие на уведомление: наряд своей роли, иначе центр уведомлений.
+function pushUrl(role: string | undefined, orderId: string | undefined): string {
+  if (orderId && role === "worker") return `/worker/orders/${orderId}`;
+  if (orderId && role === "master") return `/master/orders/${orderId}`;
+  return "/notifications";
 }
 
 // Тихие часы задаются временем завода (Костанай, UTC+5). Интервал может переходить через полночь: 22:00–06:00.

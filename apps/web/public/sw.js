@@ -38,6 +38,46 @@ self.addEventListener("message", (event) => {
   if (event.data === "clear-pages") event.waitUntil(caches.delete(PAGES_CACHE));
 });
 
+// Системные уведомления (Web Push, lib/notify/push.ts). Приходят, даже когда сайт закрыт.
+self.addEventListener("push", (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch {
+    data = { body: event.data ? event.data.text() : "" };
+  }
+  event.waitUntil(
+    self.registration.showNotification(data.title || "НарядAI", {
+      body: data.body || "",
+      icon: "/icons/icon-192.png",
+      badge: "/icons/icon-192.png",
+      tag: data.tag || undefined,
+      renotify: Boolean(data.tag),
+      requireInteraction: Boolean(data.urgent),
+      vibrate: data.urgent ? [300, 100, 300, 100, 300] : [200, 100, 200],
+      data: { url: data.url || "/notifications" },
+    }),
+  );
+});
+
+// Нажатие: фокус на открытой вкладке приложения или новое окно.
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const target = new URL((event.notification.data && event.notification.data.url) || "/notifications", self.location.origin).href;
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(async (list) => {
+      for (const client of list) {
+        if (new URL(client.url).origin === self.location.origin && "focus" in client) {
+          await client.focus();
+          if ("navigate" in client && client.url !== target) await client.navigate(target).catch(() => {});
+          return;
+        }
+      }
+      await self.clients.openWindow(target);
+    }),
+  );
+});
+
 function isStatic(url) {
   return url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/brand/") || url.pathname.startsWith("/icons/") || url.pathname.startsWith("/fonts/");
 }
