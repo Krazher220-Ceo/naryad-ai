@@ -244,8 +244,8 @@ class Repository(private val context: Context, val session: Session, private val
         val photos = withContext(Dispatchers.IO) {
             photoUris.map { uri ->
                 val name = "${UUID.randomUUID()}.jpg"
-                ImageUtils.compressToFile(context, uri, File(pendingDir, name))
-                PendingPhoto(file = name, storagePath = "${order.id}/after-${UUID.randomUUID()}.jpg", kind = "after")
+                val phash = ImageUtils.compressToFile(context, uri, File(pendingDir, name))
+                PendingPhoto(file = name, storagePath = "${order.id}/after-${UUID.randomUUID()}.jpg", kind = "after", phash = phash)
             }
         }
         val body = buildJsonObject {
@@ -328,7 +328,11 @@ class Repository(private val context: Context, val session: Session, private val
             if (!photo.registered) {
                 api.postRoute(
                     "/api/mobile/orders/${action.orderId}/photos",
-                    buildJsonObject { put("kind", photo.kind); put("path", photo.storagePath) }.toString(),
+                    buildJsonObject {
+                        put("kind", photo.kind)
+                        put("path", photo.storagePath)
+                        photo.phash?.let { put("phash", it) }
+                    }.toString(),
                 )
                 photo = photo.copy(registered = true)
                 photos = photos.toMutableList().also { it[i] = photo }

@@ -121,6 +121,7 @@ data class PendingPhoto(
     val kind: String,
     val uploaded: Boolean = false,
     val registered: Boolean = false,
+    val phash: String? = null, // dHash фото; null у старых записей очереди
 )
 
 // id — это clientActionId: создаётся один раз на нажатие и при повторе не меняется.
