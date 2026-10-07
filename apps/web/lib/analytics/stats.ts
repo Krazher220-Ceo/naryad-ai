@@ -53,3 +53,24 @@ export function ewma(series: number[], alpha = 0.3): number[] {
   for (const x of series) out.push(out.length === 0 ? x : alpha * x + (1 - alpha) * out[out.length - 1]);
   return out;
 }
+
+// Поправка Бенджамини–Хохберга на множественные проверки (контроль доли ложных открытий, FDR).
+// Проверяем много машин сразу, и при p < 0,05 одна-две «находки» появятся случайно. Поправка исправляет это:
+//   1. сортируем p-значения по возрастанию: p(1) <= ... <= p(m);
+//   2. q(i) = p(i) * m / i;
+//   3. идём с конца и берём минимум: q(i) = min(q(i), q(i+1)), чтобы q не убывал с ростом p.
+// Находка значима, если q < 0,1 (не больше 10% ложных среди найденных).
+export const FDR_Q = 0.1;
+
+export function benjaminiHochberg(ps: number[]): number[] {
+  const m = ps.length;
+  const order = ps.map((p, i) => ({ p, i })).sort((a, b) => a.p - b.p);
+  const q = new Array<number>(m).fill(1);
+  let running = 1;
+  for (let rank = m; rank >= 1; rank--) {
+    const { p, i } = order[rank - 1];
+    running = Math.min(running, (p * m) / rank);
+    q[i] = Math.min(1, running);
+  }
+  return q;
+}

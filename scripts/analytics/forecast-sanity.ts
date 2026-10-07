@@ -4,7 +4,7 @@
 // Проверка прогноза на выдуманных данных. Запуск: cd apps/web && npx tsx ../../scripts/analytics/forecast-sanity.ts
 import { computeForecast } from "../../apps/web/lib/analytics/forecast";
 import type { HistoryOrder } from "../../apps/web/lib/analytics/history";
-import { modifiedZ, poissonTail } from "../../apps/web/lib/analytics/stats";
+import { benjaminiHochberg, modifiedZ, poissonTail } from "../../apps/web/lib/analytics/stats";
 
 const DAY = 86400_000;
 const to = new Date("2026-10-07T12:00:00Z");
@@ -49,18 +49,20 @@ for (const i of r.items) {
     i.name.padEnd(14),
     `n=${i.failures90d}`.padEnd(6),
     `mtbf=${i.mtbfDays}`.padEnd(10),
-    `p7=${(i.p7 * 100).toFixed(0)}%`.padEnd(8),
-    `trend=${i.trendFactor}`.padEnd(10),
-    `30д=${i.failures30}/${i.expected30} p=${i.pValue}`.padEnd(22),
+    `p1=${(i.p1 * 100).toFixed(0)}%`.padEnd(8),
+    `rr=${i.rr}`.padEnd(8), `trend=${i.trendFactor}`.padEnd(10),
+    `30д=${i.failures30}/${i.expected30} q=${i.qValue}`.padEnd(22),
     i.reasons.join(","),
   );
 }
 
 const by = Object.fromEntries(r.items.map((i) => [i.equipmentId, i]));
-console.assert(by.a.p7 > by.c.p7, "хронический выше одиночного");
+console.assert(by.a.rr > by.c.rr, "хронический выше одиночного");
 console.assert(by.b.reasons.includes("trend_up"), "рост обнаружен");
 console.assert(!by.a.reasons.includes("trend_up"), "ровный ряд не помечен ростом");
-console.assert(by.c.p7 < 0.6, "один отказ не даёт абсурдной вероятности");
+console.assert(by.c.p1 < 0.2, "один отказ не даёт абсурдной вероятности");
 console.assert(Math.abs(poissonTail(2, 1) - (1 - Math.exp(-1) * 2)) < 1e-9, "Пуассон: P(X>=2 | 1)");
 console.assert(modifiedZ([5, 5, 6, 5, 4, 40]).at(-1)! > 3.5, "выброс по MAD");
+const q = benjaminiHochberg([0.01, 0.04, 0.03, 0.5]);
+console.assert(Math.abs(q[0] - 0.04) < 1e-9 && Math.abs(q[1] - 0.0533333) < 1e-4 && Math.abs(q[2] - 0.0533333) < 1e-4 && q[3] === 0.5, "Бенджамини–Хохберг");
 console.log("проверки выполнены (строки Assertion failed выше означают ошибку)");

@@ -4,9 +4,9 @@
 import "server-only";
 import { describeAnomalies } from "@/lib/ai/summaries";
 import type { Db } from "./db";
-import { trendTest } from "./forecast";
+import { trendTests } from "./forecast";
 import { downtimeMinutes, isNight, loadHistory, type History, type HistoryOrder } from "./history";
-import { OUTLIER_Z, modifiedZ, poissonTail } from "./stats";
+import { FDR_Q, OUTLIER_Z, benjaminiHochberg, modifiedZ, poissonTail } from "./stats";
 
 // Поиск аномалий и зависимостей (п. 6.5 кейса). Цифры и статистика — код (lib/analytics/stats.ts, forecast.ts).
 // Где можно, вместо фиксированных порогов проверяется статистика: критерий Пуассона (p-value) и
@@ -55,29 +55,33 @@ function countBy<T>(items: T[], key: (item: T) => string | null): Map<string, T[
 const unplannedOf = (orders: HistoryOrder[]) => orders.filter((o) => o.type === "unplanned" && o.status !== "cancelled");
 
 // 1. Оборудование с внеплановыми нарядами минимум вдвое чаще, чем в среднем у однотипного,
-// и так много, что случайностью это не объяснить: P(X >= k) при среднем у однотипного < 0,01 (Пуассон).
+// и так много, что случайностью это не объяснить: P(X >= k) при среднем у однотипного (Пуассон),
+// после поправки Бенджамини–Хохберга на все проверяемые машины q < 0,1.
 function problemEquipment(h: History): Draft[] {
   const unplanned = unplannedOf(h.orders);
   const byEquipment = countBy(unplanned, (o) => o.equipment?.id ?? null);
-  const drafts: Draft[] = [];
-  for (const [, orders] of byEquipment) {
+  const candidates = [...byEquipment.values()].map((orders) => {
     const eq = orders[0].equipment!;
     const sameType = [...byEquipment.values()].filter((list) => list[0].equipment!.type === eq.type && list[0].equipment!.id !== eq.id);
     const peers = sameType.length > 0 ? sameType : [...byEquipment.values()].filter((list) => list[0].equipment!.id !== eq.id);
     const peerMean = peers.reduce((s, list) => s + list.length, 0) / Math.max(1, peers.length);
     const ratio = peerMean > 0 ? orders.length / peerMean : 0;
-    const pValue = poissonTail(orders.length, peerMean);
-    if (orders.length >= 3 && ratio >= 2 && pValue < 0.01) {
-      const downtime = Math.round(orders.reduce((s, o) => s + downtimeMinutes(o), 0) / 60);
+    return { orders, eq, peerMean, ratio, hasSameType: sameType.length > 0, pValue: poissonTail(orders.length, peerMean) };
+  });
+  const qs = benjaminiHochberg(candidates.map((c) => c.pValue));
+  const drafts: Draft[] = [];
+  candidates.forEach((c, i) => {
+    if (c.orders.length >= 3 && c.ratio >= 2 && qs[i] < FDR_Q) {
+      const downtime = Math.round(c.orders.reduce((s, o) => s + downtimeMinutes(o), 0) / 60);
       drafts.push({
-        id: `problem_equipment:${eq.id}`,
+        id: `problem_equipment:${c.eq.id}`,
         kind: "problem_equipment",
-        severity: ratio >= 3 ? "high" : "medium",
-        subject: eq.name,
-        facts: { unplanned: orders.length, peerMean: round1(peerMean), ratio: round1(ratio), pValue: roundP(pValue), downtimeHours: downtime, peers: sameType.length > 0 ? eq.type : "*" },
+        severity: c.ratio >= 3 ? "high" : "medium",
+        subject: c.eq.name,
+        facts: { unplanned: c.orders.length, peerMean: round1(c.peerMean), ratio: round1(c.ratio), qValue: roundP(qs[i]), downtimeHours: downtime, peers: c.hasSameType ? c.eq.type : "*" },
       });
     }
-  }
+  });
   return drafts;
 }
 
@@ -221,27 +225,28 @@ function materialOveruse(h: History): Draft[] {
 }
 
 // 7. Рост отказов: за последние 30 дней отказов не меньше 2 и их число значимо выше ожидаемого
-// по предыдущим 60 дням (критерий Пуассона, p < 0,05). Тот же тест использует прогноз в forecast.ts.
+// по предыдущим 60 дням (критерий Пуассона, поправка Бенджамини–Хохберга по всем машинам, q < 0,1).
+// Тот же тест использует прогноз в forecast.ts.
 function failureTrend(h: History, from: Date, to: Date): Draft[] {
-  const unplanned = unplannedOf(h.orders);
   const end = to.getTime();
   const windowDays = Math.max(1, (end - from.getTime()) / DAY);
-  const drafts: Draft[] = [];
   // Для сравнения «последние 30 дней против предыдущих» нужно окно не короче 60 дней.
-  if (windowDays < 60) return drafts;
-  for (const [, list] of countBy(unplanned, (o) => o.equipment?.id ?? null)) {
-    const times = list.map((o) => new Date(o.created_at).getTime());
-    const test = trendTest(times, end, windowDays);
+  if (windowDays < 60) return [];
+  const machines = [...countBy(unplannedOf(h.orders), (o) => o.equipment?.id ?? null).values()];
+  const tests = trendTests(machines.map((list) => list.map((o) => new Date(o.created_at).getTime())), end, windowDays);
+  const drafts: Draft[] = [];
+  machines.forEach((list, i) => {
+    const test = tests[i];
     if (test.significant) {
       drafts.push({
         id: `failure_trend:${list[0].equipment!.id}`,
         kind: "failure_trend",
-        severity: test.pValue < 0.01 ? "high" : "medium",
+        severity: test.qValue < 0.03 ? "high" : "medium",
         subject: list[0].equipment!.name,
-        facts: { last30: test.failures30, expected30: round1(test.expected30), pValue: roundP(test.pValue) },
+        facts: { last30: test.failures30, expected30: round1(test.expected30), qValue: roundP(test.qValue) },
       });
     }
-  }
+  });
   return drafts;
 }
 
