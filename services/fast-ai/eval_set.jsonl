@@ -1,0 +1,192 @@
+{"text": "Заклинило подшипник приводного вала грохота, вал не вращается, участок стоит", "category": "М", "priority": "emergency", "specialty": "слесарь", "lang": "ru"}
+{"text": "Слетела лента на конвейере К-7 и намоталась на барабан, линия остановлена", "category": "М", "priority": "emergency", "specialty": "слесарь", "lang": "ru"}
+{"text": "Разрушился зуб шестерни редуктора дробилки, слышен скрежет, привод отключили", "category": "М", "priority": "emergency", "specialty": "слесарь", "lang": "ru"}
+{"text": "Упала футеровка в мельнице МШЦ, лежит у люка, мельница остановлена", "category": "М", "priority": "emergency", "specialty": "слесарь", "lang": "ru"}
+{"text": "Лопнула цепь элеватора, ковши упали, подъёмник не работает", "category": "М", "priority": "emergency", "specialty": "слесарь", "lang": "ru"}
+{"text": "Сорвало болты крепления вентилятора, он качается, есть риск падения, людей отвели", "category": "М", "priority": "emergency", "specialty": "слесарь", "lang": "ru"}
+{"text": "Пластинчатый питатель встал намертво, между пластинами застрял кусок породы", "category": "М", "priority": "emergency", "specialty": "слесарь", "lang": "ru"}
+{"text": "Провалился ролик в галерее, лента трётся о раму и дымит", "category": "М", "priority": "emergency", "specialty": "слесарь", "lang": "ru"}
+{"text": "кнв 3 стоит, лента порвана поперёк", "category": "М", "priority": "emergency", "specialty": "слесарь", "lang": "ru"}
+{"text": "Растёт вибрация опоры грохота, при каждом обороте стук, пока работает", "category": "М", "priority": "high", "specialty": "слесарь", "lang": "ru"}
+{"text": "Подшипник дробилки греется до 80 градусов, шум стал громче", "category": "М", "priority": "high", "specialty": "слесарь", "lang": "ru"}
+{"text": "Лента конвейера уходит в сторону, кромка трётся о каркас, пока работаем", "category": "М", "priority": "high", "specialty": "слесарь", "lang": "ru"}
+{"text": "Износ футеровки желоба пересыпки, образовалась дыра, порода сыплется на пол", "category": "М", "priority": "high", "specialty": "слесарь", "lang": "ru"}
+{"text": "Люфт в муфте насоса растёт, слышен стук при каждом пуске", "category": "М", "priority": "high", "specialty": "слесарь", "lang": "ru"}
+{"text": "Шум в редукторе мельницы усилился за смену, как будто крошатся зубья", "category": "М", "priority": "high", "specialty": "слесарь", "lang": "ru"}
+{"text": "Цепь привода питателя провисла, перескакивает, питатель идёт рывками", "category": "М", "priority": "high", "specialty": "слесарь", "lang": "ru"}
+{"text": "Ослабли анкерные болты фундамента грохота, рама дрожит", "category": "М", "priority": "high", "specialty": "слесарь", "lang": "ru"}
+{"text": "Не вращается один ролик нижней ветви конвейера, остальные в порядке", "category": "М", "priority": "normal", "specialty": "слесарь", "lang": "ru"}
+{"text": "Скребок очистки ленты изношен, налипает материал, нужно заменить", "category": "М", "priority": "normal", "specialty": "слесарь", "lang": "ru"}
+{"text": "Дребезжит защитный кожух вентилятора", "category": "М", "priority": "normal", "specialty": "слесарь", "lang": "ru"}
+{"text": "Погнулось ограждение приводного барабана, слегка задевает", "category": "М", "priority": "normal", "specialty": "слесарь", "lang": "ru"}
+{"text": "Туго закрывается задвижка на сливе пульпы", "category": "М", "priority": "normal", "specialty": "слесарь", "lang": "ru"}
+{"text": "Капает пульпа через сальник шламового насоса, течь небольшая", "category": "М", "priority": "normal", "specialty": "слесарь", "lang": "ru"}
+{"text": "Болтается дверца осмотрового люка на кожухе редуктора", "category": "М", "priority": "normal", "specialty": "слесарь", "lang": "ru"}
+{"text": "Плановая замена футеровки мельницы по графику ППР", "category": "М", "priority": "planned", "specialty": "слесарь", "lang": "ru"}
+{"text": "Плановая замена приводных ремней вентилятора по графику", "category": "М", "priority": "planned", "specialty": "слесарь", "lang": "ru"}
+{"text": "Плановый осмотр подшипниковых узлов дробилки с заменой по износу", "category": "М", "priority": "planned", "specialty": "слесарь", "lang": "ru"}
+{"text": "Ревизия редуктора конвейера К-2 по графику: вскрыть крышку и проверить зацепление", "category": "М", "priority": "planned", "specialty": "слесарь", "lang": "ru"}
+{"text": "Замена роликов конвейерной галереи в плановую остановку", "category": "М", "priority": "planned", "specialty": "слесарь", "lang": "ru"}
+{"text": "Плановая подтяжка болтов крепления грохота", "category": "М", "priority": "planned", "specialty": "слесарь", "lang": "ru"}
+{"text": "Плановая замена бил молотковой дробилки", "category": "М", "priority": "planned", "specialty": "слесарь", "lang": "ru"}
+{"text": "Лопнула рама питателя пополам, он перекошен и стоит, нужна срочная сварка", "category": "М", "priority": "emergency", "specialty": "сварщик", "lang": "ru"}
+{"text": "Обрушился металлический лоток пересыпки, конвейер остановлен, нужно заварить", "category": "М", "priority": "emergency", "specialty": "сварщик", "lang": "ru"}
+{"text": "Оторвалась опора галереи, конструкция провисла, проход закрыли, нужна сварка", "category": "М", "priority": "emergency", "specialty": "сварщик", "lang": "ru"}
+{"text": "Трещина в сварном шве корпуса грохота увеличивается, пока работает", "category": "М", "priority": "high", "specialty": "сварщик", "lang": "ru"}
+{"text": "Трещина на ребре жёсткости рамы дробилки выросла за неделю", "category": "М", "priority": "high", "specialty": "сварщик", "lang": "ru"}
+{"text": "Надрыв металла в кронштейне привода мельницы, крепление пока держит", "category": "М", "priority": "high", "specialty": "сварщик", "lang": "ru"}
+{"text": "Появилась трещина у основания стойки площадки обслуживания, при ходьбе вибрирует", "category": "М", "priority": "high", "specialty": "сварщик", "lang": "ru"}
+{"text": "Отломился кронштейн кабельного лотка, нужно приварить", "category": "М", "priority": "normal", "specialty": "сварщик", "lang": "ru"}
+{"text": "Треснул уголок ограждения площадки обслуживания", "category": "М", "priority": "normal", "specialty": "сварщик", "lang": "ru"}
+{"text": "Оторвалась петля крышки люка бункера, нужна сварка", "category": "М", "priority": "normal", "specialty": "сварщик", "lang": "ru"}
+{"text": "Прогорел борт желоба в нескольких местах, нужно наплавить", "category": "М", "priority": "normal", "specialty": "сварщик", "lang": "ru"}
+{"text": "Плановая наплавка быстроизнашиваемых плит желоба", "category": "М", "priority": "planned", "specialty": "сварщик", "lang": "ru"}
+{"text": "Плановый ремонт сварных швов рамы по графику ППР", "category": "М", "priority": "planned", "specialty": "сварщик", "lang": "ru"}
+{"text": "Профилактическое усиление рёбер жёсткости бункера по плану ремонта", "category": "М", "priority": "planned", "specialty": "сварщик", "lang": "ru"}
+{"text": "Искрит и пахнет гарью электрощит на участке помола, отключили вводной автомат", "category": "Э", "priority": "emergency", "specialty": "электрик", "lang": "ru"}
+{"text": "Сгорел электродвигатель насоса, из клеммной коробки идёт дым", "category": "Э", "priority": "emergency", "specialty": "электрик", "lang": "ru"}
+{"text": "Пробило кабель питания конвейера, выбило автомат, участок обесточен", "category": "Э", "priority": "emergency", "specialty": "электрик", "lang": "ru"}
+{"text": "Короткое замыкание в шкафу управления грохотом, шкаф оплавлен", "category": "Э", "priority": "emergency", "specialty": "электрик", "lang": "ru"}
+{"text": "Оголён провод у пульта на площадке, есть риск удара током", "category": "Э", "priority": "emergency", "specialty": "электрик", "lang": "ru"}
+{"text": "Не включается главный привод мельницы, защита срабатывает при каждой попытке пуска", "category": "Э", "priority": "emergency", "specialty": "электрик", "lang": "ru"}
+{"text": "Пропало питание аспирации, пыль идёт в помещение, работы остановлены", "category": "Э", "priority": "emergency", "specialty": "электрик", "lang": "ru"}
+{"text": "Частотник флотомашины отключился с ошибкой по перегреву, машина встала", "category": "Э", "priority": "emergency", "specialty": "электрик", "lang": "ru"}
+{"text": "Электродвигатель вентилятора греется выше нормы, токи выше номинальных", "category": "Э", "priority": "high", "specialty": "электрик", "lang": "ru"}
+{"text": "Периодически срабатывает защита двигателя насоса, потом включается снова", "category": "Э", "priority": "high", "specialty": "электрик", "lang": "ru"}
+{"text": "Контактор пускателя нагрелся, изоляция потемнела", "category": "Э", "priority": "high", "specialty": "электрик", "lang": "ru"}
+{"text": "Скачут показания датчика нагрузки дробилки, автоматика иногда отключает привод", "category": "Э", "priority": "high", "specialty": "электрик", "lang": "ru"}
+{"text": "На одном из двигателей конвейера пропала фаза, работает на двух", "category": "Э", "priority": "high", "specialty": "электрик", "lang": "ru"}
+{"text": "Гудит трансформатор, масло в нём сильно нагрелось", "category": "Э", "priority": "high", "specialty": "электрик", "lang": "ru"}
+{"text": "Не горит лампа освещения на галерее, нужно заменить", "category": "Э", "priority": "normal", "specialty": "электрик", "lang": "ru"}
+{"text": "Не показывает датчик температуры подшипника, остальные показывают", "category": "Э", "priority": "normal", "specialty": "электрик", "lang": "ru"}
+{"text": "Дёргается стрелка амперметра на щите, значения неясные", "category": "Э", "priority": "normal", "specialty": "электрик", "lang": "ru"}
+{"text": "Не светится индикатор «Работа» на пульте конвейера", "category": "Э", "priority": "normal", "specialty": "электрик", "lang": "ru"}
+{"text": "Сбит концевой выключатель ограждения, даёт ложные сигналы", "category": "Э", "priority": "normal", "specialty": "электрик", "lang": "ru"}
+{"text": "Датчик скорости ленты показывает ноль, лента при этом идёт нормально", "category": "Э", "priority": "normal", "specialty": "электрик", "lang": "ru"}
+{"text": "Плохо держится кабель в кабельном вводе клеммной коробки", "category": "Э", "priority": "normal", "specialty": "электрик", "lang": "ru"}
+{"text": "Плановая проверка заземления электрооборудования участка", "category": "Э", "priority": "planned", "specialty": "электрик", "lang": "ru"}
+{"text": "Плановый осмотр щита и протяжка контактов по графику", "category": "Э", "priority": "planned", "specialty": "электрик", "lang": "ru"}
+{"text": "Плановая замена контакторов пускателей по графику ППР", "category": "Э", "priority": "planned", "specialty": "электрик", "lang": "ru"}
+{"text": "Плановое измерение сопротивления изоляции кабелей питания", "category": "Э", "priority": "planned", "specialty": "электрик", "lang": "ru"}
+{"text": "Профилактическая чистка шкафа управления сушильным барабаном", "category": "Э", "priority": "planned", "specialty": "электрик", "lang": "ru"}
+{"text": "Плановая замена ламп освещения на галерее по графику", "category": "Э", "priority": "planned", "specialty": "электрик", "lang": "ru"}
+{"text": "Лопнул рукав высокого давления гидропривода дробилки, масло бьёт струёй, дробилка остановлена", "category": "Г", "priority": "emergency", "specialty": "слесарь", "lang": "ru"}
+{"text": "Сильная течь масла из гидроцилиндра пресса, под ним лужа, пресс стоит", "category": "Г", "priority": "emergency", "specialty": "слесарь", "lang": "ru"}
+{"text": "Гидростанция совсем не набирает давление, зажим не работает, линия стоит", "category": "Г", "priority": "emergency", "specialty": "слесарь", "lang": "ru"}
+{"text": "Заклинило гидромотор барабана, масло течёт, привод стоит", "category": "Г", "priority": "emergency", "specialty": "слесарь", "lang": "ru"}
+{"text": "Давление в гидросистеме падает в течение смены, цилиндр оседает под нагрузкой", "category": "Г", "priority": "high", "specialty": "слесарь", "lang": "ru"}
+{"text": "Растёт течь масла по штоку гидроцилиндра, масло в баке убывает быстро", "category": "Г", "priority": "high", "specialty": "слесарь", "lang": "ru"}
+{"text": "Гидронасос гудит и греется, подача снизилась", "category": "Г", "priority": "high", "specialty": "слесарь", "lang": "ru"}
+{"text": "Масло в гидробаке пенится и греется, давление скачет", "category": "Г", "priority": "high", "specialty": "слесарь", "lang": "ru"}
+{"text": "Фитинг рукава высокого давления мокрый, капает частыми каплями", "category": "Г", "priority": "high", "specialty": "слесарь", "lang": "ru"}
+{"text": "Капает масло из штуцера гидрораспределителя, небольшое пятно", "category": "Г", "priority": "normal", "specialty": "слесарь", "lang": "ru"}
+{"text": "Запотевание фитинга рукава гидросистемы", "category": "Г", "priority": "normal", "specialty": "слесарь", "lang": "ru"}
+{"text": "Манометр на гидростанции показывает с ошибкой", "category": "Г", "priority": "normal", "specialty": "слесарь", "lang": "ru"}
+{"text": "Гидроцилиндр открывает затвор медленнее обычного", "category": "Г", "priority": "normal", "specialty": "слесарь", "lang": "ru"}
+{"text": "Подтекает гидрозамок, потёки на корпусе", "category": "Г", "priority": "normal", "specialty": "слесарь", "lang": "ru"}
+{"text": "Плановая замена рукавов высокого давления гидросистемы дробилки", "category": "Г", "priority": "planned", "specialty": "слесарь", "lang": "ru"}
+{"text": "Плановая замена фильтров гидростанции по графику", "category": "Г", "priority": "planned", "specialty": "слесарь", "lang": "ru"}
+{"text": "Плановая проверка давления и герметичности гидросистемы пресса", "category": "Г", "priority": "planned", "specialty": "слесарь", "lang": "ru"}
+{"text": "Плановая замена масла в гидробаке с промывкой", "category": "Г", "priority": "planned", "specialty": "слесарь", "lang": "ru"}
+{"text": "Плановая опрессовка гидросистемы", "category": "Г", "priority": "planned", "specialty": "слесарь", "lang": "ru"}
+{"text": "Плановый осмотр гидроцилиндров затворов", "category": "Г", "priority": "planned", "specialty": "слесарь", "lang": "ru"}
+{"text": "Оборвался шланг подачи воздуха на пневмопривод затвора, воздух шипит, затвор не закрывается, линия стоит", "category": "П", "priority": "emergency", "specialty": "слесарь", "lang": "ru"}
+{"text": "Сильный свист воздуха из магистрали в компрессорной, давление упало до нуля, производство стоит", "category": "П", "priority": "emergency", "specialty": "слесарь", "lang": "ru"}
+{"text": "Заклинило пневмоцилиндр разгрузки, бункер забит, подача остановлена", "category": "П", "priority": "emergency", "specialty": "слесарь", "lang": "ru"}
+{"text": "Давление в воздушной магистрали падает, пневмоприводы работают медленно", "category": "П", "priority": "high", "specialty": "слесарь", "lang": "ru"}
+{"text": "Пневмоцилиндр затвора срабатывает с задержкой, всё чаще", "category": "П", "priority": "high", "specialty": "слесарь", "lang": "ru"}
+{"text": "Растёт утечка воздуха на фитинге пневмолинии флотомашины", "category": "П", "priority": "high", "specialty": "слесарь", "lang": "ru"}
+{"text": "Забивается влагоотделитель, давление на приводе скачет", "category": "П", "priority": "high", "specialty": "слесарь", "lang": "ru"}
+{"text": "На стыке шланга пневмолинии слышно шипение, утечка небольшая", "category": "П", "priority": "normal", "specialty": "слесарь", "lang": "ru"}
+{"text": "Слабый засор продувочной форсунки, воздух идёт вяло", "category": "П", "priority": "normal", "specialty": "слесарь", "lang": "ru"}
+{"text": "Течёт конденсат из влагоотделителя", "category": "П", "priority": "normal", "specialty": "слесарь", "lang": "ru"}
+{"text": "Треснул пластиковый шланг пневмолинии, нужно заменить", "category": "П", "priority": "normal", "specialty": "слесарь", "lang": "ru"}
+{"text": "Не возвращается в исходное положение шток пневмоцилиндра заслонки, иногда", "category": "П", "priority": "normal", "specialty": "слесарь", "lang": "ru"}
+{"text": "Плановая замена пневмоклапанов затворов по графику", "category": "П", "priority": "planned", "specialty": "слесарь", "lang": "ru"}
+{"text": "Плановая продувка пневмолиний и слив конденсата", "category": "П", "priority": "planned", "specialty": "слесарь", "lang": "ru"}
+{"text": "Плановая ревизия пневмоцилиндров бункера", "category": "П", "priority": "planned", "specialty": "слесарь", "lang": "ru"}
+{"text": "Плановая замена воздушных фильтров компрессора", "category": "П", "priority": "planned", "specialty": "слесарь", "lang": "ru"}
+{"text": "Плановая проверка герметичности пневмосистемы", "category": "П", "priority": "planned", "specialty": "слесарь", "lang": "ru"}
+{"text": "Редуктор мельницы перегрелся, пахнет горелым маслом, масла в картере нет, мельница остановлена", "category": "С", "priority": "emergency", "specialty": "слесарь", "lang": "ru"}
+{"text": "Заклинило подшипник из-за отсутствия смазки, дым, привод аварийно остановлен", "category": "С", "priority": "emergency", "specialty": "слесарь", "lang": "ru"}
+{"text": "Не работает система смазки дробилки, сработала блокировка, дробилка стоит", "category": "С", "priority": "emergency", "specialty": "слесарь", "lang": "ru"}
+{"text": "Масло в редукторе тёмное и со стружкой, редуктор греется", "category": "С", "priority": "high", "specialty": "слесарь", "lang": "ru"}
+{"text": "Низкий уровень масла в картере редуктора конвейера, подшипник греется", "category": "С", "priority": "high", "specialty": "слесарь", "lang": "ru"}
+{"text": "Централизованная смазка не подаёт масло на часть точек", "category": "С", "priority": "high", "specialty": "слесарь", "lang": "ru"}
+{"text": "Масло в маслостанции эмульгировало, стало мутным, температура растёт", "category": "С", "priority": "high", "specialty": "слесарь", "lang": "ru"}
+{"text": "Долить масло в редуктор до уровня, щуп показывает минимум", "category": "С", "priority": "normal", "specialty": "слесарь", "lang": "ru"}
+{"text": "Забита маслёнка подшипникового узла, смазка не проходит", "category": "С", "priority": "normal", "specialty": "слесарь", "lang": "ru"}
+{"text": "Загрязнён сапун редуктора, на корпусе потёки", "category": "С", "priority": "normal", "specialty": "слесарь", "lang": "ru"}
+{"text": "Не работает лубрикатор на одной точке", "category": "С", "priority": "normal", "specialty": "слесарь", "lang": "ru"}
+{"text": "Нужно добавить густую смазку в подшипник натяжного барабана", "category": "С", "priority": "normal", "specialty": "слесарь", "lang": "ru"}
+{"text": "Плановая замена масла в редукторе по графику", "category": "С", "priority": "planned", "specialty": "слесарь", "lang": "ru"}
+{"text": "Плановая набивка смазкой подшипников грохота", "category": "С", "priority": "planned", "specialty": "слесарь", "lang": "ru"}
+{"text": "Плановая промывка и замена масляных фильтров маслостанции", "category": "С", "priority": "planned", "specialty": "слесарь", "lang": "ru"}
+{"text": "Плановый отбор проб масла из редуктора мельницы на анализ", "category": "С", "priority": "planned", "specialty": "слесарь", "lang": "ru"}
+{"text": "Плановая заправка станций смазки пластичной смазкой", "category": "С", "priority": "planned", "specialty": "слесарь", "lang": "ru"}
+{"text": "Плановая замена масла в подшипниковых узлах вентилятора", "category": "С", "priority": "planned", "specialty": "слесарь", "lang": "ru"}
+{"text": "Грохот остановили: сломалась пружинная опора, короб перекосило", "category": "М", "priority": "emergency", "specialty": "слесарь", "lang": "ru"}
+{"text": "Оборвалась лента ковшового элеватора, подъём стоит, ковши на полу", "category": "М", "priority": "emergency", "specialty": "слесарь", "lang": "ru"}
+{"text": "Гул и биение в подшипнике барабана мельницы нарастают, температура растёт", "category": "М", "priority": "high", "specialty": "слесарь", "lang": "ru"}
+{"text": "Износ бил дробилки, фракция на выходе крупнее нормы, дальше будет хуже", "category": "М", "priority": "high", "specialty": "слесарь", "lang": "ru"}
+{"text": "Нужно подтянуть натяжной механизм ленты, небольшое проскальзывание", "category": "М", "priority": "normal", "specialty": "слесарь", "lang": "ru"}
+{"text": "Плановая проверка центровки насоса и муфты", "category": "М", "priority": "planned", "specialty": "слесарь", "lang": "ru"}
+{"text": "Сработала защита по заземлению на вводе участка сушки, дым из кабельного канала", "category": "Э", "priority": "emergency", "specialty": "электрик", "lang": "ru"}
+{"text": "Плохой контакт в клеммнике насоса, греется и подгорает изоляция", "category": "Э", "priority": "high", "specialty": "электрик", "lang": "ru"}
+{"text": "Не срабатывает кнопка местного пуска на посту управления", "category": "Э", "priority": "normal", "specialty": "электрик", "lang": "ru"}
+{"text": "Плановая ревизия электродвигателей: чистка, проверка подшипников и обмоток", "category": "Э", "priority": "planned", "specialty": "электрик", "lang": "ru"}
+{"text": "Плановая проверка работы датчиков уровня в зумпфах", "category": "Э", "priority": "planned", "specialty": "электрик", "lang": "ru"}
+{"text": "Прорвало маслопровод гидросистемы пресса, масло растекается по полу, пресс остановлен", "category": "Г", "priority": "emergency", "specialty": "слесарь", "lang": "ru"}
+{"text": "Гидроцилиндр разгрузки двигается рывками, давление не держится", "category": "Г", "priority": "high", "specialty": "слесарь", "lang": "ru"}
+{"text": "Потеют соединения маслопровода гидростанции, капли не набираются", "category": "Г", "priority": "normal", "specialty": "слесарь", "lang": "ru"}
+{"text": "Плановая проверка уровня и состояния масла в гидросистеме", "category": "Г", "priority": "planned", "specialty": "слесарь", "lang": "ru"}
+{"text": "Лопнул воздушный шланг, затвор бункера открылся сам, материал сыплется, линия остановлена", "category": "П", "priority": "emergency", "specialty": "слесарь", "lang": "ru"}
+{"text": "Давление воздуха в пневмолинии флотомашины постепенно падает, клапаны вялые", "category": "П", "priority": "high", "specialty": "слесарь", "lang": "ru"}
+{"text": "Слабое шипение на соединении пневмоклапана флотомашины", "category": "П", "priority": "normal", "specialty": "слесарь", "lang": "ru"}
+{"text": "Плановая замена уплотнений пневмоцилиндров по графику ППР", "category": "П", "priority": "planned", "specialty": "слесарь", "lang": "ru"}
+{"text": "Подшипник дробилки дымит, смазка выгорела, привод остановлен", "category": "С", "priority": "emergency", "specialty": "слесарь", "lang": "ru"}
+{"text": "Подшипник греется, смазка вытекла, подача смазки уменьшилась", "category": "С", "priority": "high", "specialty": "слесарь", "lang": "ru"}
+{"text": "Подтёки смазки на крышке подшипникового узла, уровень пока в норме", "category": "С", "priority": "normal", "specialty": "слесарь", "lang": "ru"}
+{"text": "Нужно подварить отломанную проушину крепления кожуха", "category": "М", "priority": "normal", "specialty": "сварщик", "lang": "ru"}
+{"text": "Трещина на сварном шве рамы флотомашины растёт, пульпа подтекает", "category": "М", "priority": "high", "specialty": "сварщик", "lang": "ru"}
+{"text": "Конвейер тоқтап қалды, жетек білігінің мойынтірегі қысылып қалды", "category": "М", "priority": "emergency", "specialty": "слесарь", "lang": "kk"}
+{"text": "Қалқанда ұшқын шығып, күйген иіс келеді, қорек өшірілді", "category": "Э", "priority": "emergency", "specialty": "электрик", "lang": "kk"}
+{"text": "Гидрожетектің жоғары қысымды шлангісі жарылды, май ағып жатыр, ұсақтағыш тоқтады", "category": "Г", "priority": "emergency", "specialty": "слесарь", "lang": "kk"}
+{"text": "Пневмоцилиндр қысылып қалды, бункер бітеліп қалды, беру тоқтады", "category": "П", "priority": "emergency", "specialty": "слесарь", "lang": "kk"}
+{"text": "Редуктор қатты қызды, жанған май иісі шығады, майы жоқ, диірмен тоқтады", "category": "С", "priority": "emergency", "specialty": "слесарь", "lang": "kk"}
+{"text": "Електің тірегінде діріл күшейіп барады, әр айналымда тық еткен дыбыс шығады", "category": "М", "priority": "high", "specialty": "слесарь", "lang": "kk"}
+{"text": "Сорғы қозғалтқышы нормадан артық қызады, ток номиналдан жоғары", "category": "Э", "priority": "high", "specialty": "электрик", "lang": "kk"}
+{"text": "Гидрожүйедегі қысым ауысым бойы түсіп барады", "category": "Г", "priority": "high", "specialty": "слесарь", "lang": "kk"}
+{"text": "Магистральдағы қысым түсіп барады, пневможетектер баяу жұмыс істейді", "category": "П", "priority": "high", "specialty": "слесарь", "lang": "kk"}
+{"text": "Редуктордағы май қараңғы, металл жоңқасы бар, редуктор қызып тұр", "category": "С", "priority": "high", "specialty": "слесарь", "lang": "kk"}
+{"text": "Конвейердің төменгі тармағындағы бір ролик айналмайды", "category": "М", "priority": "normal", "specialty": "слесарь", "lang": "kk"}
+{"text": "Конвейер пультіндегі «Жұмыс» индикаторы жанбайды", "category": "Э", "priority": "normal", "specialty": "электрик", "lang": "kk"}
+{"text": "Гидрораспределитель штуцерінен май тамшылап тұр, дақ шағын", "category": "Г", "priority": "normal", "specialty": "слесарь", "lang": "kk"}
+{"text": "Пневможелі қосылысынан ауа шыққан дыбыс естіледі, ағу аз", "category": "П", "priority": "normal", "specialty": "слесарь", "lang": "kk"}
+{"text": "Редуктордағы май деңгейін толтыру керек, щуп минимум көрсетеді", "category": "С", "priority": "normal", "specialty": "слесарь", "lang": "kk"}
+{"text": "Диірмен футеровкасын ЖТЖ кестесі бойынша жоспарлы ауыстыру", "category": "М", "priority": "planned", "specialty": "слесарь", "lang": "kk"}
+{"text": "Қалқандағы түйіспелерді кесте бойынша жоспарлы тексеру және тарту", "category": "Э", "priority": "planned", "specialty": "электрик", "lang": "kk"}
+{"text": "Гидрожүйенің жоғары қысымды шлангілерін жоспарлы ауыстыру", "category": "Г", "priority": "planned", "specialty": "слесарь", "lang": "kk"}
+{"text": "Елек корпусының дәнекер жігіндегі жарықшақ ұлғайып барады", "category": "М", "priority": "high", "specialty": "сварщик", "lang": "kk"}
+{"text": "Кабель науасының кронштейні сынды, дәнекерлеу керек", "category": "М", "priority": "normal", "specialty": "сварщик", "lang": "kk"}
+{"text": "Науаның тозуға төзімді тақталарын кесте бойынша жоспарлы қаптау", "category": "М", "priority": "planned", "specialty": "сварщик", "lang": "kk"}
+{"text": "Течь масла из-под уплотнения вала шламового насоса, под насосом лужа", "category": "Г", "priority": "high", "specialty": "слесарь", "lang": "ru"}
+{"text": "Не запускается электродвигатель конвейера К-3, при пуске выбивает автомат", "category": "Э", "priority": "emergency", "specialty": "электрик", "lang": "ru"}
+{"text": "Посторонний шум и сильная вибрация подшипникового узла дробилки", "category": "М", "priority": "high", "specialty": "слесарь", "lang": "ru"}
+{"text": "Плановая смазка подшипников приводного барабана", "category": "С", "priority": "planned", "specialty": "слесарь", "lang": "ru"}
+{"text": "Порвана конвейерная лента, конвейер остановлен, участок стоит", "category": "М", "priority": "emergency", "specialty": "слесарь", "lang": "ru"}
+{"text": "Искрит электрощит на участке сушки, запах гари", "category": "Э", "priority": "emergency", "specialty": "электрик", "lang": "ru"}
+{"text": "Утечка воздуха в пневмолинии на флотомашине, слышно шипение", "category": "П", "priority": "normal", "specialty": "слесарь", "lang": "ru"}
+{"text": "Трещина в раме питателя, нужно заварить", "category": "М", "priority": "high", "specialty": "сварщик", "lang": "ru"}
+{"text": "Повреждён рукав высокого давления гидросистемы дробилки, течёт масло", "category": "Г", "priority": "emergency", "specialty": "слесарь", "lang": "ru"}
+{"text": "Не срабатывает датчик уровня в зумпфе", "category": "Э", "priority": "normal", "specialty": "электрик", "lang": "ru"}
+{"text": "Перегрев редуктора, масло тёмное и загрязнённое", "category": "С", "priority": "high", "specialty": "слесарь", "lang": "ru"}
+{"text": "Плановый осмотр и замена футеровки мельницы по графику ППР", "category": "М", "priority": "planned", "specialty": "слесарь", "lang": "ru"}
+{"text": "Пневмоцилиндр затвора бункера не двигается", "category": "П", "priority": "high", "specialty": "слесарь", "lang": "ru"}
+{"text": "Ослаб крепёж кожуха муфты, кожух дребезжит", "category": "М", "priority": "normal", "specialty": "слесарь", "lang": "ru"}
+{"text": "Обрыв кабеля питания вентилятора сушильного барабана", "category": "Э", "priority": "high", "specialty": "электрик", "lang": "ru"}
+{"text": "Падает давление в гидросистеме пресса", "category": "Г", "priority": "high", "specialty": "слесарь", "lang": "ru"}
+{"text": "Не работает централизованная система смазки конвейера", "category": "С", "priority": "high", "specialty": "слесарь", "lang": "ru"}
+{"text": "Отломился кронштейн ограждения, требуется сварка", "category": "М", "priority": "normal", "specialty": "сварщик", "lang": "ru"}
+{"text": "Засор пневмолинии продувки фильтра", "category": "П", "priority": "normal", "specialty": "слесарь", "lang": "ru"}
+{"text": "Плановая замена масла в редукторе мельницы", "category": "С", "priority": "planned", "specialty": "слесарь", "lang": "ru"}

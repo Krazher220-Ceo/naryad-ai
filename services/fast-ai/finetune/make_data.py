@@ -3,9 +3,8 @@
 # без коммерческого использования. Полные условия — файл LICENSE в корне репозитория.
 # Делает обучающие данные для Laya: просит DeepSeek написать реалистичные заявки мастера
 # для каждой допустимой комбинации (шифр, специальность, приоритет). Метка = запрошенная комбинация.
-# Тестовые 20 описаний из eval.py в данные не попадают.
+# Описания из eval_set.jsonl в данные не попадают.
 # Запуск: .venv/bin/python finetune/make_data.py   (ключ DEEPSEEK_API_KEY берётся из apps/web/.env.local)
-import ast
 import json
 import random
 import re
@@ -108,9 +107,8 @@ def windows(s, n=6):
 
 
 def test_cases():
-    src = (HERE.parent / "eval.py").read_text()
-    m = re.search(r"^CASES = (\[.*?^\])", src, re.S | re.M)
-    return [c[0] for c in ast.literal_eval(m.group(1))]
+    lines = (HERE.parent / "eval_set.jsonl").read_text(encoding="utf-8").splitlines()
+    return [json.loads(line)["text"] for line in lines if line.strip()]
 
 
 def main():
