@@ -52,6 +52,8 @@ type ChatParams<T> = {
   // Своя модель для задачи, например Qwen3-4B для разбора речи (OLLAMA_VOICE_MODEL).
   model?: string;
   cloudFallback?: boolean;
+  // Общий срок (момент времени, мс): ни одна попытка, в том числе облачная запасная, не выйдет за него.
+  deadline?: number;
 };
 
 export async function chatJson<T>(params: ChatParams<T>): Promise<ChatJsonResult<T>> {
@@ -80,6 +82,9 @@ async function callProvider<T>(provider: AiProvider, params: ChatParams<T>): Pro
 
   let lastError = "";
   for (let attempt = 1; attempt <= 2; attempt++) {
+    // Таймаут попытки: свой, но не больше остатка общего срока.
+    const timeout = Math.min(params.timeoutMs ?? 30000, (params.deadline ?? Infinity) - Date.now());
+    if (timeout < 1000) return { ok: false, error: lastError || "не хватило времени" };
     try {
       const res = await fetch(config.url, {
         method: "POST",
@@ -88,7 +93,7 @@ async function callProvider<T>(provider: AiProvider, params: ChatParams<T>): Pro
           ...(config.apiKey ? { Authorization: `Bearer ${config.apiKey}` } : {}),
         },
         body: JSON.stringify(body),
-        signal: AbortSignal.timeout(params.timeoutMs ?? 30000),
+        signal: AbortSignal.timeout(timeout),
       });
       if (!res.ok) {
         lastError = `HTTP ${res.status}`;

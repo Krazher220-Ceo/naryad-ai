@@ -48,6 +48,9 @@ function PhotoGrid({ title, items }: { title: string; items: PhotoItem[] }) {
   );
 }
 
+// Проверка ИИ идёт в after() и ограничена этим временем (бюджет в reviewOrder — 90 с).
+export const maxDuration = 120;
+
 export default async function MasterOrderPage({ params }: PageProps<"/master/orders/[id]">) {
   const t = await getT();
   const { id } = await params;

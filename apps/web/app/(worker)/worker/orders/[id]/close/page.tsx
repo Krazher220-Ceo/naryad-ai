@@ -10,6 +10,9 @@ import { canComplete } from "@/lib/orders/transitions";
 import { Button, ErrorState } from "@/components/ui";
 import { OrderCloseView } from "./components/OrderCloseView";
 
+// Проверка ИИ идёт в after() и ограничена этим временем (бюджет в reviewOrder — 90 с).
+export const maxDuration = 120;
+
 type ClosePageProps = {
   params: Promise<{ id: string }>;
 };
