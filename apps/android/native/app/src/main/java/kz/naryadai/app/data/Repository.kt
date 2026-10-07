@@ -41,6 +41,9 @@ import java.util.UUID
 // Всё, что экран просит у данных. Здесь нет правил статусов и прав: что можно, решает сервер.
 // Мы только показываем данные, отправляем действия и храним очередь, пока нет сети.
 
+@kotlinx.serialization.Serializable
+private class ReasonRow(val reason: String? = null)
+
 class DetailData(
     val order: WorkOrder,
     val events: List<OrderEvent>,
@@ -172,6 +175,14 @@ class Repository(private val context: Context, val session: Session, private val
         if (cached != null) Result.success(DetailData(cached, emptyList(), emptyList(), emptyList(), true)) else Result.failure(e)
     } catch (e: ApiException) {
         Result.failure(e)
+    }
+
+    // Причина последней паузы — только для подписи в уведомлении. Нет сети — null.
+    suspend fun lastPauseReason(orderId: String): String? = try {
+        val text = api.get("/rest/v1/work_order_events?order_id=eq.$orderId&action=eq.pause&select=reason&order=created_at.desc&limit=1")
+        AppJson.decodeFromString<List<ReasonRow>>(text).firstOrNull()?.reason
+    } catch (_: Exception) {
+        null
     }
 
     // Справочники для формы закрытия. Без сети берём последние сохранённые.

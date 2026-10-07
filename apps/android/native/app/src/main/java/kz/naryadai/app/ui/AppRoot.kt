@@ -3,6 +3,10 @@
 // без коммерческого использования. Полные условия — файл LICENSE в корне репозитория.
 package kz.naryadai.app.ui
 
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -25,22 +29,28 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -54,6 +64,8 @@ import kotlinx.coroutines.launch
 import kz.naryadai.app.Graph
 import kz.naryadai.app.R
 import kz.naryadai.app.data.ActionResult
+import kz.naryadai.app.notify.DeepLink
+import kz.naryadai.app.notify.WorkerService
 import kz.naryadai.app.ui.components.AppSnackbarHost
 import kz.naryadai.app.ui.components.showResult
 import kz.naryadai.app.ui.screens.CompleteScreen
@@ -97,6 +109,33 @@ fun AppRoot() {
         }
     }
 
+    // Нажатие на уведомление: открываем наряд или список уведомлений
+    val deepLink by DeepLink.target.collectAsState()
+    LaunchedEffect(deepLink, loggedIn, route) {
+        val target = deepLink
+        if (target != null && loggedIn && route != null && route != LOGIN) {
+            DeepLink.target.value = null
+            nav.navigate(target) { launchSingleTop = true }
+        }
+    }
+
+    // Уведомления: один раз объясняем, зачем они, и просим разрешение (Android 13+).
+    // Службу с «живым» уведомлением держим, пока исполнитель вошёл и уведомления разрешены.
+    val context = LocalContext.current
+    var askNotif by remember { mutableStateOf(false) }
+    val notifPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) WorkerService.start(context)
+    }
+    LaunchedEffect(loggedIn) {
+        if (loggedIn && Build.VERSION.SDK_INT >= 33 && !Graph.session.notifAsked &&
+            context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED
+        ) askNotif = true
+    }
+    LifecycleResumeEffect(loggedIn) {
+        if (loggedIn) WorkerService.start(context) else WorkerService.stop(context)
+        onPauseOrDispose { }
+    }
+
     // Обновление данных каждые 20 секунд, пока приложение на экране (и при возвращении в него)
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     LaunchedEffect(loggedIn) {
@@ -117,6 +156,30 @@ fun AppRoot() {
 
     val sentForReview = stringResource(R.string.toast_sent_for_review)
     val offlineText = stringResource(R.string.toast_offline)
+
+    if (askNotif) {
+        AlertDialog(
+            onDismissRequest = { },
+            title = { Text(stringResource(R.string.notif_ask_title), style = MaterialTheme.typography.titleMedium) },
+            text = { Text(stringResource(R.string.notif_ask_text), style = MaterialTheme.typography.bodyLarge) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        askNotif = false
+                        Graph.session.notifAsked = true
+                        notifPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    },
+                    modifier = Modifier.padding(4.dp),
+                ) { Text(stringResource(R.string.notif_ask_yes), style = MaterialTheme.typography.labelLarge) }
+            },
+            dismissButton = {
+                TextButton(onClick = { askNotif = false; Graph.session.notifAsked = true }, modifier = Modifier.padding(4.dp)) {
+                    Text(stringResource(R.string.notif_ask_later), style = MaterialTheme.typography.labelLarge)
+                }
+            },
+            containerColor = Color.White,
+        )
+    }
 
     Box(Modifier.fillMaxSize().background(Canvas)) {
         Column(Modifier.fillMaxSize()) {

@@ -19,6 +19,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import android.content.Intent
+import kz.naryadai.app.notify.DeepLink
 import kz.naryadai.app.ui.AppRoot
 import kz.naryadai.app.ui.theme.NaryadTheme
 import java.util.Locale
@@ -29,12 +31,26 @@ private class LocalizedContext(base: Context, private val localizedResources: Re
 }
 
 class MainActivity : ComponentActivity() {
+    // Нажатие на уведомление: запоминаем, какой экран открыть (переход делает AppRoot)
+    private fun readDeepLink(intent: Intent?) {
+        intent?.getStringExtra(DeepLink.EXTRA)?.let {
+            DeepLink.target.value = it
+            intent.removeExtra(DeepLink.EXTRA)
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        readDeepLink(intent)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
         )
+        readDeepLink(intent)
         setContent {
             val language by Graph.session.language.collectAsState()
             val config = remember(language) {
