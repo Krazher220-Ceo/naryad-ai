@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: LicenseRef-NaryadAI-NonCommercial
+// © 2026 команда «НарядAI»: Алихан, Бауыржан, Али, Тамерлан. Только для проверки и обучения,
+// без коммерческого использования. Полные условия — файл LICENSE в корне репозитория.
 import { Card, cx } from "@/components/ui";
 import { SettingsForm } from "@/app/(master)/master/settings/SettingsForm";
 import { getAiStatus, type ServiceState } from "@/lib/ai/status";

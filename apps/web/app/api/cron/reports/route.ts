@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: LicenseRef-NaryadAI-NonCommercial
+// © 2026 команда «НарядAI»: Алихан, Бауыржан, Али, Тамерлан. Только для проверки и обучения,
+// без коммерческого использования. Полные условия — файл LICENSE в корне репозитория.
 import { refreshAllSnapshots } from "@/lib/analytics/cached";
 
 // Ночной пересчёт отчётов и текстов ИИ в report_snapshots. Расписание — apps/web/vercel.json
