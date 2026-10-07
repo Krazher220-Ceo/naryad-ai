@@ -19,7 +19,9 @@ export type RuleInput = {
   dueAt: string;
   excusedPauseMinutes: number; // паузы «ждёт запчасть / допуск / остановку» не считаем
   afterPhotos: number;
-  duplicatePhotos: number; // фото «после», которые уже встречались в других нарядах
+  duplicatePhotos: number; // фото «после», которые уже встречались в других нарядах (точный отпечаток)
+  similarPhoto: { orderNumber: number; sameEquipment: boolean } | null; // похожее фото (dHash) из другого наряда
+  afterLooksLikeBefore: boolean; // «после» почти совпадает с «до» этого же наряда
   materials: { name: string; unit: string; qty: number; typicalQty: number; faultCodes: string[] }[];
 };
 
@@ -48,6 +50,16 @@ export function runRules(input: RuleInput): RuleCheck[] {
   // 2. Повтор старого фото.
   if (input.duplicatePhotos > 0) {
     checks.push({ id: "photo_duplicate", status: "fail", message: t("ai.rules.duplicatePhoto") });
+  } else if (input.similarPhoto) {
+    // Похожий снимок на том же оборудовании возможен честно (тот же ракурс): только замечание.
+    checks.push({
+      id: "photo_similar",
+      status: input.similarPhoto.sameEquipment ? "warn" : "fail",
+      message: fill("ai.rules.similarPhoto", { number: input.similarPhoto.orderNumber }),
+    });
+  }
+  if (input.afterLooksLikeBefore) {
+    checks.push({ id: "photo_same_as_before", status: "warn", message: t("ai.rules.sameAsBefore") });
   }
 
   // 3. Логичность материалов: расход против обычного и связь с шифром.

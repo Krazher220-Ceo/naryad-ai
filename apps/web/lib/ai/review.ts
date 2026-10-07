@@ -9,6 +9,7 @@ import type { Json } from "@/lib/supabase/database.types";
 import { createAnonymizer } from "./anonymize";
 import type { ReviewChecks } from "./types";
 import { chatJson, type AiProvider, type ContentPart } from "./provider";
+import { hammingHex } from "./phash";
 import { PHOTO_CHECK_SYSTEM, REVIEW_TEXT_SYSTEM, WORK_MATCH_SYSTEM } from "./prompts";
 import { runRules, rulesScore, type RuleCheck } from "./rules";
 import {
@@ -31,10 +32,23 @@ import {
 export type Verdict = "accept" | "accept_with_note" | "rework" | "needs_master";
 
 const EXCUSED_PAUSES = ["waiting_parts", "waiting_permit", "waiting_stop"];
+// Общий бюджет времени на проверку и минимум, при котором модель ещё стоит вызывать.
+// Функция живёт не дольше maxDuration (120 с): остаток уходит на запись результата и уведомления.
+const REVIEW_BUDGET_MS = 90000;
+const MIN_CALL_MS = 5000;
+const SKIPPED = "пропущено: не хватило времени";
+const PHOTO_TIMEOUT_MS = 40000;
+const TEXT_TIMEOUT_MS = 20000;
+// Расстояние Хэмминга между dHash: «после» и фото из другого наряда / из «до» того же наряда.
+const SIMILAR_OTHER_ORDER = 6;
+const SIMILAR_SAME_ORDER = 4;
+const SIMILAR_LOOKBACK_DAYS = 180;
+const SIMILAR_MAX_ROWS = 3000;
 const MAX_PHOTOS_PER_KIND = 2; // больше двух фото на вид модели не отправляем: дольше и дороже
 
 export async function reviewOrder(orderId: string): Promise<{ verdict: Verdict } | null> {
   const db = createAdminClient();
+  const deadline = Date.now() + REVIEW_BUDGET_MS;
 
   const { data: order } = await db
     .from("work_orders")
@@ -60,7 +74,7 @@ export async function reviewOrder(orderId: string): Promise<{ verdict: Verdict }
       .from("material_usages")
       .select("qty, material:material_id ( name, unit, typical_qty, fault_codes )")
       .eq("order_id", orderId),
-    db.from("photos").select("kind, path, sha256").eq("order_id", orderId).order("created_at"),
+    db.from("photos").select("kind, path, sha256, phash").eq("order_id", orderId).order("created_at"),
     db.from("work_order_events").select("action, reason_code, created_at").eq("order_id", orderId).order("created_at"),
   ]);
 
@@ -77,6 +91,14 @@ export async function reviewOrder(orderId: string): Promise<{ verdict: Verdict }
     ? await db.from("photos").select("id", { count: "exact", head: true }).in("sha256", afterHashes).neq("order_id", orderId)
     : { count: 0 };
 
+  // Похожее фото (обрезка, сжатие, другой размер): сравниваем dHash в коде.
+  const similar = await findSimilarPhoto(db, orderId, order.equipment_id, after.map((p) => p.phash));
+  // «После» почти совпадает с «до» этого же наряда: работа на фото не видна.
+  const beforeHashes = before.map((p) => p.phash).filter((h): h is string => !!h);
+  const afterLooksLikeBefore = after.some(
+    (p) => !!p.phash && beforeHashes.some((h) => hammingHex(p.phash!, h) <= SIMILAR_SAME_ORDER),
+  );
+
   // ---------- 1. Правила ----------
   const rules = runRules({
     type: order.type,
@@ -89,6 +111,8 @@ export async function reviewOrder(orderId: string): Promise<{ verdict: Verdict }
     excusedPauseMinutes: excusedPauseMinutes(eventsRes.data ?? []),
     afterPhotos: after.length,
     duplicatePhotos: duplicates ?? 0,
+    similarPhoto: similar,
+    afterLooksLikeBefore,
     materials: (materialsRes.data ?? []).flatMap((m) =>
       m.material
         ? [{ name: m.material.name, unit: m.material.unit, qty: m.qty, typicalQty: m.material.typical_qty, faultCodes: m.material.fault_codes }]
@@ -100,8 +124,11 @@ export async function reviewOrder(orderId: string): Promise<{ verdict: Verdict }
 
   // ---------- 2. Работы против проблемы (текст) ----------
   let workMatch: WorkMatch | null = null;
-  if (order.work_done) {
+  if (order.work_done && deadline - Date.now() < MIN_CALL_MS) {
+    errors.push(`work_match: ${SKIPPED}`);
+  } else if (order.work_done) {
     const res = await chatJson({
+      deadline,
       cloudFallback: true, // данные уже обезличены
       provider,
       system: WORK_MATCH_SYSTEM,
@@ -113,7 +140,7 @@ export async function reviewOrder(orderId: string): Promise<{ verdict: Verdict }
           `Комментарий исполнителя: ${order.close_comment ?? "—"}`,
       ),
       validate: validateWorkMatch,
-      timeoutMs: 20000,
+      timeoutMs: TEXT_TIMEOUT_MS,
     });
     if (res.ok) workMatch = { ...res.data, explanation: anon.restore(res.data.explanation) };
     else errors.push(`work_match: ${res.error}`);
@@ -121,7 +148,9 @@ export async function reviewOrder(orderId: string): Promise<{ verdict: Verdict }
 
   // ---------- 3. Фото ----------
   let photoCheck: PhotoCheck | null = null;
-  if (after.length > 0) {
+  if (after.length > 0 && deadline - Date.now() < MIN_CALL_MS) {
+    errors.push(`photo: ${SKIPPED}`);
+  } else if (after.length > 0) {
     const images = await loadImages([...before.slice(0, MAX_PHOTOS_PER_KIND), ...after.slice(0, MAX_PHOTOS_PER_KIND)]);
     const beforeCount = Math.min(before.length, MAX_PHOTOS_PER_KIND);
     const content: ContentPart[] = [
@@ -135,13 +164,14 @@ export async function reviewOrder(orderId: string): Promise<{ verdict: Verdict }
       ...images.map((url): ContentPart => ({ type: "image_url", image_url: { url } })),
     ];
     const res = await chatJson({
+      deadline,
       cloudFallback: true, // данные уже обезличены
       provider,
       system: PHOTO_CHECK_SYSTEM,
       user: content,
       validate: validatePhotoCheck,
       withImages: true,
-      timeoutMs: 45000,
+      timeoutMs: PHOTO_TIMEOUT_MS,
     });
     if (res.ok) photoCheck = res.data;
     else errors.push(`photo: ${res.error}`);
@@ -164,14 +194,18 @@ export async function reviewOrder(orderId: string): Promise<{ verdict: Verdict }
       cannot_verify: photoCheck.cannot_verify,
     },
   };
-  const textRes = await chatJson({
-    cloudFallback: true, // данные уже обезличены
-    provider,
-    system: REVIEW_TEXT_SYSTEM,
-    user: anon.hide(JSON.stringify(facts)),
-    validate: validateReviewText,
-    timeoutMs: 20000,
-  });
+  const textRes: Awaited<ReturnType<typeof chatJson<ReviewText>>> =
+    deadline - Date.now() < MIN_CALL_MS
+      ? { ok: false, error: SKIPPED }
+      : await chatJson({
+          deadline,
+          cloudFallback: true, // данные уже обезличены
+          provider,
+          system: REVIEW_TEXT_SYSTEM,
+          user: anon.hide(JSON.stringify(facts)),
+          validate: validateReviewText,
+          timeoutMs: TEXT_TIMEOUT_MS,
+        });
   if (textRes.ok) {
     text = {
       good: textRes.data.good.map(anon.restore),
@@ -235,8 +269,10 @@ export function decide(input: {
   if (workMatch && !workMatch.matches && workMatch.confidence >= threshold) return { verdict: "rework", score: Math.min(score, 2), confidence };
   if (photoCheck?.verdict === "rework" && photoCheck.confidence >= threshold) return { verdict: "rework", score: Math.min(score, 2), confidence };
 
+  // Фото похоже на чужое или на «до» — решает мастер, оценку не выдумываем.
+  const photoSuspicious = rules.some((r) => r.status === "warn" && (r.id === "photo_similar" || r.id === "photo_same_as_before"));
   // Модель недоступна или не уверена — решение за мастером, оценку не выдумываем.
-  if (input.hadAiError || confidence < threshold || photoCheck?.verdict === "needs_master") {
+  if (photoSuspicious || input.hadAiError || confidence < threshold || photoCheck?.verdict === "needs_master") {
     return { verdict: "needs_master", score, confidence };
   }
 
@@ -244,6 +280,42 @@ export function decide(input: {
     return { verdict: "accept_with_note", score: Math.min(score, 4), confidence };
   }
   return { verdict: "accept", score, confidence };
+}
+
+// Ищет среди свежих фото других нарядов самое похожее на «после» этого наряда (по dHash).
+// Возвращает номер наряда и признак «то же оборудование»: на одном оборудовании похожий снимок возможен
+// честно (тот же ракурс), поэтому там это только замечание, а на другом — ошибка.
+async function findSimilarPhoto(
+  db: ReturnType<typeof createAdminClient>,
+  orderId: string,
+  equipmentId: string | null,
+  afterHashes: (string | null)[],
+): Promise<{ orderNumber: number; sameEquipment: boolean } | null> {
+  const hashes = afterHashes.filter((h): h is string => !!h);
+  if (hashes.length === 0) return null;
+
+  const since = new Date(Date.now() - SIMILAR_LOOKBACK_DAYS * 86400000).toISOString();
+  const { data } = await db
+    .from("photos")
+    .select("phash, order:order_id ( number, equipment_id )")
+    .not("phash", "is", null)
+    .neq("order_id", orderId)
+    .gte("created_at", since)
+    .order("created_at", { ascending: false })
+    .limit(SIMILAR_MAX_ROWS);
+
+  let best: { orderNumber: number; sameEquipment: boolean; distance: number } | null = null;
+  for (const row of data ?? []) {
+    if (!row.phash || !row.order) continue;
+    const distance = Math.min(...hashes.map((h) => hammingHex(h, row.phash!)));
+    if (distance > SIMILAR_OTHER_ORDER) continue;
+    const sameEquipment = !!equipmentId && row.order.equipment_id === equipmentId;
+    // Лучшее совпадение — с меньшим расстоянием; при равенстве берём чужое оборудование (оно строже).
+    if (!best || distance < best.distance || (distance === best.distance && best.sameEquipment && !sameEquipment)) {
+      best = { orderNumber: row.order.number, sameEquipment, distance };
+    }
+  }
+  return best && { orderNumber: best.orderNumber, sameEquipment: best.sameEquipment };
 }
 
 // Минуты пауз по уважительным причинам: от «пауза» до следующего «продолжить» или «исполнено».
