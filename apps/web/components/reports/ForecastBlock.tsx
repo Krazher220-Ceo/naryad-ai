@@ -7,6 +7,7 @@ import type { EquipmentForecast } from "@/lib/analytics/forecast";
 import type { Translate } from "@/lib/i18n";
 import { getT } from "@/lib/i18n-server";
 import { fill, formatP, oneDecimal } from "./format";
+import { SnapshotBar } from "./SnapshotBar";
 
 // Блок «Риск отказа на неделю»: верхние машины по вероятности отказа. Цифры считает код (lib/analytics/forecast.ts),
 // строка причины собирается из кодов причин по словарю.
@@ -35,9 +36,9 @@ export function reasonText(t: Translate, f: EquipmentForecast): string {
   const code = f.reasons[0];
   switch (code) {
     case "trend_up":
-      return fill(t("forecast.reason.trend_up"), { k: f.failures30, exp: oneDecimal(f.expected30), p: formatP(f.pValue) });
+      return fill(t("forecast.reason.trend_up"), { k: f.failures30, exp: oneDecimal(f.expected30), q: formatP(f.qValue) });
     case "high_rate":
-      return fill(t("forecast.reason.high_rate"), { ratio: oneDecimal(f.rateRatio), n: f.failures90d });
+      return fill(t("forecast.reason.high_rate"), { n: f.failures90d });
     case "recent_failure":
       return fill(t("forecast.reason.recent_failure"), { d: oneDecimal(f.daysSinceLast ?? 0) });
     case "little_data":
@@ -49,8 +50,9 @@ export function reasonText(t: Translate, f: EquipmentForecast): string {
 
 export async function ForecastBlock({ limit = 5 }: { limit?: number }) {
   const t = await getT();
-  const { data } = await cachedForecast();
-  const top = data.items.filter((i) => i.failures90d > 0).slice(0, limit);
+  const { data, computedAt } = await cachedForecast();
+  // Старый снимок (до перехода на сутки) не имеет поля p1: пока не пересчитан, блок показывает «мало данных».
+  const top = data.items.filter((i) => i.failures90d > 0 && typeof i.p1 === "number").slice(0, limit);
 
   return (
     <section aria-label={t("forecast.title")} className="flex flex-col gap-3">
@@ -58,13 +60,15 @@ export async function ForecastBlock({ limit = 5 }: { limit?: number }) {
         <h2 className="text-xl font-bold text-ink">{t("forecast.title")}</h2>
         <p className="text-base text-ink-muted">{t("forecast.hint")}</p>
       </div>
+      <SnapshotBar kind="forecast" scope="90" computedAt={computedAt} />
       {top.length === 0 ? (
         <EmptyState title={t("forecast.empty")} text={t("dashboard.noDataText")} />
       ) : (
         <ol className="flex flex-col gap-3 lg:grid lg:grid-cols-2 lg:items-start">
           {top.map((f) => {
-            const percent = Math.round(f.p7 * 100);
-            const high = percent >= 50;
+            const percent = Math.round(f.p1 * 100);
+            const relative = f.rr >= 1.2 ? fill(t("forecast.relHigh"), { rr: oneDecimal(f.rr) }) : f.rr <= 0.8 ? t("forecast.relLow") : t("forecast.relNear");
+            const high = f.rr >= 2;
             return (
               <li key={f.equipmentId}>
                 <Card tone={high ? "emergency" : "default"} className="flex flex-col gap-2">
@@ -78,6 +82,7 @@ export async function ForecastBlock({ limit = 5 }: { limit?: number }) {
                       <p className="text-sm text-ink-muted">{t("forecast.probLabel")}</p>
                     </div>
                   </div>
+                  <p className="text-base font-semibold text-ink">{relative}</p>
                   <p className="text-base text-ink">{reasonText(t, f)}</p>
                   <div className="flex flex-wrap items-end justify-between gap-x-3 gap-y-2">
                     <ul className="flex flex-col text-base text-ink-muted">

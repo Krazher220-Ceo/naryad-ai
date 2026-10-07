@@ -39,7 +39,7 @@ export function factLabel(t: Translate, key: string): string {
 }
 
 export function factValue(t: Translate, key: string, value: number | string): string {
-  if (typeof value === "number" && key === "pValue") return formatP(value);
+  if (typeof value === "number" && (key === "pValue" || key === "qValue")) return formatP(value);
   if (typeof value === "number") return oneDecimal(value);
   if (key === "shift" && (value === "night" || value === "day")) return t(`anomaly.shiftName.${value}`);
   if (value === "*") return t("anomaly.allEquipment");
