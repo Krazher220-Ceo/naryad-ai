@@ -3,6 +3,7 @@
 // без коммерческого использования. Полные условия — файл LICENSE в корне репозитория.
 import { NextResponse } from "next/server";
 import { createBearerClient } from "@/lib/supabase/bearer";
+import { PHASH_PATTERN } from "@/lib/ai/phash";
 
 
 export async function POST(
@@ -32,6 +33,11 @@ export async function POST(
 
   const body = await req.json().catch(() => ({}));
   const { kind, path } = body;
+  // Перцептивный хеш необязателен (старые версии приложения его не шлют), но если есть — 16 hex-символов.
+  const phash: string | null = typeof body.phash === "string" ? body.phash.toLowerCase() : null;
+  if (body.phash != null && (!phash || !PHASH_PATTERN.test(phash))) {
+    return NextResponse.json({ ok: false, error: "phash must be 16 hex chars" }, { status: 400 });
+  }
 
   if (!kind || !path) {
     return NextResponse.json({ ok: false, error: "kind and path are required" }, { status: 400 });
@@ -42,6 +48,7 @@ export async function POST(
     kind,
     path,
     author_id: employee.id,
+    phash,
   }).select("id").single();
 
   if (error) {
