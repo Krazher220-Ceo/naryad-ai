@@ -207,7 +207,6 @@
     <string name="channel_current_desc">Постоянное уведомление о наряде в работе, без звука</string>
     <string name="live_title">№%1$s · %2$s</string>
     <string name="live_text">%1$s · %2$s</string>
-    <string name="live_overdue">Просрочен на %1$s мин</string>
     <string name="live_paused">Пауза: %1$s</string>
     <string name="live_paused_no_reason">Пауза</string>
     <string name="live_idle_title">На смене · нарядов нет</string>

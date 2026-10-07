@@ -207,7 +207,6 @@
     <string name="channel_current_desc">Орындалып жатқан наряд туралы тұрақты хабарлама, дыбыссыз</string>
     <string name="live_title">№%1$s · %2$s</string>
     <string name="live_text">%1$s · %2$s</string>
-    <string name="live_overdue">%1$s мин кешікті</string>
     <string name="live_paused">Үзіліс: %1$s</string>
     <string name="live_paused_no_reason">Үзіліс</string>
     <string name="live_idle_title">Ауысымда · наряд жоқ</string>

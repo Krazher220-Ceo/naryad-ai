@@ -59,6 +59,11 @@ object Notifier {
     private fun equipmentLine(o: WorkOrder): String =
         listOfNotNull(o.equipment?.name?.takeIf { it.isNotBlank() }, o.section?.name?.takeIf { it.isNotBlank() }).joinToString(" · ")
 
+    // «20 ч 14 мин» вместо «1214 мин» — как на карточке наряда (OverdueTag).
+    private fun lateText(ctx: Context, minutes: Long): String =
+        if (minutes >= 60) ctx.getString(R.string.time_hours, minutes / 60, minutes % 60)
+        else ctx.getString(R.string.time_minutes, minutes)
+
     // Постоянное уведомление о наряде в работе (живое уведомление).
     // pauseReason — причина паузы, если известна. nowMs передаём снаружи, чтобы это можно было проверить.
     fun buildOngoing(ctx: Context, order: WorkOrder, pauseReason: String?, nowMs: Long = System.currentTimeMillis()): Notification {
@@ -71,7 +76,7 @@ object Notifier {
         val headline = when {
             paused && !pauseReason.isNullOrBlank() -> ctx.getString(R.string.live_paused, pauseReason)
             paused -> ctx.getString(R.string.live_paused_no_reason)
-            overdue -> ctx.getString(R.string.live_overdue, lateMin.toString())
+            overdue -> ctx.getString(R.string.overdue_by, lateText(ctx, lateMin!!))
             else -> null
         }
         // Обычное состояние: «Оборудование · Участок». Пауза и просрочка выходят в первую строку.
@@ -96,7 +101,7 @@ object Notifier {
         if (due != null && !paused && !overdue) {
             b.setShowWhen(true).setWhen(due).setUsesChronometer(true).setChronometerCountDown(true)
         } else {
-            b.setShowWhen(false)
+            b.setShowWhen(false).setUsesChronometer(false)
         }
         // Заливка цветом отключает живое уведомление на Android 16, поэтому там остаётся только цвет значка
         if (overdue && Build.VERSION.SDK_INT < 36) b.setColorized(true)
