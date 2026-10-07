@@ -38,7 +38,8 @@ type Draft = Omit<Anomaly, "text" | "recommendation" | "source">;
 
 const DAY = 24 * 60 * 60 * 1000;
 const round1 = (x: number) => Math.round(x * 10) / 10;
-const roundP = (p: number) => Math.round(p * 10000) / 10000;
+// Меньше 0,0001 показываем как 0,0001, чтобы модель не писала «p=0».
+const roundP = (p: number) => Math.max(0.0001, Math.round(p * 10000) / 10000);
 const share = (part: number, all: number) => (all > 0 ? Math.round((part / all) * 100) : 0);
 
 function countBy<T>(items: T[], key: (item: T) => string | null): Map<string, T[]> {
