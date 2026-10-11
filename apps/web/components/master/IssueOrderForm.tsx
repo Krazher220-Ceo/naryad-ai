@@ -326,7 +326,8 @@ export function IssueOrderForm({
         setSuggestion(null);
         setSuggestionUnavailable(true);
       }
-      setJumpTo({ step: steps.length - 1, key: Date.now() });
+      // Оборудование не узнали — открываем шаг 1, иначе сразу шаг подтверждения.
+      setJumpTo({ step: filled.equipment ? steps.length - 1 : 0, key: Date.now() });
     }
     return filled;
   }
