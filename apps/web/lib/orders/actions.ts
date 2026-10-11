@@ -11,6 +11,7 @@ import { getT } from "@/lib/i18n-server";
 import { reviewOrder } from "@/lib/ai/review";
 import { getCurrentEmployee } from "@/lib/auth/session";
 import { classifyProblem, type Classification } from "@/lib/ai/classify";
+import { parseOrderSpeech, type SpeechFields } from "@/lib/ai/voice";
 import { suggestWorkers, type Candidate } from "./suggest";
 import { notifyNewOrder, notifySideRequest, notifyStatusChange } from "./notifications";
 import type { ActionResult, OrderAction, OrderPriority, OrderStatus, OrderType } from "./types";
@@ -206,6 +207,62 @@ export async function suggestForIssue(description: string): Promise<
   const classification = await classifyProblem(description);
   const candidates = await suggestWorkers(classification?.specialty ?? null, classification?.category ?? null);
   return { ok: true, data: { classification, candidates } };
+}
+
+// Экспресс-выдача одной фразой: разбор фразы по полям (lib/ai/voice) и подсказка Laya (classifyProblem)
+// за один вызов. Модели недоступны — оборудование и фамилию ищем в тексте кодом, поля проверяет мастер.
+export async function expressIssue(text: string): Promise<
+  ActionResult<{ fields: SpeechFields; classification: Classification | null; candidates: Candidate[] }>
+> {
+  const t = await getT();
+  const me = await getCurrentEmployee();
+  if (me?.role !== "master") return { ok: false, error: t("orders.errors.forbidden") };
+  const phrase = text.trim().slice(0, 500);
+  if (phrase.length < 5) return { ok: false, error: t("master.express.errors.short") };
+
+  const supabase = await createClient();
+  const [equipment, workers, faultCodes] = await Promise.all([
+    supabase.from("equipment").select("id, name, inventory_no"),
+    supabase.from("worker_board").select("id, full_name"),
+    supabase.from("fault_codes").select("code, name"),
+  ]);
+  const refs = {
+    equipment: equipment.data ?? [],
+    workers: (workers.data ?? []).filter((w): w is { id: string; full_name: string } => Boolean(w.id && w.full_name)),
+    faultCodes: faultCodes.data ?? [],
+  };
+  const [parsed, classification] = await Promise.all([parseOrderSpeech(phrase, refs), classifyProblem(phrase)]);
+  const fields = { ...parsed };
+  if (!fields.equipmentId) fields.equipmentId = findEquipmentInText(phrase, refs.equipment);
+  if (!fields.assigneeId) fields.assigneeId = findWorkerInText(phrase, refs.workers);
+
+  const candidates = await suggestWorkers(classification?.specialty ?? null, classification?.category ?? null);
+  return { ok: true, data: { fields, classification, candidates } };
+}
+
+const plain = (s: string) => s.toLowerCase().replace(/ё/g, "е").replace(/[\s\-–«»"]/g, "");
+
+// Код оборудования из названия («НШ-2», «К-3», «КМД-1750») есть в фразе. Буквенная часть кода тоже подходит,
+// если в ней от 3 букв: «КМД» → «Дробилка КМД-1750». Совпало несколько — не угадываем.
+function findEquipmentInText(text: string, list: { id: string; name: string; inventory_no: string }[]): string | null {
+  const p = plain(text);
+  const found = list.filter((e) => {
+    if (p.includes(plain(e.inventory_no))) return true;
+    const code = plain(e.name.split(" ").find((w) => /\d/.test(w)) ?? "");
+    const letters = code.replace(/\d/g, "");
+    return (code.length >= 2 && p.includes(code)) || (letters.length >= 3 && p.includes(letters));
+  });
+  return found.length === 1 ? found[0].id : null;
+}
+
+// Фамилия в любом падеже: первые 5 букв фамилии есть в тексте. Несколько совпадений — не угадываем.
+function findWorkerInText(text: string, list: { id: string; full_name: string }[]): string | null {
+  const words = text.toLowerCase().replace(/ё/g, "е").split(/[^а-яәіңғүұқөһa-z]+/);
+  const found = list.filter((w) => {
+    const stem = w.full_name.split(" ")[0].toLowerCase().replace(/ё/g, "е").slice(0, 5);
+    return stem.length >= 4 && words.some((word) => word.startsWith(stem));
+  });
+  return found.length === 1 ? found[0].id : null;
 }
 
 // Пороги контроля сроков и режим ИИ (мастер или руководитель). Права проверяет база (update_settings).
