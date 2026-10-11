@@ -24,9 +24,10 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
 from questions import QUESTIONS  # noqa: E402
 
-DATA = HERE / "data" / "train.jsonl"
-OUT = HERE / "laya-naryad"
-LOG = HERE / "train.log"
+# Пути можно переопределить: LAYA_TRAIN_DATA и LAYA_OUT (по умолчанию как раньше)
+DATA = Path(os.environ.get("LAYA_TRAIN_DATA", HERE / "data" / "train.jsonl"))
+OUT = Path(os.environ.get("LAYA_OUT", HERE / "laya-naryad"))
+LOG = HERE / ("train.log" if "LAYA_OUT" not in os.environ else f"train_{OUT.name}.log")
 
 EPOCHS = int(sys.argv[1]) if len(sys.argv) > 1 else 4
 MICRO_BATCH = 8
