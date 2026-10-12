@@ -7,7 +7,8 @@ import { useState, useTransition } from "react";
 import { useT } from "@/components/LocaleProvider";
 import { Button, Card, cx, useToast } from "@/components/ui";
 import type { MessageKey } from "@/lib/i18n";
-import { saveNotificationPrefs, setBigText, unlinkTelegram } from "@/lib/notify/actions";
+import { saveNotificationPrefs, setTextSize, unlinkTelegram } from "@/lib/notify/actions";
+import { TEXT_SIZES, type TextSize } from "@/lib/display";
 import { useConnection } from "@/lib/offline/ConnectionProvider";
 import type { Enums } from "@/lib/supabase/database.types";
 
@@ -159,31 +160,39 @@ export function NotificationPrefsForm({
   );
 }
 
-// «Крупный текст» — две большие кнопки, как переключатель языка.
-export function BigTextSwitch({ on }: { on: boolean }) {
+// Размер текста: четыре кнопки с образцом «Аа» нужного размера. Выбор применяется сразу,
+// а cookie сохраняет его для следующих страниц.
+const SIZE_SAMPLE: Record<TextSize, string> = { sm: "text-sm", md: "text-base", lg: "text-xl", xl: "text-2xl" };
+
+export function TextSizeSwitch({ value }: { value: TextSize }) {
   const t = useT();
-  const [pending, startTransition] = useTransition();
-  const options = [
-    { value: false, label: t("profile.display.bigTextOff") },
-    { value: true, label: t("profile.display.bigTextOn") },
-  ];
+  const [current, setCurrent] = useState<TextSize>(value);
+  const [, startTransition] = useTransition();
+
+  function choose(size: TextSize) {
+    setCurrent(size);
+    document.documentElement.setAttribute("data-text-size", size);
+    startTransition(() => setTextSize(size));
+  }
+
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-base font-semibold text-ink">{t("profile.display.bigText")}</span>
-      <div role="group" aria-label={t("profile.display.bigText")} className="grid grid-cols-2 gap-1 rounded-xl bg-canvas p-1">
-        {options.map((o) => (
+      <span className="text-base font-semibold text-ink">{t("profile.display.textSize")}</span>
+      <div role="radiogroup" aria-label={t("profile.display.textSize")} className="grid grid-cols-2 gap-1 rounded-xl bg-canvas p-1 sm:grid-cols-4">
+        {TEXT_SIZES.map((size) => (
           <button
-            key={String(o.value)}
+            key={size}
             type="button"
-            disabled={pending}
-            aria-pressed={on === o.value}
-            onClick={() => startTransition(() => setBigText(o.value))}
+            role="radio"
+            aria-checked={current === size}
+            onClick={() => choose(size)}
             className={cx(
-              "min-h-touch-sm rounded-lg px-2 text-base font-bold",
-              on === o.value ? "bg-accent text-ink" : "text-ink hover:bg-surface",
+              "flex min-h-touch flex-col items-center justify-center gap-0.5 rounded-lg px-1 text-ink",
+              current === size ? "bg-accent" : "hover:bg-surface",
             )}
           >
-            {o.label}
+            <span aria-hidden="true" className={cx("font-display leading-none", SIZE_SAMPLE[size])}>Аа</span>
+            <span className="text-sm font-semibold">{t(`profile.display.size.${size}` as MessageKey)}</span>
           </button>
         ))}
       </div>

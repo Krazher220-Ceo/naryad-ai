@@ -159,3 +159,15 @@ export function IconChat(p: IconProps) {
 export function IconWarning(p: IconProps) {
   return <Svg {...p}><path d="M12 3l10 18H2zM12 10v4M12 17.5v.01" /></Svg>;
 }
+
+export function IconPlay(p: IconProps) {
+  return <Svg {...p}><path d="M7 4.5v15L19 12z" /></Svg>;
+}
+
+export function IconPause(p: IconProps) {
+  return <Svg {...p}><path d="M8 5v14M16 5v14" /></Svg>;
+}
+
+export function IconTextSize(p: IconProps) {
+  return <Svg {...p}><path d="M3 18l4.5-12L12 18M4.7 14h5.6M14 18l3-8 3 8M15 15.5h4" /></Svg>;
+}

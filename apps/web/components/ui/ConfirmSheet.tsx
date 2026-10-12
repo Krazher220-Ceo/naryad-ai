@@ -6,6 +6,7 @@
 import { useEffect, useRef } from "react";
 import { useT } from "@/components/LocaleProvider";
 import { Button } from "./Button";
+import { useSheetDismiss } from "./useSheetDismiss";
 
 type ConfirmSheetProps = {
   open: boolean;
@@ -38,6 +39,7 @@ export function ConfirmSheet({
 }: ConfirmSheetProps) {
   const t = useT();
   const sheetRef = useRef<HTMLDivElement>(null);
+  const { dragProps, sheetStyle, dismiss } = useSheetDismiss(open, onCancel);
 
   // onCancel приходит новой функцией при каждой отрисовке. Держим её в ref, чтобы эффект ниже
   // срабатывал только при открытии: иначе каждая введённая буква уводила фокус из поля причины.
@@ -65,7 +67,7 @@ export function ConfirmSheet({
         type="button"
         aria-label={t("ui.action.cancel")}
         tabIndex={-1}
-        onClick={onCancel}
+        onClick={dismiss}
         className="absolute inset-0 bg-ink/60"
       />
       <div
@@ -74,9 +76,16 @@ export function ConfirmSheet({
         aria-modal="true"
         aria-labelledby="confirm-sheet-title"
         tabIndex={-1}
+        style={sheetStyle}
         className="relative flex max-h-[90dvh] w-full max-w-xl flex-col gap-4 overflow-y-auto rounded-t-3xl bg-surface p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] focus:outline-none md:rounded-3xl"
       >
-        <span className="mx-auto h-1.5 w-12 rounded-full bg-line md:hidden" aria-hidden="true" />
+        <div
+          {...dragProps}
+          aria-hidden="true"
+          className="-mx-5 -mt-5 flex h-8 shrink-0 cursor-grab touch-none items-center justify-center md:hidden"
+        >
+          <span className="h-1.5 w-12 rounded-full bg-line-strong" />
+        </div>
         <h2 id="confirm-sheet-title" className="text-xl font-bold text-ink">
           {title}
         </h2>
@@ -92,7 +101,7 @@ export function ConfirmSheet({
           >
             {confirmLabel}
           </Button>
-          <Button variant="secondary" fullWidth onClick={onCancel}>
+          <Button variant="secondary" fullWidth onClick={dismiss}>
             {t("ui.action.cancel")}
           </Button>
         </div>

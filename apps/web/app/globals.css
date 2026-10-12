@@ -67,8 +67,9 @@
   --color-st-cancelled-fg: #334155;
 
   /* Размеры касания: основная цель 56 px, вторичная 48 px */
-  --spacing-touch: 3.5rem;
-  --spacing-touch-sm: 3rem;
+  /* Не меньше 56 и 48 px даже при мелком тексте: кнопки рассчитаны на перчатки */
+  --spacing-touch: max(3.5rem, 56px);
+  --spacing-touch-sm: max(3rem, 48px);
 
   /* Шрифты подключаются в app/layout.tsx (next/font, файлы хранятся у нас) */
   --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -79,9 +80,15 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
-/* «Крупный текст» из профиля: все размеры в rem растут на восьмую часть */
-html.big-text {
+/* Размер текста из профиля: все размеры в rem меняются вместе с корневым шрифтом */
+html[data-text-size="sm"] {
+  font-size: 87.5%;
+}
+html[data-text-size="lg"] {
   font-size: 112.5%;
+}
+html[data-text-size="xl"] {
+  font-size: 125%;
 }
 
 body {

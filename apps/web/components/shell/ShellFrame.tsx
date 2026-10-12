@@ -10,6 +10,7 @@ import { LanguageSwitch } from "@/components/LanguageSwitch";
 import {
   IconChart,
   IconChat,
+  IconChevronLeft,
   IconClipboard,
   IconPlus,
   IconScan,
@@ -22,7 +23,7 @@ import type { Role } from "@/lib/auth/roles";
 import { ConnectionPill } from "./ConnectionPill";
 import { LinkIcon } from "./LinkIcon";
 import { NotificationBell } from "./NotificationBell";
-import { NAV, hidesBottomNav, isActive, pageTitle, type NavIcon } from "./nav";
+import { NAV, backHref, hidesBottomNav, isActive, pageTitle, type NavIcon } from "./nav";
 
 // Каркас экрана: одно дерево, две раскладки (PLAN.md, раздел 8.1).
 // Телефон (< 1024 px): белая шапка сверху, три кнопки внизу.
@@ -60,6 +61,7 @@ function initials(fullName: string): string {
 export function ShellFrame({ role, employeeId, fullName, roleLabel, unread, children }: ShellFrameProps) {
   const t = useT();
   const pathname = usePathname();
+  const back = backHref(role, pathname);
   const nav = NAV[role];
   const showBottomNav = !hidesBottomNav(pathname);
   // Если профиля нет среди трёх кнопок (у мастера), он открывается из шапки.
@@ -144,7 +146,17 @@ export function ShellFrame({ role, employeeId, fullName, roleLabel, unread, chil
           <div className="h-1 bg-accent" />
           <div className="flex items-center justify-between gap-2 px-4 py-2.5">
             <div className="flex min-w-0 items-center gap-2.5">
-              <span aria-hidden="true" className="km-logo h-7 shrink-0 bg-brand" />
+              {back ? (
+                <Link
+                  href={back}
+                  aria-label={t("ui.action.back")}
+                  className="-ml-2 flex size-12 shrink-0 items-center justify-center rounded-xl text-ink hover:bg-canvas active:bg-line"
+                >
+                  <IconChevronLeft className="size-7" />
+                </Link>
+              ) : (
+                <span aria-hidden="true" className="km-logo h-7 shrink-0 bg-brand" />
+              )}
               <span className="truncate font-display text-[22px] font-semibold text-ink">{t(pageTitle(role, pathname))}</span>
             </div>
             <div className="flex shrink-0 items-center gap-2">

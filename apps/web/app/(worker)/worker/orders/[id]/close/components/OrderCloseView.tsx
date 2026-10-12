@@ -7,8 +7,7 @@ import { useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useT } from "@/components/LocaleProvider";
-import { uploadOrderPhoto } from "@/lib/orders/photos";
-import { completeOrder } from "@/lib/orders/actions";
+import { sendComplete } from "@/lib/offline/queue";
 import type { OrderDetails, CloseFormData } from "@/lib/orders/queries";
 import type { CurrentEmployee } from "@/lib/auth/session";
 import {
@@ -24,6 +23,7 @@ import {
   EmptyState,
   Button,
   IconChevronLeft,
+  useToast,
   type Step,
 } from "@/components/ui";
 
@@ -53,6 +53,7 @@ export function OrderCloseView({
   beforePhotoUrl,
 }: OrderCloseViewProps) {
   const t = useT();
+  const toast = useToast();
   const router = useRouter();
 
   // Шаг 1: Работы
@@ -89,8 +90,6 @@ export function OrderCloseView({
   // Idempotency: сохранение clientActionId
   const clientActionIdRef = useRef<string | null>(null);
 
-  // Отслеживание уже загруженных фото для предотвращения повторной загрузки при ошибке сети
-  const uploadedFilesRef = useRef<Set<File>>(new Set());
 
   // При выборе или смене шифра подставляем типовые материалы для этого шифра
   function handleFaultCodeChange(newCode: string) {
@@ -142,7 +141,8 @@ export function OrderCloseView({
     (m) => !materials.some((sm) => sm.id === m.id),
   );
 
-  // Отправка формы закрытия наряда
+  // Отправка формы закрытия наряда. Нет сети — фото и действие сохраняются на телефоне
+  // и уйдут сами, когда связь появится (lib/offline/queue.ts).
   async function handleSubmit() {
     const clientActionId = clientActionIdRef.current || crypto.randomUUID();
     clientActionIdRef.current = clientActionId;
@@ -151,26 +151,6 @@ export function OrderCloseView({
     setPhotoError(null);
     setSubmitError(null);
 
-    // 1. Загрузка фото «после» через uploadOrderPhoto
-    try {
-      for (const file of afterPhotos) {
-        if (!uploadedFilesRef.current.has(file)) {
-          await uploadOrderPhoto({
-            orderId: order.id,
-            kind: "after",
-            file,
-            authorId: employee.id,
-          });
-          uploadedFilesRef.current.add(file);
-        }
-      }
-    } catch {
-      setPhotoError(t("orders.errors.photoUpload"));
-      setLoading(false);
-      return;
-    }
-
-    // 2. Отправка действия completeOrder
     const materialsPayload = materials
       .filter((m) => m.qty > 0)
       .map((m) => ({
@@ -179,17 +159,22 @@ export function OrderCloseView({
       }));
 
     try {
-      const res = await completeOrder({
-        orderId: order.id,
-        workDone: workDone.trim(),
-        faultCode,
-        materials: materialsPayload,
-        comment: comment.trim() || undefined,
-        clientActionId,
-      });
+      const res = await sendComplete(
+        {
+          orderId: order.id,
+          workDone: workDone.trim(),
+          faultCode,
+          materials: materialsPayload,
+          comment: comment.trim() || undefined,
+          clientActionId,
+        },
+        afterPhotos,
+        employee.id,
+      );
 
       if (res.ok) {
         clientActionIdRef.current = null;
+        if (res.queued) toast.show("offline");
         router.push("/worker");
       } else {
         setSubmitError(res.error);
@@ -405,7 +390,7 @@ export function OrderCloseView({
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 py-4">
       {/* Шапка формы */}
       <div className="flex items-center justify-between gap-3">
-        <Link href={`/worker/orders/${order.id}`}>
+        <Link href={`/worker/orders/${order.id}`} className="hidden lg:block">
           <Button
             variant="secondary"
             size="md"

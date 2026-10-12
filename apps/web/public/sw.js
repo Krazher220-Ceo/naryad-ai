@@ -9,13 +9,15 @@
 //    сохранённая версия этого экрана, а если её нет — страница «Нет сети».
 // 3. Запросы к /api, Supabase и действия (POST) не кэшируются: действия без сети копит
 //    офлайн-очередь (lib/offline/queue.ts), а не service worker.
+// 4. Прогрев: пока сеть есть, страница присылает список экранов (свои наряды, форма выдачи),
+//    и они сохраняются заранее. Тогда без сети открываются даже экраны, куда ещё не заходили.
 // Кэш экранов очищается при выходе из аккаунта и кнопкой в профиле.
 
-const VERSION = "v2";
+const VERSION = "v3";
 const STATIC_CACHE = `naryad-static-${VERSION}`;
 const PAGES_CACHE = `naryad-pages-${VERSION}`;
 const OFFLINE_URL = "/offline";
-const MAX_PAGES = 40;
+const MAX_PAGES = 80;
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(PAGES_CACHE).then((cache) => cache.add(OFFLINE_URL)));
@@ -36,7 +38,24 @@ self.addEventListener("activate", (event) => {
 // Выход из аккаунта: страница присылает сообщение, и сохранённые экраны удаляются.
 self.addEventListener("message", (event) => {
   if (event.data === "clear-pages") event.waitUntil(caches.delete(PAGES_CACHE));
+  if (event.data && event.data.type === "warm" && Array.isArray(event.data.urls)) event.waitUntil(warm(event.data.urls));
 });
+
+// Сохраняем экраны заранее, по одному, чтобы не нагружать сервер. Переадресацию на вход не сохраняем.
+async function warm(urls) {
+  const cache = await caches.open(PAGES_CACHE);
+  for (const path of urls.slice(0, 30)) {
+    try {
+      const url = new URL(path, self.location.origin);
+      if (url.origin !== self.location.origin) continue;
+      const response = await fetch(url.href, { credentials: "same-origin", headers: { Accept: "text/html" } });
+      if (response.ok && !response.redirected) await cache.put(url.pathname + url.search, response);
+    } catch {
+      return; // сеть пропала — остальное прогреем в следующий раз
+    }
+  }
+  await trim(cache);
+}
 
 // Системные уведомления (Web Push, lib/notify/push.ts). Приходят, даже когда сайт закрыт.
 self.addEventListener("push", (event) => {

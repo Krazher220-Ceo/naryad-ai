@@ -7,6 +7,7 @@ import { getT } from "@/lib/i18n-server";
 import { ConnectionProvider } from "@/lib/offline/ConnectionProvider";
 import { createClient } from "@/lib/supabase/server";
 import { ShellFrame } from "./ShellFrame";
+import { OfflineWarmup } from "@/components/OfflineWarmup";
 
 // Каркас для всех экранов после входа. Кладётся в layout роли один раз.
 // Всплывающие сообщения и связь работают на любом экране внутри.
@@ -25,6 +26,7 @@ export async function AppShell({ employee, children }: { employee: CurrentEmploy
 
   return (
     <ConnectionProvider>
+      <OfflineWarmup role={employee?.role ?? "operator"} />
       <ToastProvider>
         <ShellFrame
           role={employee?.role ?? "operator"}

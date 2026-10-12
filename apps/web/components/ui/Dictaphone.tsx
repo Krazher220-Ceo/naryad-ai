@@ -7,7 +7,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useSpeechLang, useT } from "@/components/LocaleProvider";
 import { Button } from "./Button";
 import { cx } from "./cx";
-import { IconMic, IconX } from "./icons";
+import { IconMic, IconPause, IconPlay, IconX } from "./icons";
 import { Sheet } from "./Sheet";
 import { VoiceButton, appendSpoken } from "./VoiceButton";
 
@@ -247,7 +247,7 @@ export function Dictaphone({ mode, onText, onFields, describe }: Props) {
               aria-label={stage === "paused" ? t("voice.resume") : t("voice.pause")}
               className="flex size-16 items-center justify-center justify-self-center rounded-full border-2 border-line-strong text-base font-bold text-ink"
             >
-              {stage === "paused" ? "▶" : "❚❚"}
+              {stage === "paused" ? <IconPlay /> : <IconPause />}
             </button>
           </div>
         )}

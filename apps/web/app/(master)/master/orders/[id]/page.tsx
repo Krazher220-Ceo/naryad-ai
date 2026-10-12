@@ -60,7 +60,7 @@ export default async function MasterOrderPage({ params }: PageProps<"/master/ord
   const details = await getOrderDetails(id).catch(() => null);
 
   const back = (
-    <Link href="/master" className="inline-flex min-h-touch-sm items-center gap-1 self-start text-lg font-semibold text-ink">
+    <Link href="/master" className="hidden min-h-touch-sm items-center gap-1 self-start text-lg font-semibold text-ink lg:inline-flex">
       <IconChevronLeft />
       {t("master.card.back")}
     </Link>

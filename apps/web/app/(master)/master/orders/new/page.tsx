@@ -24,7 +24,7 @@ export default async function NewOrderPage({ searchParams }: PageProps<"/master/
     <div className="flex flex-1 flex-col bg-canvas">
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 py-4 lg:h-dvh lg:flex-none lg:max-w-none lg:gap-2 lg:px-6 lg:py-3">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-6">
-          <Link href="/master" className="inline-flex min-h-touch-sm items-center gap-1 self-start text-lg font-semibold text-ink">
+          <Link href="/master" className="hidden min-h-touch-sm items-center gap-1 self-start text-lg font-semibold text-ink lg:inline-flex">
             <IconChevronLeft />
             {t("master.card.back")}
           </Link>

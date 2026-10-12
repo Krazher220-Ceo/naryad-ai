@@ -88,10 +88,14 @@ export function ConnectionPill({ wide = false }: { wide?: boolean }) {
           <ul className="flex flex-col gap-2">
             {connection.pending.map((item) => (
               <li
-                key={item.input.clientActionId}
+                key={item.id}
                 className="flex items-center justify-between gap-3 rounded-xl border border-line p-3"
               >
-                <span className="text-base font-semibold">{t(`orders.action.${item.input.action}` as MessageKey)}</span>
+                <span className="text-base font-semibold">
+                  {item.kind === "transition"
+                    ? t(`orders.action.${item.input.action}` as MessageKey)
+                    : t(`conn.kind.${item.kind}` as MessageKey)}
+                </span>
                 <span className="text-sm text-ink-muted">
                   {t("conn.queuedAt").replace("{time}", time(new Date(item.queuedAt)))}
                 </span>
