@@ -171,7 +171,7 @@ export function TextSizeSwitch({ value }: { value: TextSize }) {
 
   function choose(size: TextSize) {
     setCurrent(size);
-    document.documentElement.dataset.textSize = size;
+    document.documentElement.setAttribute("data-text-size", size);
     startTransition(() => setTextSize(size));
   }
 
