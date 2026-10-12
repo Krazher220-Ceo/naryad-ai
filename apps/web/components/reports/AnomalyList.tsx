@@ -2,7 +2,7 @@
 // © 2026 команда «НарядAI»: Алихан, Бауыржан, Али, Тамерлан. Только для проверки и обучения,
 // без коммерческого использования. Полные условия — файл LICENSE в корне репозитория.
 import Link from "next/link";
-import { Card, cx } from "@/components/ui";
+import { Card, IconWarning, cx } from "@/components/ui";
 import { type Anomaly } from "@/lib/analytics/anomalies";
 import { cachedAnomalies } from "@/lib/analytics/cached";
 import { type MessageKey } from "@/lib/i18n";
@@ -22,7 +22,7 @@ export async function AnomalyCard({ anomaly }: { anomaly: Anomaly }) {
             high ? "bg-danger text-white" : "border-2 border-accent-ink bg-warning-soft text-ink",
           )}
         >
-          {high && <span aria-hidden="true">⚠</span>}
+          {high && <IconWarning className="size-4" />}
           {t(`anomalies.severity.${anomaly.severity}`)}
         </span>
         <span className="text-base font-semibold text-ink-muted">{t(`anomalies.kind.${anomaly.kind}`)}</span>

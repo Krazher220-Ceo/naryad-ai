@@ -4,7 +4,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Button, IconCheck, InlineNotice, Skeleton, TextInput, cx } from "@/components/ui";
+import { Button, IconCheck, IconInfo, InlineNotice, Skeleton, TextInput, cx } from "@/components/ui";
 import { useT } from "@/components/LocaleProvider";
 import { type MessageKey } from "@/lib/i18n";
 import { expressIssue } from "@/lib/orders/actions";
@@ -90,13 +90,20 @@ export function LayaExpress({
   }
 
   return (
-    <div ref={rootRef} className="scroll-mt-4 overflow-hidden rounded-2xl border-2 border-brand bg-surface">
-      <div className="flex flex-wrap items-center justify-between gap-2 bg-brand px-4 py-3 text-white lg:px-5">
-        <h2 className="text-xl font-bold lg:text-lg">{t("master.express.title")}</h2>
-        <span className="rounded-full bg-accent px-3 py-1 text-sm font-bold text-ink">{t("master.express.model")}</span>
-      </div>
-
-      <div className="flex flex-col gap-3 p-4 lg:p-5">
+    <section
+      ref={rootRef}
+      aria-labelledby="laya-express-title"
+      className="scroll-mt-4 rounded-2xl border border-line bg-surface p-4 lg:p-5"
+    >
+      <div className="flex flex-col gap-3">
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 id="laya-express-title" className="text-xl font-bold text-ink lg:text-lg">
+            {t("master.express.title")}
+          </h2>
+          <span className="shrink-0 rounded-md border border-brand px-2 py-0.5 text-sm font-semibold text-brand">
+            {t("master.express.model")}
+          </span>
+        </div>
         <p className="text-base text-ink-muted">{t("master.express.hint")}</p>
 
         <div className="flex flex-col gap-3 lg:flex-row lg:items-stretch">
@@ -154,7 +161,7 @@ export function LayaExpress({
         {outcome?.kind === "empty" && <InlineNotice tone="warning">{t("master.express.errors.nothing")}</InlineNotice>}
         {outcome?.kind === "ok" && <Summary result={outcome.result} filled={outcome.filled} />}
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -166,30 +173,31 @@ function Summary({ result, filled }: { result: ExpressResult; filled: ExpressFil
   const modelUsed = classification !== null || fields.source === "llm";
   const confidence = Math.round(Math.max(classification?.confidence ?? 0, fields.source === "llm" ? fields.confidence : 0) * 100);
 
-  let badge: string;
-  if (!modelUsed) {
-    badge = t("master.express.badge.rules");
-  } else if (classification) {
-    const category = classification.category ? t(`faultCategory.${classification.category}` as MessageKey) : "—";
-    const specialty = classification.specialty ? t(`master.express.specialty.${classification.specialty}` as MessageKey) : "—";
-    badge = t(classification.source === "laya" ? "master.express.badge.laya" : "master.express.badge.llm")
-      .replace("{category}", category)
-      .replace("{specialty}", specialty)
-      .replace("{confidence}", String(confidence));
-  } else {
-    badge = t("master.express.badge.partial").replace("{confidence}", String(confidence));
-  }
+  const title = !modelUsed
+    ? t("master.express.badge.rules")
+    : t(classification ? (classification.source === "laya" ? "master.express.badge.laya" : "master.express.badge.llm") : "master.express.badge.partial");
+  const rows: [MessageKey, string][] = [];
+  if (classification?.category) rows.push(["master.express.result.category", t(`faultCategory.${classification.category}` as MessageKey)]);
+  if (classification?.specialty) rows.push(["master.express.result.specialty", t(`master.express.specialty.${classification.specialty}` as MessageKey)]);
+  if (modelUsed) rows.push(["master.express.result.confidence", `${confidence}%`]);
 
   return (
     <div className="laya-in flex flex-col gap-3">
-      <div
-        role="status"
-        className={cx(
-          "rounded-xl border-l-8 p-4 text-base font-bold text-ink",
-          modelUsed ? "border-success bg-success-soft" : "border-accent-ink bg-warning-soft",
+      <div role="status" className={cx("rounded-xl border p-4", modelUsed ? "border-success bg-success-soft" : "border-accent-ink bg-warning-soft")}>
+        <p className="flex items-center gap-2 text-base font-bold text-ink">
+          {modelUsed ? <IconCheck className="size-5 shrink-0 text-success" /> : <IconInfo className="size-5 shrink-0" />}
+          {title}
+        </p>
+        {rows.length > 0 && (
+          <dl className="mt-3 grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-3">
+            {rows.map(([label, value]) => (
+              <div key={label} className="flex justify-between gap-3 sm:flex-col sm:justify-start sm:gap-0.5">
+                <dt className="text-sm text-ink-muted">{t(label)}</dt>
+                <dd className="text-base font-semibold text-ink">{value}</dd>
+              </div>
+            ))}
+          </dl>
         )}
-      >
-        {badge}
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-sm font-semibold text-ink-muted">{t("master.express.filled.title")}:</span>
