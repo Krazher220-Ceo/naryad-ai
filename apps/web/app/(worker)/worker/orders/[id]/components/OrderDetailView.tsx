@@ -220,7 +220,7 @@ export function OrderDetailView({ order, events, photos, materials, review, toBr
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-4 py-4 pb-44">
         {/* Шапка карточки: кнопка назад и номер наряда */}
         <div className="flex items-center justify-between gap-3">
-          <Link href="/worker">
+          <Link href="/worker" className="hidden lg:block">
             <Button
               variant="secondary"
               size="md"

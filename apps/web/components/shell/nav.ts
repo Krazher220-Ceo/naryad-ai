@@ -114,3 +114,15 @@ export function pageTitle(role: Role, pathname: string): MessageKey {
   const match = NAV[role].pc.find((item) => isActive(item, pathname));
   return match?.label ?? "app.name";
 }
+
+// Куда ведёт «Назад» в шапке телефона. null — экран из нижнего меню, кнопка не нужна.
+// Кнопка стоит в закреплённой шапке, поэтому не уезжает при прокрутке длинного наряда.
+export function backHref(role: Role, pathname: string): string | null {
+  const close = pathname.match(/^(\/[^/]+\/orders\/[^/]+)\/close$/);
+  if (close) return close[1];
+  if (/^\/[^/]+\/orders\/[^/]+$/.test(pathname)) return `/${role}`;
+  if (pathname.startsWith("/worker/equipment/")) return "/worker";
+  if (pathname === "/profile/password") return "/profile";
+  if (pathname.startsWith("/notifications")) return role === "operator" ? "/operator" : `/${role}`;
+  return null;
+}

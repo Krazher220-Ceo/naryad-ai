@@ -405,7 +405,7 @@ export function OrderCloseView({
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 py-4">
       {/* Шапка формы */}
       <div className="flex items-center justify-between gap-3">
-        <Link href={`/worker/orders/${order.id}`}>
+        <Link href={`/worker/orders/${order.id}`} className="hidden lg:block">
           <Button
             variant="secondary"
             size="md"
