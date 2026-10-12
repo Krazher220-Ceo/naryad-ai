@@ -6,7 +6,8 @@
 import { useRef, useState } from "react";
 import { useT } from "@/components/LocaleProvider";
 import { Button, ConfirmSheet, Field, TextArea, useToast, VoiceButton, appendSpoken, cx } from "@/components/ui";
-import { createSideRequest, requestHelp } from "@/lib/orders/actions";
+import { requestHelp } from "@/lib/orders/actions";
+import { sendSideRequest } from "@/lib/offline/queue";
 import type { OrderDetails } from "@/lib/orders/queries";
 import type { OrderStatus } from "@/lib/orders/types";
 
@@ -158,9 +159,11 @@ export function WorkerHelpActions({ orderId, equipmentId, status }: { orderId: s
         helpActionId.current = null;
         toast.show("saved", { detail: t("help.sent") });
       } else {
-        const res = await createSideRequest({ orderId, equipmentId, description: text });
+        // Нет сети — заявка сохранится на телефоне и уйдёт сама.
+        const res = await sendSideRequest({ orderId, equipmentId, description: text });
         if (!res.ok) return toast.show("error", { detail: res.error });
-        toast.show("saved", { detail: t("sideRequest.sent") });
+        if (res.queued) toast.show("offline");
+        else toast.show("saved", { detail: t("sideRequest.sent") });
       }
       close();
     } catch {

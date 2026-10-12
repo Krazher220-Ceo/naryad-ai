@@ -26,11 +26,12 @@ import {
   appendSpoken,
   WorkerChip,
   cx,
+  useToast,
 } from "@/components/ui";
 import { type MessageKey } from "@/lib/i18n";
 import { useT } from "@/components/LocaleProvider";
-import { createOrder, suggestForIssue } from "@/lib/orders/actions";
-import { uploadOrderPhoto } from "@/lib/orders/photos";
+import { suggestForIssue } from "@/lib/orders/actions";
+import { sendCreateOrder } from "@/lib/offline/queue";
 import type { IssueFormData } from "@/lib/orders/queries";
 import type { OrderPriority, OrderType } from "@/lib/orders/types";
 import {
@@ -105,13 +106,10 @@ export function IssueOrderForm({
   const [photos, setPhotos] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // Наряд уже создан, а упала загрузка фото: тогда показываем ссылку на панель.
-  const [orderCreated, setOrderCreated] = useState(false);
+  const toast = useToast();
 
   // При повторе после ошибки берём тот же id, чтобы наряд не задвоился.
   const actionId = useRef<string | null>(null);
-  const createdOrderId = useRef<string | null>(null);
-  const uploadedCount = useRef(0);
 
   const [suggesting, setSuggesting] = useState(false);
   const [suggestionUnavailable, setSuggestionUnavailable] = useState(false);
@@ -234,9 +232,10 @@ export function IssueOrderForm({
     setLoading(true);
     setError(null);
     try {
-      if (!createdOrderId.current) {
-        actionId.current ??= crypto.randomUUID();
-        const result = await createOrder({
+      actionId.current ??= crypto.randomUUID();
+      // Нет сети — наряд и фото «до» сохраняются на телефоне и уйдут сами (lib/offline/queue.ts).
+      const res = await sendCreateOrder(
+        {
           type,
           description: description.trim(),
           sectionId: equipment.section_id,
@@ -247,27 +246,18 @@ export function IssueOrderForm({
           faultCode: faultCode || undefined,
           requestId,
           clientActionId: actionId.current,
-        });
-        if (!result.ok) {
-          setError(result.error);
-          return;
-        }
-        createdOrderId.current = result.data.orderId;
-        setOrderCreated(true);
+        },
+        photos,
+        employeeId,
+      );
+      if (!res.ok) {
+        setError(res.error);
+        return;
       }
-      // Фото грузим по одному; при сбое повтор продолжит с того же места.
-      while (uploadedCount.current < photos.length) {
-        await uploadOrderPhoto({
-          orderId: createdOrderId.current,
-          kind: "before",
-          file: photos[uploadedCount.current],
-          authorId: employeeId,
-        });
-        uploadedCount.current += 1;
-      }
+      if (res.queued) toast.show("offline");
       router.push("/master");
     } catch {
-      setError(createdOrderId.current ? t("orders.errors.photoUpload") : t("orders.errors.unknown"));
+      setError(t("orders.errors.unknown"));
     } finally {
       setLoading(false);
     }
@@ -629,13 +619,6 @@ export function IssueOrderForm({
           {error && (
             <InlineNotice
               tone="danger"
-              action={
-                orderCreated ? (
-                  <Link href="/master" className="text-base font-bold underline">
-                    {t("master.card.back")}
-                  </Link>
-                ) : undefined
-              }
             >
               {error}
             </InlineNotice>

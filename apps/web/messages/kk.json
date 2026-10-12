@@ -1196,7 +1196,12 @@
     "failedTitle": "Жіберілмеді",
     "queuedAt": "{time} сақталды",
     "retry": "Қазір жіберу",
-    "clearErrors": "Қателерді алып тастау"
+    "clearErrors": "Қателерді алып тастау",
+    "kind": {
+      "createOrder": "Наряд беру",
+      "complete": "Нарядты жабу",
+      "sideRequest": "Жолай өтінім"
+    }
   },
   "toast": {
     "saved": "Сақталды",

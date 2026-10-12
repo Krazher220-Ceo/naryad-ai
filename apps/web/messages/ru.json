@@ -1196,7 +1196,12 @@
     "failedTitle": "Не отправилось",
     "queuedAt": "сохранено в {time}",
     "retry": "Отправить сейчас",
-    "clearErrors": "Убрать ошибки"
+    "clearErrors": "Убрать ошибки",
+    "kind": {
+      "createOrder": "Выдача наряда",
+      "complete": "Закрытие наряда",
+      "sideRequest": "Попутная заявка"
+    }
   },
   "toast": {
     "saved": "Сохранено",
