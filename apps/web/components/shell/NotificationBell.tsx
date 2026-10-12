@@ -43,6 +43,7 @@ export function NotificationBell({
     let cancelled = false;
     supabase.auth.getSession().then(({ data }) => {
       if (cancelled) return;
+      void recount(); // первое число — сразу после загрузки страницы
       if (data.session) supabase.realtime.setAuth(data.session.access_token);
       channel = supabase
         .channel(`bell-${employeeId}-${channelId}`)

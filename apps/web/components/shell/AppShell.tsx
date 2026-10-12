@@ -5,7 +5,6 @@ import { ToastProvider } from "@/components/ui";
 import type { CurrentEmployee } from "@/lib/auth/session";
 import { getT } from "@/lib/i18n-server";
 import { ConnectionProvider } from "@/lib/offline/ConnectionProvider";
-import { createClient } from "@/lib/supabase/server";
 import { ShellFrame } from "./ShellFrame";
 import { OfflineWarmup } from "@/components/OfflineWarmup";
 
@@ -14,15 +13,7 @@ import { OfflineWarmup } from "@/components/OfflineWarmup";
 // employee = null — оператор без входа (раздел /operator).
 export async function AppShell({ employee, children }: { employee: CurrentEmployee | null; children: React.ReactNode }) {
   const t = await getT();
-  let count: number | null = 0;
-  if (employee) {
-    const supabase = await createClient();
-    ({ count } = await supabase
-      .from("notifications")
-      .select("id", { count: "exact", head: true })
-      .eq("employee_id", employee.id)
-      .is("read_at", null));
-  }
+  // Число непрочитанных колокольчик считает сам в браузере (NotificationBell): страница его не ждёт.
 
   return (
     <ConnectionProvider>
@@ -33,7 +24,7 @@ export async function AppShell({ employee, children }: { employee: CurrentEmploy
           employeeId={employee?.id ?? null}
           fullName={employee?.fullName ?? t("shell.guest")}
           roleLabel={t(`roles.${employee?.role ?? "operator"}`)}
-          unread={count ?? 0}
+          unread={0}
         >
           {children}
         </ShellFrame>

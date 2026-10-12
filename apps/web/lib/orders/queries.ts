@@ -152,13 +152,13 @@ export async function getOrderDetails(orderId: string) {
   if (photosRes.error) throw photosRes.error;
   if (materialsRes.error) throw materialsRes.error;
 
-  // Хранилище закрытое: для показа делаем ссылки, которые живут 1 час.
-  const photos = await Promise.all(
-    photosRes.data.map(async (p) => {
-      const { data } = await supabase.storage.from("photos").createSignedUrl(p.path, 60 * 60);
-      return { ...p, url: data?.signedUrl ?? null };
-    }),
-  );
+  // Хранилище закрытое: для показа делаем ссылки, которые живут 1 час. Все ссылки — одним запросом.
+  const paths = photosRes.data.map((p) => p.path);
+  const { data: signed } = paths.length
+    ? await supabase.storage.from("photos").createSignedUrls(paths, 60 * 60)
+    : { data: [] };
+  const urlByPath = new Map((signed ?? []).map((s) => [s.path, s.signedUrl]));
+  const photos = photosRes.data.map((p) => ({ ...p, url: urlByPath.get(p.path) ?? null }));
 
   return {
     order: { ...order, overdue: isOverdue(order) },
