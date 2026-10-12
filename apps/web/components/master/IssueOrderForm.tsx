@@ -282,53 +282,42 @@ export function IssueOrderForm({
   // Поля помечаем «выбрано вручную», чтобы подсказка по описанию их потом не перебила.
   function applyExpress(phrase: string, r: ExpressResult): ExpressFilled {
     const { fields, classification, candidates } = r;
-    const filled: ExpressFilled = { equipment: false, priority: false, faultCode: false, assignee: false };
-
-    if (fields.equipmentId && data.equipment.some((e) => e.id === fields.equipmentId)) {
-      setEquipmentId(fields.equipmentId);
-      setSearch("");
-      filled.equipment = true;
-    }
-
+    const equipment = fields.equipmentId && data.equipment.some((e) => e.id === fields.equipmentId) ? fields.equipmentId : null;
     const prio = fields.priority ?? classification?.priority ?? null;
-    if (prio) {
-      hasManuallyChangedPriority.current = true;
-      setPriority(prio);
-      filled.priority = true;
-    }
+    const code = [fields.faultCode, classification?.faultCode].find((c) => c && data.faultCodes.some((f) => f.code === c)) ?? null;
+    const workerId = [fields.assigneeId, candidates[0]?.id].find((id) => id && data.workers.some((w) => w.id === id)) ?? null;
+    const filled: ExpressFilled = { equipment: !!equipment, priority: !!prio, faultCode: !!code, assignee: !!workerId };
 
-    const code = [fields.faultCode, classification?.faultCode].find((c) => c && data.faultCodes.some((f) => f.code === c));
-    if (code) {
-      hasManuallyChangedFaultCode.current = true;
-      setFaultCode(code);
-      filled.faultCode = true;
-    }
+    // Ничего не распознали — форму не трогаем, мастер заполняет сам.
+    if (!Object.values(filled).some(Boolean)) return filled;
 
-    const workerId = [fields.assigneeId, candidates[0]?.id].find((id) => id && data.workers.some((w) => w.id === id));
+    // Новая фраза заменяет всё: чего в ней нет, сбрасываем, чтобы не осталось значений от прошлого запуска.
+    setEquipmentId(equipment);
+    setSearch("");
+    setPriority(prio ?? "normal");
+    hasManuallyChangedPriority.current = !!prio;
+    setFaultCode(code ?? "");
+    hasManuallyChangedFaultCode.current = !!code;
     if (workerId) {
       hasManuallyChangedAssignee.current = true;
       setAssigneeId(workerId);
-      filled.assignee = true;
     }
 
-    // Сработало хоть что-то — переносим описание и показываем подсказку, повторный запрос не нужен.
-    if (Object.values(filled).some(Boolean)) {
-      const text = (fields.problem ?? phrase).trim();
-      setDescription(text);
-      lastFetchedDesc.current = text;
-      if (classification) {
-        setSuggestion({
-          classification: classification as IssueClassification,
-          candidates: candidates as IssueCandidate[],
-        });
-        setSuggestionUnavailable(false);
-      } else {
-        setSuggestion(null);
-        setSuggestionUnavailable(true);
-      }
-      // Оборудование не узнали — открываем шаг 1, иначе сразу шаг подтверждения.
-      setJumpTo({ step: filled.equipment ? steps.length - 1 : 0, key: Date.now() });
+    const text = (fields.problem ?? phrase).trim();
+    setDescription(text);
+    lastFetchedDesc.current = text;
+    if (classification) {
+      setSuggestion({
+        classification: classification as IssueClassification,
+        candidates: candidates as IssueCandidate[],
+      });
+      setSuggestionUnavailable(false);
+    } else {
+      setSuggestion(null);
+      setSuggestionUnavailable(true);
     }
+    // Оборудование не узнали — открываем шаг 1, иначе сразу шаг подтверждения.
+    setJumpTo({ step: equipment ? steps.length - 1 : 0, key: Date.now() });
     return filled;
   }
 

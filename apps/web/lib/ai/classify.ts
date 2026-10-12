@@ -101,6 +101,9 @@ async function viaLlm(description: string): Promise<Classification | null> {
 export async function classifyProblem(description: string): Promise<Classification | null> {
   if (description.trim().length < 5) return null;
   const [laya, llm] = await Promise.all([viaLaya(description), viaLlm(description)]);
+  // Laya и шифр языковой модели расходятся (Laya «Механика», шифр Э-01) — берём ответ модели целиком,
+  // чтобы шифр, категория и подобранный по специальности исполнитель не противоречили друг другу.
+  if (laya && llm && llm.category && laya.category && laya.category !== llm.category) return llm;
   if (laya && llm) return { ...llm, category: laya.category ?? llm.category, specialty: laya.specialty ?? llm.specialty, source: "laya" };
   if (laya) return laya; // приоритета нет — его выберет мастер
   return llm;
