@@ -3,6 +3,7 @@
 // без коммерческого использования. Полные условия — файл LICENSE в корне репозитория.
 import Link from "next/link";
 import { PushBanner } from "@/components/PushControl";
+import { Suspense } from "react";
 import { TelegramLinkCard } from "@/components/TelegramLinkCard";
 import { OrderCard, OrderRow } from "@/components/master/OrderRow";
 import { SideRequests } from "@/components/master/SideRequests";
@@ -50,7 +51,10 @@ export default async function MasterPage() {
   return (
     <div className="flex flex-1 flex-col bg-canvas lg:h-dvh lg:flex-none lg:overflow-hidden">
       <RealtimeRefresh />
-      <TelegramLinkCard />
+      {/* Карточка догружается потоком и не задерживает основной экран */}
+      <Suspense fallback={null}>
+        <TelegramLinkCard />
+      </Suspense>
       <PushBanner />
 
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 py-4 pb-36 lg:min-h-0 lg:max-w-none lg:gap-3 lg:px-4 lg:py-3 lg:pb-3">
