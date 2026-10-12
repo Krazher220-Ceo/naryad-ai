@@ -188,7 +188,7 @@ export function TextSizeSwitch({ value }: { value: TextSize }) {
             onClick={() => choose(size)}
             className={cx(
               "flex min-h-touch flex-col items-center justify-center gap-0.5 rounded-lg px-1 text-ink",
-              current === size ? "bg-surface shadow-sm ring-2 ring-brand" : "hover:bg-surface",
+              current === size ? "bg-accent" : "hover:bg-surface",
             )}
           >
             <span aria-hidden="true" className={cx("font-display leading-none", SIZE_SAMPLE[size])}>Аа</span>
