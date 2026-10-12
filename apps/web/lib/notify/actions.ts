@@ -10,7 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getT } from "@/lib/i18n-server";
 import type { Enums } from "@/lib/supabase/database.types";
 import type { ActionResult } from "@/lib/orders/types";
-import { BIG_TEXT_COOKIE } from "@/lib/display";
+import { BIG_TEXT_COOKIE, TEXT_SIZE_COOKIE, TEXT_SIZES, type TextSize } from "@/lib/display";
 
 // Действия центра уведомлений и профиля. Всё идёт через функции базы
 // (0012_notification_center.sql): сотрудник меняет только свои уведомления и настройки.
@@ -61,10 +61,11 @@ export async function unlinkTelegram(): Promise<ActionResult<null>> {
   return { ok: true, data: null };
 }
 
-// Крупный текст запоминается в cookie, чтобы сервер сразу рисовал страницу нужного размера.
-export async function setBigText(on: boolean): Promise<void> {
+// Размер текста запоминается в cookie, чтобы сервер сразу рисовал страницу нужного размера.
+export async function setTextSize(size: TextSize): Promise<void> {
+  if (!TEXT_SIZES.includes(size)) return;
   const store = await cookies();
-  if (on) store.set(BIG_TEXT_COOKIE, "1", { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" });
-  else store.delete(BIG_TEXT_COOKIE);
+  store.set(TEXT_SIZE_COOKIE, size, { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" });
+  store.delete(BIG_TEXT_COOKIE);
   refresh();
 }

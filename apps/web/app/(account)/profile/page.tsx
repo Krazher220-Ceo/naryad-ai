@@ -10,11 +10,11 @@ import { LanguageSwitch } from "@/components/LanguageSwitch";
 import { getCurrentEmployee } from "@/lib/auth/session";
 import type { Role } from "@/lib/auth/roles";
 import { SignOutButton } from "@/components/shell/SignOutButton";
-import { BIG_TEXT_COOKIE } from "@/lib/display";
+import { BIG_TEXT_COOKIE, TEXT_SIZE_COOKIE, parseTextSize } from "@/lib/display";
 import { getT } from "@/lib/i18n-server";
 import type { Enums } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
-import { BigTextSwitch, DeviceData, NotificationPrefsForm, TelegramSection } from "./ProfileSections";
+import { TextSizeSwitch, DeviceData, NotificationPrefsForm, TelegramSection } from "./ProfileSections";
 
 // Какие события вообще приходят сотруднику этой роли (lib/orders/notifications.ts, расписание сроков).
 const KINDS_BY_ROLE: Record<Role, Enums<"notification_kind">[]> = {
@@ -39,7 +39,8 @@ export default async function ProfilePage() {
   const telegram = link?.[0];
   const botUsername = (process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || "naryad_ai_bot").replace(/^@/, "");
   const connectUrl = telegram?.link_code ? `https://t.me/${botUsername}?start=${telegram.link_code}` : null;
-  const bigText = (await cookies()).get(BIG_TEXT_COOKIE)?.value === "1";
+  const store = await cookies();
+  const textSize = parseTextSize(store.get(TEXT_SIZE_COOKIE)?.value, store.get(BIG_TEXT_COOKIE)?.value);
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 py-4 lg:max-w-3xl lg:py-8">
@@ -81,7 +82,7 @@ export default async function ProfilePage() {
           <span className="text-base font-semibold text-ink">{t("profile.display.language")}</span>
           <LanguageSwitch full />
         </div>
-        <BigTextSwitch on={bigText} />
+        <TextSizeSwitch value={textSize} />
       </Card>
 
       <DeviceData />
