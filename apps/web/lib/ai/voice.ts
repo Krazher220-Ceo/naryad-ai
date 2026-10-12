@@ -65,12 +65,18 @@ type RawFields = {
   confidence: number;
 };
 
-const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : null);
+// Маленькие модели иногда копируют шаблон из промпта: «emergency|null», «К-3|null». Берём часть до «|», «null» — пусто.
+const str = (v: unknown) => {
+  if (typeof v !== "string") return null;
+  const s = v.split("|")[0].trim();
+  return s && s !== "null" && s !== "..." ? s : null;
+};
 
 function validate(v: unknown): RawFields | null {
   if (typeof v !== "object" || v === null) return null;
   const o = v as Record<string, unknown>;
-  const priority = (PRIORITIES as readonly unknown[]).includes(o.priority) ? (o.priority as SpeechPriority) : null;
+  const p = str(o.priority);
+  const priority = (PRIORITIES as readonly (string | null)[]).includes(p) ? (p as SpeechPriority) : null;
   const confidence = typeof o.confidence === "number" ? Math.max(0, Math.min(1, o.confidence)) : 0.5;
   return {
     equipment_hint: str(o.equipment_hint),
@@ -121,8 +127,10 @@ function systemPrompt(refs: SpeechRefs): string {
     `priority: emergency — авария, оборудование стоит или опасно; high — срочно; normal — обычный ремонт; planned — плановые работы.\n` +
     `equipment_hint — как названо оборудование (например «НШ-2»), assignee_hint — фамилия исполнителя, как сказано.\n` +
     `Не выдумывай: чего нет в тексте — null.\n` +
-    `Ответ строго JSON: {"equipment_hint": "...|null", "problem": "кратко что сломано", "priority": "...|null", ` +
-    `"fault_code": "код из списка|null", "assignee_hint": "...|null", "confidence": 0..1}`
+    `Ответ строго JSON с полями equipment_hint, problem (кратко что сломано), priority, fault_code (код из списка), ` +
+    `assignee_hint, confidence (0..1). Пустое поле — null без кавычек.\n` +
+    `Пример: {"equipment_hint": "НШ-2", "problem": "течь масла из рукава", "priority": "high", "fault_code": null, ` +
+    `"assignee_hint": "Ахметову", "confidence": 0.8}`
   );
 }
 
