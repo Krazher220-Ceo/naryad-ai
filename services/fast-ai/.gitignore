@@ -1,7 +1,7 @@
 .venv/
 __pycache__/
 finetune/data/
-finetune/laya-naryad/
+finetune/laya-naryad*/
 finetune/*.log
 *.pt
 *.safetensors
