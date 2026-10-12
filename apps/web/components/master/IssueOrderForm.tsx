@@ -39,6 +39,7 @@ import {
   type IssueClassification,
 } from "./IssueSuggestion";
 import { EquipmentPicker } from "./EquipmentPicker";
+import { LayaExpress, type ExpressFilled, type ExpressResult } from "./LayaExpress";
 
 const DESCRIPTION_CHIPS = [
   "master.issue.chips.leak",
@@ -124,6 +125,8 @@ export function IssueOrderForm({
   const hasManuallyChangedAssignee = useRef(false);
   const lastFetchedDesc = useRef<string | null>(null);
   const step3Ref = useRef<HTMLDivElement>(null);
+  // Переход на последний шаг после экспресс-выдачи; key меняется при каждом запуске.
+  const [jumpTo, setJumpTo] = useState<{ step: number; key: number } | undefined>(undefined);
 
   const triggerSuggest = useCallback(
     async (text: string) => {
@@ -274,6 +277,60 @@ export function IssueOrderForm({
   const duplicates = data.openOrders.filter((o) => o.equipment_id === equipmentId);
   const openCountByEquipment = new Map<string, number>();
   for (const o of data.openOrders) openCountByEquipment.set(o.equipment_id, (openCountByEquipment.get(o.equipment_id) ?? 0) + 1);
+
+  // Экспресс-выдача Laya: заполняем форму из ответа и возвращаем, какие поля заполнены.
+  // Поля помечаем «выбрано вручную», чтобы подсказка по описанию их потом не перебила.
+  function applyExpress(phrase: string, r: ExpressResult): ExpressFilled {
+    const { fields, classification, candidates } = r;
+    const filled: ExpressFilled = { equipment: false, priority: false, faultCode: false, assignee: false };
+
+    if (fields.equipmentId && data.equipment.some((e) => e.id === fields.equipmentId)) {
+      setEquipmentId(fields.equipmentId);
+      setSearch("");
+      filled.equipment = true;
+    }
+
+    const prio = fields.priority ?? classification?.priority ?? null;
+    if (prio) {
+      hasManuallyChangedPriority.current = true;
+      setPriority(prio);
+      filled.priority = true;
+    }
+
+    const code = [fields.faultCode, classification?.faultCode].find((c) => c && data.faultCodes.some((f) => f.code === c));
+    if (code) {
+      hasManuallyChangedFaultCode.current = true;
+      setFaultCode(code);
+      filled.faultCode = true;
+    }
+
+    const workerId = [fields.assigneeId, candidates[0]?.id].find((id) => id && data.workers.some((w) => w.id === id));
+    if (workerId) {
+      hasManuallyChangedAssignee.current = true;
+      setAssigneeId(workerId);
+      filled.assignee = true;
+    }
+
+    // Сработало хоть что-то — переносим описание и показываем подсказку, повторный запрос не нужен.
+    if (Object.values(filled).some(Boolean)) {
+      const text = (fields.problem ?? phrase).trim();
+      setDescription(text);
+      lastFetchedDesc.current = text;
+      if (classification) {
+        setSuggestion({
+          classification: classification as IssueClassification,
+          candidates: candidates as IssueCandidate[],
+        });
+        setSuggestionUnavailable(false);
+      } else {
+        setSuggestion(null);
+        setSuggestionUnavailable(true);
+      }
+      // Оборудование не узнали — открываем шаг 1, иначе сразу шаг подтверждения.
+      setJumpTo({ step: filled.equipment ? steps.length - 1 : 0, key: Date.now() });
+    }
+    return filled;
+  }
 
   // Шаблон плановой работы заполняет описание, шифр и приоритет.
   function applyTemplate(template: IssueFormData["templates"][number]) {
@@ -606,7 +663,10 @@ export function IssueOrderForm({
           {t("master.issue.section")}: {data.sections.find((s) => s.id === equipment.section_id)?.name}
         </p>
       )}
-      <StepForm wide steps={steps} submitLabel={t("master.issue.submit")} onSubmit={submit} loading={loading} />
+      <div className="mb-4 lg:mb-3">
+        <LayaExpress onResult={applyExpress} />
+      </div>
+      <StepForm wide steps={steps} submitLabel={t("master.issue.submit")} onSubmit={submit} loading={loading} jumpTo={jumpTo} />
     </div>
   );
 }

@@ -105,6 +105,14 @@ function matchWorker(hint: string | null, list: SpeechRefs["workers"]): string |
   return found.length === 1 ? found[0].id : null;
 }
 
+// Модель иногда не ставит приоритет, хотя в тексте прямо сказано «авария» или «срочно». Подстраховываем кодом.
+function priorityByWords(text: string): SpeechPriority | null {
+  const t = text.toLowerCase();
+  if (/авари|стоит|останов|дым|искр|пожар/.test(t)) return "emergency";
+  if (/срочн/.test(t)) return "high";
+  return null;
+}
+
 function systemPrompt(refs: SpeechRefs): string {
   const codes = refs.faultCodes.map((c) => `${c.code} ${c.name}`).join("; ");
   return (
@@ -164,7 +172,7 @@ export async function parseOrderSpeech(text: string, refs: SpeechRefs): Promise<
   return {
     problem: raw.problem ?? text.trim(),
     equipmentId: matchEquipment(raw.equipment_hint, refs.equipment),
-    priority: raw.priority,
+    priority: raw.priority ?? priorityByWords(text),
     faultCode: refs.faultCodes.some((c) => c.code === raw.fault_code) ? raw.fault_code : null,
     assigneeId: matchWorker(raw.assignee_hint, refs.workers),
     confidence: raw.confidence,

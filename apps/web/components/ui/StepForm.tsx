@@ -25,14 +25,22 @@ type StepFormProps = {
   loading?: boolean;
   // true — на широком экране (lg) шаги идут колонками на одном экране, кнопка под последней колонкой.
   wide?: boolean;
+  // Перейти на шаг снаружи (экспресс-выдача Laya). Новый key — новый переход, даже на тот же шаг.
+  jumpTo?: { step: number; key: number };
 };
 
 // Одна форма, две раскладки.
 // Телефон (до md): по одному шагу, «Назад» и «Далее» внизу экрана.
 // Ноутбук (от md): все шаги одной страницей и одна кнопка отправки.
-export function StepForm({ steps, submitLabel, onSubmit, loading, wide }: StepFormProps) {
+export function StepForm({ steps, submitLabel, onSubmit, loading, wide, jumpTo }: StepFormProps) {
   const t = useT();
   const [current, setCurrent] = useState(0);
+  // Переход снаружи делаем при рендере, без эффекта: так нет лишней перерисовки.
+  const [seenJumpKey, setSeenJumpKey] = useState<number | null>(null);
+  if (jumpTo && jumpTo.key !== seenJumpKey) {
+    setSeenJumpKey(jumpTo.key);
+    setCurrent(Math.min(Math.max(jumpTo.step, 0), steps.length - 1));
+  }
   const isLast = current === steps.length - 1;
   const currentValid = steps[current]?.valid !== false;
   const allValid = steps.every((s) => s.valid !== false);
@@ -68,6 +76,7 @@ export function StepForm({ steps, submitLabel, onSubmit, loading, wide }: StepFo
             "flex-col gap-4 md:flex md:rounded-2xl md:border md:border-line md:bg-surface md:p-6",
             wide && "lg:min-h-0 lg:gap-3 lg:overflow-y-auto lg:p-4 lg:[&_button]:min-h-10",
             i === current ? "flex" : "hidden",
+            jumpTo && i === jumpTo.step && "laya-in",
           )}
         >
           <h2 id={`step-${s.id}`} className={cx("text-xl font-bold text-ink", wide && "lg:text-lg")}>
