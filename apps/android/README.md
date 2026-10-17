@@ -6,7 +6,7 @@
 
 ## Что лежит здесь
 
-- `twa-manifest.json` — настройки сборки Bubblewrap: пакет `kz.naryadai.app`, цвета km.kz, иконки из `public/icons`,
+- `twa-manifest.json` — настройки сборки Bubblewrap: пакет `kz.naryadai.app`, фирменные цвета НарядAI, иконки из `public/icons`,
   ярлык «Сообщить о поломке».
 - Ключ подписи (`*.keystore`) и сгенерированный Android-проект в репозиторий не попадают (`.gitignore`).
 

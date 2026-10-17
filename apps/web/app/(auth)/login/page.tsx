@@ -16,7 +16,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
       </div>
       <div className="flex flex-1 flex-col justify-center gap-6">
         <div className="flex flex-col items-center text-center">
-          <span role="img" aria-label={t("brand.company")} className="km-logo mb-4 h-16 bg-brand" />
+          <span role="img" aria-label={t("app.name")} className="app-logo mb-4 h-16 bg-brand" />
           <h1 className="text-4xl font-bold tracking-tight text-ink">
             {t("app.name")}
           </h1>

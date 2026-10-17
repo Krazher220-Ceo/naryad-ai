@@ -15,7 +15,7 @@ export type PlateData = {
   qrPath: string; // чёрные модули
 };
 
-export type PlateLabels = { app: string; company: string; cta: string; inventory: string };
+export type PlateLabels = { app: string; tagline: string; cta: string; inventory: string };
 
 export const PLATE_W = 600;
 export const PLATE_H = 840;
@@ -50,7 +50,7 @@ export function wrapName(name: string, maxChars: number, maxLines: number): stri
   return lines.map((line) => (line.length > maxChars ? line.slice(0, maxChars - 1) + "…" : line));
 }
 
-// logoInner — содержимое km-logo.svg без внешнего <svg> (белый логотип 124 x 80).
+// logoInner — содержимое naryad-mark.svg без внешнего <svg> (белый знак 80 x 80).
 // heading — шрифт заголовков: на странице Oswald с сайта, в скачанном файле запасные шрифты.
 export function plateSvg(p: PlateData, l: PlateLabels, logoInner: string, heading: string): string {
   const body = "Inter, Arial, Helvetica, sans-serif";
@@ -71,9 +71,9 @@ export function plateSvg(p: PlateData, l: PlateLabels, logoInner: string, headin
     `<rect width="${PLATE_W}" height="${PLATE_H}" rx="28" fill="#fff"/>` +
     `<path d="M0 28a28 28 0 0 1 28-28h544a28 28 0 0 1 28 28V118H0z" fill="${NAVY}"/>` +
     `<rect y="118" width="${PLATE_W}" height="10" fill="${ACCENT}"/>` +
-    `<g transform="translate(28 20)">${logoInner}</g>` +
-    `<text x="170" y="62" font-family="${heading}" font-size="40" font-weight="600" fill="#fff">${esc(l.app)}</text>` +
-    `<text x="170" y="92" font-family="${body}" font-size="17" font-weight="700" letter-spacing="1.5" fill="${ACCENT}">${esc(l.company.toUpperCase())}</text>` +
+    `<g transform="translate(36 20)">${logoInner}</g>` +
+    `<text x="136" y="62" font-family="${heading}" font-size="40" font-weight="600" fill="#fff">${esc(l.app)}</text>` +
+    `<text x="136" y="92" font-family="${body}" font-size="17" font-weight="700" letter-spacing="1.5" fill="${ACCENT}">${esc(l.tagline.toUpperCase())}</text>` +
     // QR: белая подложка и чисто чёрные модули
     `<rect x="${boxX}" y="${boxY}" width="${box}" height="${box}" fill="#fff"/>` +
     `<g transform="translate(${boxX + 4 * cell} ${boxY + 4 * cell}) scale(${cell})"><path d="${p.qrPath}" fill="#000" shape-rendering="crispEdges"/></g>` +

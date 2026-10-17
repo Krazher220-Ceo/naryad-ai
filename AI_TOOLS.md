@@ -89,5 +89,5 @@
 
 | Шрифт | Лицензия | Назначение |
 |---|---|---|
-| Inter и Oswald (Google Fonts через next/font: файлы скачиваются при сборке и раздаются с нашего домена) | SIL Open Font License 1.1 | Фирменные шрифты сайта km.kz: текст и заголовки интерфейса |
+| Inter и Oswald (Google Fonts через next/font: файлы скачиваются при сборке и раздаются с нашего домена) | SIL Open Font License 1.1 | Фирменные шрифты НарядAI: текст и заголовки интерфейса |
 | IBM Plex Sans Regular и Bold (`apps/web/public/fonts/`, текст лицензии рядом в `OFL.txt`) | SIL Open Font License 1.1, коммерческое использование разрешено | Кириллица в PDF-выгрузках: в стандартном шрифте PDF русских букв нет. Источник: github.com/IBM/plex |

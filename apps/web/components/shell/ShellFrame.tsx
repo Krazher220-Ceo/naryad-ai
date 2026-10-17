@@ -73,10 +73,10 @@ export function ShellFrame({ role, employeeId, fullName, roleLabel, unread, chil
       {/* ===== ПК: меню слева ===== */}
       <aside className="sticky top-0 hidden h-dvh w-72 shrink-0 flex-col gap-5 overflow-y-auto bg-ink px-4 py-5 text-white lg:flex">
         <Link href={nav.pc[0].href} className="flex items-center gap-3 rounded-2xl bg-surface px-3.5 py-3">
-          <span aria-hidden="true" className="km-logo h-8 bg-brand" />
+          <span aria-hidden="true" className="app-logo h-8 bg-brand" />
           <span className="flex flex-col leading-tight">
             <span className="font-display text-xl font-semibold text-brand">{t("app.name")}</span>
-            <span className="text-[11px] font-bold tracking-wider uppercase text-brand-hover">{t("shell.company")}</span>
+            <span className="text-[11px] font-bold tracking-wider uppercase text-brand-hover">{t("shell.tagline")}</span>
           </span>
         </Link>
 
@@ -155,7 +155,7 @@ export function ShellFrame({ role, employeeId, fullName, roleLabel, unread, chil
                   <IconChevronLeft className="size-7" />
                 </Link>
               ) : (
-                <span aria-hidden="true" className="km-logo h-7 shrink-0 bg-brand" />
+                <span aria-hidden="true" className="app-logo h-7 shrink-0 bg-brand" />
               )}
               <span className="truncate font-display text-[22px] font-semibold text-ink">{t(pageTitle(role, pathname))}</span>
             </div>

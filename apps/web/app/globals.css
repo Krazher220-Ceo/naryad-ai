@@ -4,7 +4,7 @@
   Токены дизайн-системы НарядAI. Описание и правила: docs/ui/design-system.md.
   Каждый цвет --color-x даёт классы bg-x, text-x, border-x.
   Все пары «текст на фоне» проверены на контраст не ниже WCAG AA (4.5:1).
-  Фирменные цвета и шрифты взяты с сайта АО «Костанайские минералы» (km.kz):
+  Фирменные цвета и шрифты НарядAI:
   тёмно-синий #07316e и #001636, синий #1753a9, жёлтый акцент #ffc107, заголовки Oswald, текст Inter.
   Цвета статусов и приоритетов не фирменные: они закреплены правилами интерфейса (AGENTS.md).
 */
@@ -106,19 +106,19 @@ body {
   outline-offset: 2px;
 }
 
-/* Заголовки страниц — узкий Oswald, как на km.kz */
+/* Заголовки страниц — узкий Oswald */
 h1,
 h2 {
   font-family: var(--font-display);
   letter-spacing: 0.01em;
 }
 
-/* Логотип компании: белый SVG как маска, цвет задаётся фоном (bg-brand, bg-white) */
-.km-logo {
+/* Знак НарядAI: белый SVG как маска, цвет задаётся фоном (bg-brand, bg-white) */
+.app-logo {
   display: inline-block;
-  aspect-ratio: 124 / 80;
-  -webkit-mask: url("/brand/km-logo.svg") center / contain no-repeat;
-  mask: url("/brand/km-logo.svg") center / contain no-repeat;
+  aspect-ratio: 1 / 1;
+  -webkit-mask: url("/brand/naryad-mark.svg") center / contain no-repeat;
+  mask: url("/brand/naryad-mark.svg") center / contain no-repeat;
 }
 
 /* ===== Печать QR-табличек (/master/equipment/qr) ===== */

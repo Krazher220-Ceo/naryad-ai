@@ -127,7 +127,7 @@ fun LoginScreen() {
                         style = MaterialTheme.typography.headlineLarge.copy(fontFamily = Oswald, fontSize = 44.sp, lineHeight = 50.sp),
                         color = Color.White,
                     )
-                    Text(stringResource(R.string.brand_company), style = MaterialTheme.typography.bodyLarge, color = Color.White.copy(alpha = 0.9f))
+                    Text(stringResource(R.string.brand_tagline), style = MaterialTheme.typography.bodyLarge, color = Color.White.copy(alpha = 0.9f))
                 }
                 Box(Modifier.fillMaxWidth().height(4.dp).background(Accent))
             }
