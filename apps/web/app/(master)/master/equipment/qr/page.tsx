@@ -43,7 +43,7 @@ export default async function EquipmentQrPage() {
   });
 
   // Логотип берём из файла и кладём в табличку без внешнего <svg>
-  const logoFile = await readFile(join(process.cwd(), "public/brand/km-logo.svg"), "utf8");
+  const logoFile = await readFile(join(process.cwd(), "public/brand/naryad-mark.svg"), "utf8");
   const logoInner = logoFile.replace(/^[\s\S]*?<svg[^>]*>/, "").replace(/<\/svg>\s*$/, "");
 
   return (
@@ -61,7 +61,7 @@ export default async function EquipmentQrPage() {
           logoInner={logoInner}
           labels={{
             app: t("app.name"),
-            company: t("shell.company"),
+            tagline: t("shell.tagline"),
             cta: t("equipmentQr.cta"),
             inventory: t("equipmentQr.inventory"),
           }}

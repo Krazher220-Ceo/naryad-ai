@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">НарядAI</string>
-    <string name="brand_company">Костанайские минералы</string>
+    <string name="brand_tagline">Наряды на ремонт</string>
     <string name="login_title">Вход</string>
     <string name="login_field">Логин</string>
     <string name="password">Пароль</string>

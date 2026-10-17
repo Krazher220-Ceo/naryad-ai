@@ -90,12 +90,12 @@ export default async function DemoPage() {
   const t = await getT();
   return (
     <div className="flex min-h-dvh flex-col bg-canvas text-ink">
-      {/* Шапка в стиле km.kz: тёмно-синий фон, белый логотип, узкий заголовок */}
+      {/* Шапка: тёмно-синий фон, белый знак, узкий заголовок */}
       <header className="bg-[#001636] text-white">
         <div className="h-1 bg-accent" />
         <div className="mx-auto flex w-full max-w-xl flex-col gap-3 px-4 py-6 lg:max-w-5xl">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <span role="img" aria-label={t("brand.company")} className="km-logo h-12 bg-white" />
+            <span role="img" aria-label={t("app.name")} className="app-logo h-12 bg-white" />
             <div className="flex items-center gap-3">
               <Link
                 href="/demo/ui"

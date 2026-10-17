@@ -2,8 +2,8 @@
 // © 2026 команда «НарядAI»: Алихан, Бауыржан, Али, Тамерлан. Только для проверки и обучения,
 // без коммерческого использования. Полные условия — файл LICENSE в корне репозитория.
 // QR-коды для проверки: страница жюри и тестовая наклейка оборудования. Результат — SVG в docs/qr.
-// В центре кода и в полосе снизу — логотип АО «Костанайские минералы» (docs/brand), белый на тёмном.
-// Заодно собирается белый блок «логотип — черта — НарядAI» для слайдов и печати: docs/brand.
+// В центре кода и в полосе снизу — знак НарядAI (docs/brand/naryad-mark.svg), белый на тёмном.
+// Заодно собирается белый блок «знак — черта — НарядAI» для слайдов и печати: docs/brand.
 // Запуск: node scripts/qr/make-test-qr.mjs [адрес-приложения]
 // Библиотека qrcode берётся из apps/web (она уже есть в зависимостях приложения).
 import { createRequire } from "node:module";
@@ -16,17 +16,17 @@ const APP = (process.argv[2] ?? "https://naryad-ai.vercel.app").replace(/\/$/, "
 const OUT = new URL("../../docs/qr/", import.meta.url);
 
 const BRAND = new URL("../../docs/brand/", import.meta.url);
-// Цвета сайта km.kz: тёмно-синий и жёлтый акцент.
+// Фирменные цвета НарядAI: тёмно-синий и жёлтый акцент.
 const NAVY = "#001636";
 const AMBER = "#ffc107";
 const BLUE = "#07316e";
 
-// Логотип: берём содержимое svg без обёртки. Знак и надпись лежат в рамке x 10…116, y 9…71.
-const LOGO = readFileSync(new URL("kostanay-minerals-logo.svg", BRAND), "utf8")
+// Знак: берём содержимое svg без обёртки. Буква «Н» лежит в рамке x 12…68, y 8…72.
+const LOGO = readFileSync(new URL("naryad-mark.svg", BRAND), "utf8")
   .replace(/^[\s\S]*?<svg[^>]*>/, "")
   .replace(/<\/svg>\s*$/, "")
   .trim();
-const LOGO_BOX = { x: 10, y: 9, w: 106, h: 62 };
+const LOGO_BOX = { x: 12, y: 8, w: 56, h: 64 };
 
 // Логотип шириной w, левый верхний угол в (x, y). Цвет — белый, как в исходном файле.
 function logo(x, y, w) {
@@ -76,10 +76,10 @@ function card({ url, title, subtitle, lines }) {
   const badgeH = qrSize * 0.21;
   const badgeX = qrSize / 2 - badgeW / 2;
   const badgeY = qrSize / 2 - badgeH / 2;
-  const logoW = badgeW * 0.8;
+  const logoW = (badgeH * 0.7 * LOGO_BOX.w) / LOGO_BOX.h;
   const textY = qrY + qrSize + 32;
   const urlY = textY + lines.length * 24 + 8;
-  const band = lockup(W / 2, urlY + 40, 120);
+  const band = lockup(W / 2, urlY + 40, 48);
   const bandY = urlY + 20;
   const H = bandY + band.height + 40;
 
@@ -137,12 +137,12 @@ const files = {
 };
 
 // Белый вариант: логотип, черта и «НарядAI» — всё белое, фон прозрачный.
-const white = lockup(120, 16, 200, { dash: "#ffffff", text: "#ffffff", accent: "#ffffff", size: 34 });
+const white = lockup(120, 16, 80, { dash: "#ffffff", text: "#ffffff", accent: "#ffffff", size: 34 });
 writeFileSync(
   new URL("naryad-lockup-white.svg", BRAND),
   `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="240" height="${white.height + 24}" viewBox="0 0 240 ${white.height + 24}" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif">
-  <title>НарядAI — АО «Костанайские минералы»</title>
+  <title>НарядAI</title>
   ${white.svg}
 </svg>
 `,

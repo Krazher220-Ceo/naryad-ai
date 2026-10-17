@@ -10,7 +10,7 @@ import { Inter, Oswald } from "next/font/google";
 import { BIG_TEXT_COOKIE, TEXT_SIZE_COOKIE, parseTextSize } from "@/lib/display";
 import "./globals.css";
 
-// Шрифты сайта km.kz. next/font скачивает их при сборке и раздаёт с нашего домена.
+// Фирменные шрифты: Inter и Oswald. next/font скачивает их при сборке и раздаёт с нашего домена.
 const inter = Inter({ subsets: ["latin", "cyrillic"], variable: "--font-inter", display: "swap" });
 const oswald = Oswald({ subsets: ["latin", "cyrillic"], variable: "--font-oswald", display: "swap" });
 
